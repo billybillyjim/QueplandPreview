@@ -1,0 +1,470 @@
+[
+  {
+    "name": "Jumbo",
+    "id": 0,
+    "spokenText": "Feel free to browse. I'll buy anything you have on you. If you're interested in my Gnome, Lumpy is just 1000gp.",
+    "unlockFollowerIDs": [ 0 ],
+    "isInteractable": true
+  },
+  {
+    "name": "Mayor Quellando",
+    "id": 1,
+    "spokenText": "Who are you? Get out of my house.",
+    "isInteractable": true
+  },
+  {
+    "name": "Angry Gnome",
+    "id": 2,
+    "spokenText": "Who are you? What do you want? Sounds pretty stupid to me.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 2 ]
+  },
+  {
+    "name": "Mining Gnome",
+    "id": 3,
+    "spokenText": "Yes? I'm a little busy mining here.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 1 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Ugly Gnome",
+    "id": 4,
+    "spokenText": "Hello. Please don't look at me.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 4 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Strange Man",
+    "id": 5,
+    "spokenText": "One to start, no choice of course. One, two, travel true, one, one, don't run, three, three, almost free, two, two, and I'm through. HeHA! HeHAHA!",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Man",
+    "id": 6,
+    "spokenText": "Membership card?",
+    "purchaseItemIDs": [ 139 ],
+    "isInteractable": true
+  },
+  {
+    "name": "Grumpy Knight",
+    "id": 7,
+    "spokenText": "I won't let anyone pass unless they're better than me at swords and stuff.",
+    "isInteractable": true
+  },
+  {
+    "name": "Stupid Dwarf",
+    "id": 8,
+    "spokenText": "Hello. Do you have any cheese? I'd be eternally grateful.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 6 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Friendly Dwarf",
+    "id": 9,
+    "spokenText": "Hello. I'd love a job, if you could give me one.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 7 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Tholdbur the Dwarf",
+    "id": 10,
+    "spokenText": "Hello. I hear you are looking for a useful helper.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 8 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Dwarny",
+    "id": 11,
+    "spokenText": "Hello. I am a true dwarf, capable of carrying untold amounts of ore faster than any other. For a one time fee, I'll work for you.",
+    "isInteractable": true,
+    "unlockFollowerIDs": [ 9 ],
+    "hideOnFollow": true
+  },
+  {
+    "name": "Jeplomi",
+    "id": 12,
+    "spokenText": "You want to know about the culinary arts? All great culinary artists make sushi rolls by combining rice with seaweed, then adding a raw fish on top. The easiest sushi to make uses icefish. You can catch those up in the north sea.",
+    "isInteractable": true
+  },
+  {
+    "name": "Yondo-Mondo II",
+    "id": 13,
+    "spokenText": "You're interested in smithing? You'll need to find a smithy to smelt your ores into bars and hammer your bars into items. I've heard rumors of a smithy in Queple Cave, but I've never seen one myself.",
+    "isInteractable": true
+  },
+  {
+    "name": "Gish Garn",
+    "id": 14,
+    "spokenText": "See all these stones and berries? Worthless. Don't waste your time.",
+    "isInteractable": true
+  },
+  {
+    "name": "Traveller",
+    "id": 15,
+    "spokenText": "Beyond here is the great swamp. You won't make it to the other side without knowledge from someone who already has. Apparently a guy from Uragota Town made it out alive, but he's crazy now.",
+    "isInteractable": true
+  },
+  {
+    "name": "Man by Campfire",
+    "id": 16,
+    "spokenText": "I've heard of a place to the south that's so warm you can't travel across it without riding an animal. Don't believe a word of it, to be honest.",
+    "isInteractable": true
+  },
+  {
+    "name": "Strange Fish Man",
+    "id": 17,
+    "spokenText": "You won't get any further than here without a camel. Trust me, I would know.",
+    "isInteractable": true
+  },
+  {
+    "name": "Sign Post",
+    "id": 18,
+    "spokenText": "You speak to the sign post. It doesn't respond. Instead it says, 'East:The Great City of Chickenpull(ROAD CLOSED), West:The Great Swamp, South:More Wasteland, North:Higashi Woods'",
+    "isInteractable": true
+  },
+  {
+    "name": "Mr. Tote M Poll",
+    "id": 19,
+    "spokenText": "You see that totem pole? I put it there. Once you've learned the basics, feel free to use it to practice your woodworking. I've put a few of these things around the area for people to improve. Let's enjoy learning together!",
+    "isInteractable": true
+  },
+  {
+    "name": "Fence Guard",
+    "id": 20,
+    "spokenText": "If you want to get inside, you'll need to pay the entrance fee. The money all goes to supporting the town, so it's for a good cause!",
+    "isInteractable": true
+  },
+  {
+    "name": "Man at Register",
+    "id": 21,
+    "spokenText": "Don't mind old Weesun over there. He's just excited about chopping trees.",
+    "isInteractable": true
+  },
+  {
+    "name": "Shelf Stocker",
+    "id": 22,
+    "spokenText": "Chop Chop!",
+    "isInteractable": true
+  },
+  {
+    "name": "Gordo",
+    "id": 23,
+    "spokenText": "Hi, welcome to Mound's boats. I'm the new guy. Would you like a boat?",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Man",
+    "id": 24,
+    "spokenText": "You're not from around here, are you? Up ahead is Tsu City, the capital of the Rising Hills. You can buy almost anything you want there.",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Woman",
+    "id": 25,
+    "spokenText": "Oh, you're headed to Tsu City? They have a lovely garden there. It's just north of the castle.",
+    "isInteractable": true
+  },
+  {
+    "name": "Nursery Guard",
+    "id": 26,
+    "spokenText": "These trees are the property of Tsu City. You can't cut them down without permission!",
+    "isInteractable": true
+  },
+  {
+    "name": "Shady Hooded Person",
+    "id": 27,
+    "spokenText": "Would you like to learn more about alchemy? Visit the alchemic emporium on the east side of town. The information isn't free, of course.",
+    "isInteractable": true
+  },
+  {
+    "name": "Mr. Meat",
+    "id": 28,
+    "spokenText": "Hi there! I'm Mr. Meat. I love meat! Come to my shop and sell me your meat! Okay? See you there! Hahahaha!",
+    "isInteractable": true
+  },
+  {
+    "name": "Town Crier",
+    "id": 29,
+    "spokenText": "The crier ignores you as he cries out, 'The warriors guild is looking for new entrants! See the admissions counselor at the Settled Sea Horse for more information!'",
+    "isInteractable": true
+  },
+  {
+    "name": "Castle Archer Captain",
+    "id": 30,
+    "spokenText": "These training dummies are for our guards to practice on, but I suppose I could let you use them as well. They're specifically built to be good for shooting, so you won't get experience as quickly if you just try to beat them with melee weapons.",
+    "isInteractable": true
+  },
+  {
+    "name": "Untrustworthy-looking Salesman",
+    "id": 31,
+    "spokenText": "Wanna buy some art?",
+    "isInteractable": true,
+    "purchaseItemIDs": [ 8, 10 ]
+  },
+  {
+    "name": "Food Stall Operator",
+    "id": 32,
+    "spokenText": "I've got all kinds of sushi rolls! Buy somethin' will ya?",
+    "isInteractable": true,
+    "purchaseItemIDs": [ 128, 130, 132 ]
+  },
+  {
+    "name": "Garden Guard",
+    "id": 33,
+    "spokenText": "The garden is 15000 gold coins to enter. What? You got a problem with that?",
+    "isInteractable": true
+  },
+  {
+    "name": "Doooligan Quellop",
+    "id": 34,
+    "spokenText": "Alchemy is built around an intrinsic property of metals, elements, and areas of strong elemental power. We call it a queplar value, and all metals, elements, and elemental halls have one. Elements have a negative queplar value, while metals and elemental halls have a positive value.",
+    "isInteractable": true
+  },
+  {
+    "name": "Goranjio Quellop",
+    "id": 35,
+    "spokenText": "Alchemy is still a new field, so we don't know the queplar values of very many things. What we can say for certain, is that Carquen has a value of -5.",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Alchemist",
+    "id": 36,
+    "spokenText": "You seek information about alchemy? Do you know of queplar values? The alchemists in Tsu City south of the wasteland can tell you more, but I can tell you what I know. Copper is the only metal with a queplar value of 0, and the great hall here has a value of 25.",
+    "isInteractable": true
+  },
+  {
+    "name": "Excited Gnome",
+    "id": 37,
+    "spokenText": "You got a job for me? Yeah? Sure, I'll do it. I'm in. Just let me know. Yessir. Right away! Oh, but you'll need to pay me. Up front. Deal?",
+    "unlockFollowerIDs": [ 5 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Slouching Gnome",
+    "id": 38,
+    "spokenText": "I'll work for you. Just show me the money!",
+    "unlockFollowerIDs": [ 3 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Excited Traveller",
+    "id": 39,
+    "spokenText": "Did you see it?? All this cheese fell right out of the sky! This is the best day of my life!",
+    "isInteractable": true
+  },
+  {
+    "name": "Raka the Kushtaka",
+    "id": 40,
+    "spokenText": "I'll gladly help you bank your fish, if you pay me, of course.",
+    "unlockFollowerIDs": [ 12 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Al the Kushtaka",
+    "id": 41,
+    "spokenText": "Need any help banking your fish?",
+    "unlockFollowerIDs": [ 13 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Krim the Kushtaka",
+    "id": 42,
+    "spokenText": "I'm always available for hire. Just let me know when to start.",
+    "unlockFollowerIDs": [ 14 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Sloodle the Kushtaka",
+    "id": 43,
+    "spokenText": "I love hard work and doing a good job. Need any help with fishing?",
+    "unlockFollowerIDs": [ 15 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Wenshoop the Kushtaka",
+    "id": 44,
+    "spokenText": "I don't offer my services to just anyone, seeing how I'm the greatest fish-banker there ever was. But for a fee I suppose I could lend you a hand. You look like you need it...",
+    "unlockFollowerIDs": [ 16 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Glindrear the Kushtaka",
+    "id": 45,
+    "spokenText": "Glindrear says nothing. The sign laying by his feet says, 'Will Work For Money'.",
+    "unlockFollowerIDs": [ 17 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Tolani Seba the Scout",
+    "id": 46,
+    "spokenText": "If you need someone to scout out enemies for you to fight, I'd love to help.",
+    "unlockFollowerIDs": [ 11 ],
+    "isInteractable": true
+  },
+  {
+    "name": "Grib Grab Grub Grob the Goblin",
+    "id": 47,
+    "spokenText": "The hideous creature cries in a shrill voice:I love to sell things. I'll do it for you, for a price...",
+    "unlockFollowerIDs": [ 18 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Mysterious Traveller",
+    "id": 48,
+    "spokenText": "Did you know there is a great river south of Quepland Woods? Meet me there and I'll show you. No strings attached.",
+    "unlockNPCIds": [ 49 ],
+    "isInteractable": true,
+    "hideOnFollow": true,
+    "hideOnSpeak": true
+  },
+  {
+    "name": "Mysterious Traveller",
+    "id": 49,
+    "spokenText": "Greetings. I see you're interested in travelling somewhere new! Excellent. The forest is thick here, but if you can struggle through you'll reach the river in no time. Follow me.",
+    "unlockAreaIDs": [ 63 ],
+    "isInteractable": false,
+    "hideOnFollow": true,
+    "hideOnSpeak": true
+  },
+  {
+    "name": "Mysterious Raft Salesman",
+    "id": 50,
+    "spokenText": "Here we are! Wanna buy a raft? You'll need it to head down the river. What? Why are you looking at me like that?",
+    "purchaseItemIDs": [ 314 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Skia the Monopod",
+    "id": 51,
+    "spokenText": "I'm the best blacksmith in Quepland. I'll work for you if the price is right.",
+    "unlockFollowerIDs": [ 10 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Farmer",
+    "id": 52,
+    "spokenText": "We don't see too many visitors around these parts. The restaurant here is run by one of the greatest chefs in the world. He's mostly retired now, though.",
+    "isInteractable": true
+  },
+  {
+    "name": "Man eating jerky",
+    "id": 53,
+    "spokenText": "I like jerky! That's why I always bring my meat to Tammy. In just a few days I can get all the jerky I can eat. Yum!",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Man",
+    "id": 54,
+    "spokenText": "Would you like to learn more about the culinary arts? I can teach you, if you pay for the materials.",
+    "isInteractable": true
+  },
+  {
+    "name": "Old Woman",
+    "id": 55,
+    "spokenText": "He may not look it, but my husband is one of the greatest chefs in the world. There's a lot he could teach you.",
+    "isInteractable": true
+  },
+  {
+    "name": "Man with pipe",
+    "id": 56,
+    "spokenText": "Hey man. We got all kinds of interesting things here. Check it out!",
+    "isInteractable": true
+  },
+  {
+    "name": "Tammy",
+    "id": 57,
+    "spokenText": "Welcome! You seem like an adventurer. Would you be interested in making use of my curing and tanning facilities?",
+    "isInteractable": true
+  },
+  {
+    "name": "Ancient Alchemist",
+    "id": 58,
+    "spokenText": "Welcome to the Wind Hall. Inside you will find one of the great elemental portals which allows alchemists to perform alchemy. All that is required of you is a metal and one of the base elements. Finding the right recipe can be time consuming, but very rewarding.",
+    "isInteractable": true
+  },
+  {
+    "name": "Woodworker",
+    "id": 59,
+    "spokenText": "They've got some lovely adzes over there. And look at the kerfs on these! Wow.",
+    "isInteractable": true
+  },
+  {
+    "name": "Man behind booth",
+    "id": 60,
+    "spokenText": "Welcome to the Woodworkers' Association. We're a small group, but steadily growing! Can I interest you in some overpriced gloves?",
+    "isInteractable": true
+  },
+  {
+    "name": "Garden Sign",
+    "id": 61,
+    "spokenText": "The sign reads:Entry Fee: 5 Gold Coins",
+    "isInteractable": true
+  },
+  {
+    "name": "Mysterious Traveller",
+    "id": 62,
+    "spokenText": "Did you know there is a great river south of Quepland Woods? Meet me there and I'll show you. No strings attached.",
+    "unlockNPCIds": [ 49 ],
+    "isInteractable": true,
+    "hideOnFollow": true,
+    "hideOnSpeak": true
+  },
+  {
+    "name": "Excited Chicken Man",
+    "id": 63,
+    "spokenText": "Killing all these chickens sure is exciting! I can't wait to attach them to my arrow shafts, I need lots of arrows to kill all these chickens!",
+    "isInteractable": true
+  },
+  {
+    "name": "Toby McGurga",
+    "id": 64,
+    "spokenText": "Are you interested in sharpening a sword in my whetstone? That's fine by me, but you'll have to do something in return. Bring me 1000 teeth from baobhan siths and I'll let you sharpen a sword on it.",
+    "isInteractable": true,
+    "purchaseItemIDs": [ 408, 410, 412, 413, 414, 415, 416, 417, 418, 419 ],
+    "itemPaymentIDs": [
+      [ 409, 407 ],
+      [ 409, 35 ],
+      [ 409, 255 ],
+      [ 409, 271 ],
+      [ 409, 279 ],
+      [ 409, 280 ],
+      [ 409, 281 ],
+      [ 409, 282 ],
+      [ 409, 283 ],
+      [ 409, 323 ]
+    ],
+    "specialCosts": [ 1000, 1 ],
+    "hasSpecialCosts": true
+  },
+  {
+    "name": "Mr. Doorly",
+    "id": 65,
+    "spokenText": "You look like an adventurer. Any interest in buying a pet? Come to my store anytime and we'll see if we can find you something you like.",
+    "isInteractable": true
+  },
+    {
+    "name": "Thunkirn the Dwarf",
+    "id": 66,
+    "spokenText": "Well what are you waiting for? I can smell the money on you. You know the drill, pay me a pile of gold and I'll work for you. I'm the best ore hauler you've ever met, probably.",
+    "unlockFollowerIDs": [ 20 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  }
+]

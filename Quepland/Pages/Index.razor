@@ -1,0 +1,550 @@
+﻿@page "/"
+@inject HttpClient Http
+@inject GameState GameState
+@inject MessageManager MessageManager
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ISyncLocalStorageService localStorage
+@inject Blazored.LocalStorage.ILocalStorageService asyncLocalStorage
+@using System.Threading;
+@implements IDisposable
+
+
+<h1>Hello, Welcome to Quepland!</h1>
+
+@if (GameState.safeToLoad)
+{
+    @if (debugMode)
+    {
+        @testString
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugAll99s()))">Max Account</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugUnlockAllFollowers()))">Unlock Followers</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugGetMoney()))">Gain Money</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugOneOfEveryItem()))">Get All Items</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugGainStrengthLevel()))">Gain Strength Level</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => SaveDataEncrypted())))">Save Encrypted</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => LoadDataEncrypted()))">Load Encrypted</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => AddRoomToHouse()))">Add Test Room To House</button></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugUnlockAllAreas()))">Unlock All Areas</button></p>
+        <p>Item ID:<input type="number" @bind-value="@itemID" @bind-value:event="onchange" /></p>
+        <p>Amount:<input type="number" @bind-value="@amount" @bind-value:event="onchange" /></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => GetItem()))">Get Item</button></p>
+        <p>Skill:<input type="text" @bind-value="@skill" @bind-value:event="onchange" /></p>
+        <p>Level:<input type="number" @bind-value="@skillLevel" @bind-value:event="onchange" /></p>
+        <p><button class="btn btn-primary" onclick="@(new Action(() => DebugSetLevel(skill, skillLevel)))">Set Skill To Level</button></p>
+    }
+
+    @if (GameState.saveDataLoaded == false && saveGameExists && gameHasBeenSaved == false && loadBegun == false)
+    {
+        <p><button class="btn btn-primary" onclick="@(new Action(() => LoadData()))">Load Game</button></p>
+
+    }
+    else
+    {
+        <p>Click the bank on your left to begin your journey. You'll find an axe to start off.</p>
+        <p><button class="btn btn-primary" disabled onclick="@(new Action(() => LoadData()))">Load Game</button></p>
+    }
+    @if (Program.playfabManager.IsConnected)
+    {
+        <p><button class="btn btn-primary" onclick="@(new Action(() => LoadDataFromCloud()))">Load From Cloud</button></p>
+    }
+    @if (GameState.saveGameExists == false || (GameState.saveDataLoaded == true))
+    {
+        <p><button class="btn btn-primary" onclick="@(new Action(() => SaveData()))">Save Game</button></p>
+        @if (Program.playfabManager.IsConnected)
+        {
+            <p><button class="btn btn-primary" onclick="@(new Action(() => SaveCloudManually()))">Save Game To Cloud</button></p>
+        }
+
+    }
+    else
+    {
+        <p><button class="btn btn-primary" disabled onclick="@(new Action(() => SaveData()))">Save Game</button></p>
+        @if (Program.playfabManager.IsConnected)
+        {
+            <p><button class="btn btn-primary" disabled onclick="@(new Action(() => SaveCloudManually()))">Save Game To Cloud</button></p>
+        }
+    }
+
+    <br />
+    <br />
+    @if (userWantsGameReset)
+    {
+        <p><button class="btn btn-primary" onclick="@(new Action(() => ResetGame()))">Are you sure?</button></p>
+    }
+    else
+    {
+        <p><button class="btn btn-primary" onclick="@(new Action(() => AskForReset()))">Reset Game</button></p>
+    }
+}
+else
+{
+    <p>More Loading...</p>
+    <p>If you see this for more than a few seconds, you might have to enable third party cookies in your browser settings.</p>
+}
+
+@functions{
+    private bool safeToLoadGame = false;
+    private bool saveGameExists = false;
+    private bool loadBegun = false;
+    private bool userWantsGameReset = false;
+    private bool gameHasBeenSaved = false;
+    private bool gameIsRendered = false;
+    private bool debugMode = false;
+    public string pudding = "Not set.";
+    public string encrypt = "This is a whole string, with many things to test! 1234, 50, 100";
+    public string testString = "";
+    private int itemID;
+    private int amount;
+    private string skill;
+    private int skillLevel;
+    private ElementReference simpleList;
+    private SimpleAES Encryptor = new SimpleAES();
+
+    public void AddRoomToHouse()
+    {
+        GameState.GetPlayer().house.AddRoom(Program.roomManager.GetRoomByID(0));
+    }
+    public void GetItem()
+    {
+        GameState.GetPlayerBank().GetInventory().AddMultipleOfItem(Program.itemDatabase.GetItemByID(itemID), amount);
+    }
+    private async void UpdateHighScores()
+    {
+        if (Program.playfabManager.IsConnected == false && (GameState.userID == null || GameState.userID == ""))
+        {
+            ConnectToKongregate();
+        }
+        else
+        {
+            await JSRuntime.InvokeAsync<object>("kongregateFunctions.updateTotalLevelScore", GameState.GetPlayer().GetTotalLevel());
+            await JSRuntime.InvokeAsync<object>("kongregateFunctions.updateTotalKills", GameState.totalKills);
+        }
+
+
+    }
+    public void GoToDebugArea()
+    {
+        Program.areaManager.GetAreaByID(68).IsUnlocked = true;
+    }
+    public async void LoadDataFromCloud()
+    {
+        string data = await Program.playfabManager.LoadData();
+        data = Encryptor.EncryptToString(data);
+        LoadDataFromString(data);
+    }
+    public void DebugUnlockAllFollowers()
+    {
+        foreach (Follower f in Program.followerManager.GetFollowers())
+        {
+            f.IsUnlocked = true;
+        }
+    }
+    public void DebugUnlockAllAreas()
+    {
+        Program.areaManager.UnlockAllAreas();
+        StateHasChanged();
+        GameState.UpdateState();
+    }
+    public void DebugGainStrengthLevel()
+    {
+        GameState.GetPlayer().GainExperience("Strength", Extensions.GetExperienceRequired(GameState.GetPlayer().GetLevel("Strength")) - GameState.GetPlayer().GetSkill("Strength").SkillExperience);
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    public void DebugSetLevel(string skill, int level)
+    {
+        GameState.GetPlayer().GetSkill(skill).SetSkillLevel(level);
+    }
+    public void DebugOneOfEveryItem()
+    {
+
+        GameState.GetPlayerBank().GetInventory().AddOneOfMultipleItemsUnlimited(Program.itemDatabase.GetAllItems());
+
+    }
+    public void DebugAll99s()
+    {
+        foreach (Skill s in GameState.GetPlayer().GetSkills())
+        {
+            GameState.GetPlayer().GainExperience(s.SkillName, 15000000);
+        }
+    }
+    public void DebugGetMoney()
+    {
+        GameState.GetPlayerBank().GetInventory().AddMultipleOfItemUnlimited(Program.itemDatabase.GetGold(), 100000);
+    }
+    private void AskForReset()
+    {
+        userWantsGameReset = true;
+    }
+    private void ResetGame()
+    {
+        MessageManager.AddMessage("Save Game Reset. Please reload the page to avoid errors.");
+        localStorage.Clear();
+        StateHasChanged();
+    }
+    private void SaveDataEncrypted()
+    {
+        localStorage.SetItem("SaveGameExists", true);
+        localStorage.SetItem("eSave", GetSaveDataString());
+        UpdateHighScores();
+    }
+    private string LoadDataEncrypted()
+    {
+
+        LoadDataFromString(localStorage.GetItem<string>("eSave"));
+        GameState.UpdateState();
+        this.StateHasChanged();
+        return "";
+    }
+    private void SaveData()
+    {
+        while (!GameState.safeToSave)
+        {
+            Thread.Sleep(5);
+        }
+
+        SaveDataEncrypted();
+
+        MessageManager.AddMessage("Your game has been saved.");
+        gameHasBeenSaved = true;
+        GameState.saveDataLoaded = true;
+        GameState.saveGameExists = true;
+        GC.Collect();
+    }
+    public void SaveCloudManually()
+    {
+        if (Program.playfabManager.IsConnected == false && (GameState.userID == null || GameState.userID == ""))
+        {
+            ConnectToKongregate();
+        }
+        else if (Program.playfabManager.IsConnected)
+        {
+            Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+        }
+    }
+    public string GetSaveDataString()
+    {
+        return GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, true);
+    }
+    private void LoadDataFromString(string data)
+    {
+        string decryptedData = Encryptor.DecryptString(data);
+
+
+        string[] lines = decryptedData.Split('#');
+        testString = lines[0];
+
+        Dictionary<GameItem, int> bankItems = Extensions.GetItemDicFromString(lines[0], Program.itemDatabase);
+        List<Skill> skills = Extensions.GetSkillsFromString(lines[1]);
+        Dictionary<GameItem, int> invItems = Extensions.GetItemDicFromString(lines[2], Program.itemDatabase);
+
+        GameState.GetPlayerBank().GetInventory().LoadItems(bankItems);
+        GameState.GetPlayer().SetSkills(skills);
+        GameState.GetPlayerInventory().LoadItems(invItems);
+
+        Program.areaManager.LoadSaveData(lines[3]);
+        Program.followerManager.LoadSaveData(lines[4]);
+
+        if (int.TryParse(lines[5], out int hp))
+        {
+            GameState.GetPlayer().CurrentHP = hp;
+        }
+        else
+        {
+            GameState.GetPlayer().CurrentHP = GameState.GetPlayer().MaxHP;
+        }
+
+        if (int.TryParse(lines[6], out int activeFollower))
+        {
+            GameState.GetPlayer().activeFollower = Program.followerManager.GetFollowerByID(activeFollower);
+        }
+
+        List<string> recipes = lines[7].Split('/').ToList();
+        GameState.GetPlayer().LoadRecipes(recipes);
+
+
+        List<int> equippedItems = new List<int>();
+        foreach (string s in lines[8].Split('/') ?? Enumerable.Empty<string>())
+        {
+            if (int.TryParse(s, out int id))
+            {
+                equippedItems.Add(id);
+            }
+        }
+        if (equippedItems != null && equippedItems.Count > 0)
+        {
+            GameState.GetPlayer().EquipItems(equippedItems);
+        }
+        if (lines.Length > 9 && lines[9] != null)
+        {
+            string[] settings = lines[9].Split(',');
+            GameState.isSplitView = bool.Parse(settings[0]);
+            GameState.compactBankView = bool.Parse(settings[1]);
+            if (settings.Length > 2 && settings[2] != null)
+            {
+                GameState.expensiveItemThreshold = int.Parse(settings[2]);
+            }
+            if (settings.Length > 3 && settings[3] != null)
+            {
+                GameState.totalKills = int.Parse(settings[3]);
+            }
+            if (settings.Length > 4 && settings[4] != null)
+            {
+                GameState.PetShopUnlocked = bool.Parse(settings[4]);
+            }
+            if (settings.Length > 5 && settings[5] != null)
+            {
+                GameState.autoBuySushiSupplies = bool.Parse(settings[5]);
+            }
+            if (settings.Length > 6 && settings[6] != null)
+            {
+                GameState.totalCoinsEarned = long.Parse(settings[6]);
+            }
+            if (settings.Length > 7 && settings[7] != null)
+            {
+                GameState.totalDeaths = int.Parse(settings[7]);
+            }
+        }
+        if (lines.Length > 10 && lines[10] != null)
+        {
+            Program.npcManager.LoadNPCData(lines[10]);
+        }
+        if (lines.Length > 11 && lines[11] != null)
+        {
+            GameState.sushiHouseRice = int.Parse(lines[11].Split(',')[0]);
+            GameState.sushiHouseSeaweed = int.Parse(lines[11].Split(',')[1]);
+        }
+        if (lines.Length > 12 && lines[12] != null)
+        {
+            string[] salts = lines[12].Split('/');
+            foreach (string salt in salts)
+            {
+                if (salt.Length > 0)
+                {
+                    int id = int.Parse(salt.Split(',')[0]);
+                    int amount = int.Parse(salt.Split(',')[1]);
+                    Program.buildingManager.GetBuildingByID(id).Salt = amount;
+                }
+            }
+        }
+        if (lines.Length > 13 && lines[13] != null)
+        {
+            string[] tanneries = lines[13].Split('@');
+
+            foreach (string tannery in tanneries)
+            {
+                if (tannery.Length > 0)
+                {
+                    Building t = Program.buildingManager.GetBuildingByID(int.Parse(tannery.Split('>')[0]));
+                    string[] tanneryData = tannery.Split('>')[1].Split('_');
+
+                    foreach (string s in tanneryData)
+                    {
+                        if (s.Length > 0)
+                        {
+                            TanningSlot slot = new TanningSlot();
+                            slot.SetDataFromString(s);
+                            t.TanneryItems.Add(slot);
+
+                        }
+
+                    }
+                }
+            }
+        }
+        if (lines.Length > 14 && lines[14] != null)
+        {
+            if (bool.TryParse(lines[14].Split(',')[0], out bool isHunting))
+            {
+                if (isHunting)
+                {
+                    GameState.isHunting = true;
+                    GameState.huntingAreaID = int.Parse(lines[14].Split(',')[1]);
+                    GameState.huntingStartTime = DateTime.Parse(lines[14].Split(',')[2]);
+                    GameState.huntingEndTime = DateTime.Parse(lines[14].Split(',')[3]);
+                    Program.huntingManager.LoadHunt(GameState.huntingStartTime, GameState.huntingEndTime);
+
+                }
+            }
+        }
+        if (lines.Length > 15 && lines[15] != null)
+        {
+            GameState.GetPlayerBank().LoadTabsFromString(lines[15]);
+        }
+        if (lines.Length > 16 && lines[16] != null)
+        {
+            GameState.GetPlayer().LoadPetsFromString(lines[16]);
+        }
+        if (lines.Length > 17 && lines[17] != null)
+        {
+            GameState.LoadKC(lines[17]);
+        }
+        MessageManager.AddMessage("Save game loaded.");
+        Console.WriteLine(GameState.isHunting + ", " + GameState.CanLeave() + ", " + GameState.huntingAreaID);
+        GameState.saveDataLoaded = true;
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private async void LoadData()
+    {
+        LoadDataEncrypted();
+
+        GameState.saveDataLoaded = true;
+        if (GameState.autoSaveTimer != null)
+        {
+            GameState.autoSaveTimer.Dispose();
+            GameState.autoSaveTimer = null;
+        }
+        GameState.autoSaveTimer = new Timer(new TimerCallback(_ =>
+        {
+            try
+            {
+                SaveData();
+            }
+            catch
+            {
+                MessageManager.AddMessage("Failed to auto save. Please make a local backup before closing the game.", "red");
+            }
+            GameState.saveToPlayFab++;
+            if (GameState.saveToPlayFab > GameState.saveToPlayFabEvery)
+            {
+                if (Program.playfabManager.IsConnected == false)
+                {
+                    ConnectToCloudAndSave();
+
+                }
+                else if (Program.playfabManager.IsConnected)
+                {
+                    Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+                }
+
+                GameState.saveToPlayFab = 0;
+            }
+        }), null, 60000, 60000);
+
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private async Task ConnectToCloudAndSave()
+    {
+        await ConnectToKongregate();
+        await Program.playfabManager.TryLogin(GameState.userID, GameState.token);
+        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        //saveGameExists = localStorage.GetItem<bool>("SaveGameExists");
+
+
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        saveGameExists = await asyncLocalStorage.GetItemAsync<bool>("SaveGameExists");
+        GameState.JSRuntime = JSRuntime;
+        await ConnectToKongregate();
+        GameState.saveGameExists = saveGameExists;
+        Console.WriteLine("Game data loaded:" + GameState.gameDataLoaded);
+        if (GameState.gameDataLoaded == false)
+        {
+            Program.gatherManager.SetGameState(GameState);
+            Program.huntingManager.SetGameState(GameState);
+
+            GameState.LoadPlayerData(Http);
+            Console.WriteLine("Loaded player data");
+            await Program.itemDatabase.LoadItems(Http);
+            await Program.areaManager.LoadAreas(Http);
+            await Program.buildingManager.LoadBuildings(Http);
+            await Program.followerManager.LoadFollowers(Http);
+            await Program.npcManager.LoadNPCs(Http);
+            await Program.battleManager.LoadMonsters(Http, GameState, MessageManager, Program.itemDatabase, JSRuntime);
+            await Program.roomManager.LoadRooms(Http);
+            await Program.furnitureManager.LoadFurniture(Http);
+            await Program.petManager.LoadPets(Http);
+            GameState.GetPlayer().SetMessageManager(MessageManager);
+            GameState.GetPlayer().CurrentHP = 50;
+            GameState.GetPlayerBank().AddItemsToCurrentTab(Program.itemDatabase.GetAllItemIDs());
+            GameState.GetPlayerBank().GetInventory().isBank = true;
+            GameState.LoadMonsters(Program.battleManager.GetAllMonsters());
+            GameState.gameDataLoaded = true;
+            GameState.safeToLoad = true;
+        }
+        else
+        {
+            GameState.safeToLoad = true;
+        }
+        if (saveGameExists == false)
+        {
+            if (GameState.autoSaveTimer != null)
+            {
+                GameState.autoSaveTimer.Dispose();
+                GameState.autoSaveTimer = null;
+            }
+            GameState.autoSaveTimer = new Timer(new TimerCallback(_ =>
+            {
+                try
+                {
+                    SaveData();
+                }
+                catch
+                {
+                    MessageManager.AddMessage("Failed to auto save. Please make a local backup before closing the game.", "red");
+                }
+                GameState.saveToPlayFab++;
+                if (GameState.saveToPlayFab > GameState.saveToPlayFabEvery)
+                {
+                    if (Program.playfabManager.IsConnected == false)
+                    {
+                        ConnectToCloudAndSave();
+
+                    }
+                    else if (Program.playfabManager.IsConnected)
+                    {
+                        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+                    }
+
+                    GameState.saveToPlayFab = 0;
+                }
+            }), null, 60000, 60000);
+        }
+        try
+        {
+            await Program.playfabManager.TryLogin(GameState.userID, GameState.token);
+            GameState.UpdateState();
+            this.StateHasChanged();
+        }
+        catch
+        {
+            Console.WriteLine("Couldn't connect to Playfab.");
+        }
+
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private async Task ConnectToKongregate()
+    {
+        try
+        {
+            GameState.userID = await JSRuntime.InvokeAsync<string>("kongregateFunctions.getUserID");
+            GameState.token = await JSRuntime.InvokeAsync<string>("kongregateFunctions.getToken");
+        }
+        catch
+        {
+
+            GameState.userID = "";
+            GameState.token = "";
+
+        }
+    }
+    protected override void OnAfterRender()
+    {
+        safeToLoadGame = true;
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

@@ -1,0 +1,21 @@
+﻿@page "/House/ChickenRoom"
+@inject HttpClient Http
+@inject GameState GameState
+@implements IDisposable
+
+
+
+@functions{
+
+
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

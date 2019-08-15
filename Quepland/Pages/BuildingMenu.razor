@@ -1,0 +1,945 @@
+﻿@page "/Inside/{buildingURL}"
+@inject GameState  GameState
+@inject MessageManager MessageManager
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@using System.Threading
+
+
+<button class="btn btn-primary" style="margin-bottom:10px" onclick="@(new Action((() => Return(GameState.previousURL))))">Leave</button>
+
+<br />
+@LoadNPCs()
+@LoadShop()
+@LoadBuildings()
+@LoadRoadblocks()
+@LoadAlchemyStation()
+@LoadInn()
+@if (thisBuilding.IsSushiTrainingBuilding)
+{
+    <p>
+        <input type="checkbox" title="Rice is 250 gp, seaweed is 300 gp."@bind-value="@GameState.autoBuySushiSupplies" @bind-value:event="onchange" />
+        Auto Buy Supplies
+    </p>
+   
+    @LoadSushiTraining()
+}
+@if (thisBuilding.IsTannery)
+{
+   @LoadTannery()
+}
+
+@functions{
+
+    [Parameter]
+    private string buildingURL { get; set; }
+
+    private Building thisBuilding;
+    private GameItem currentMetalBar;
+    private GameItem currentElement;
+    private int alchemyStage;
+    private int buyAmount;
+    private string proofstring = "Not set.";
+
+    private bool showItemTanningMenu = false;
+
+    public RenderFragment LoadShop()
+    {
+        return builder =>
+        {
+            if (thisBuilding != null)
+            {
+                builder.OpenElement(0, "h");
+                builder.AddContent(1, "You are in " + thisBuilding.Name);
+                builder.CloseElement();
+                builder.OpenElement(2, "br");
+                builder.CloseElement();
+                builder.OpenElement(3, "p");
+                builder.AddContent(4, thisBuilding.Description);
+                builder.CloseElement();
+
+                if (thisBuilding.IsShop)
+                {
+                    builder.OpenElement(5, "p");
+                    builder.AddContent(6, "Buy X: ");
+                    builder.OpenElement(7, "input");
+                    //builder.AddAttribute(8, "value", Microsoft.AspNetCore.Components.BindMethods.GetValue(buyAmount));
+                    //builder.AddAttribute(9, "onchange", Microsoft.AspNetCore.Components.EventCallback.Factory.CreateBinder(this, __value => buyAmount = __value, buyAmount));
+                    builder.CloseElement();
+                    builder.CloseElement();
+                    builder.OpenElement(10, "table");
+                    builder.OpenElement(11, "thead");
+                    builder.OpenElement(12, "tr");
+                    builder.OpenElement(13, "th");
+                    builder.AddContent(14, "Item Name");
+                    builder.CloseElement();
+                    builder.OpenElement(15, "th");
+                    builder.AddContent(16, "Item Description");
+                    builder.CloseElement();
+                    builder.OpenElement(17, "th");
+                    builder.AddContent(18, "Cost");
+                    builder.CloseElement();
+                    builder.OpenElement(19, "th");
+                    builder.AddAttribute(20, "style", "text-align:right");
+                    builder.AddContent(21, "Buy");
+
+                    builder.CloseElement();
+                    builder.CloseElement();
+                    builder.CloseElement();
+                    builder.OpenElement(22, "tbody");
+
+                    foreach (int i in thisBuilding.items ?? Enumerable.Empty<int>())
+                    {
+                        builder.AddContent(23, ShopItem(i));
+                    }
+                    builder.CloseElement();
+                    builder.CloseElement();
+                }
+            }
+        };
+    }
+    public RenderFragment ShopItem(int i)
+    {
+        return builder =>
+        {
+            GameItem item = Program.itemDatabase.GetItemByID(i);
+            builder.OpenElement(0, "tr");
+            builder.OpenElement(1, "td");
+            builder.AddContent(2, item.ItemName);
+            builder.CloseElement();
+            builder.OpenElement(3, "td");
+            builder.AddContent(4, item.ItemDescription);
+            builder.CloseElement();
+            builder.OpenElement(5, "td");
+            if (thisBuilding.IsExpensive)
+            {
+                builder.AddContent(6, String.Format("{0:n0}",item.Value * 3));
+            }
+            else
+            {
+                builder.AddContent(6, String.Format("{0:n0}",item.Value));
+            }
+            builder.CloseElement();
+            builder.OpenElement(7, "td");
+            builder.AddAttribute(8, "style", "text-align: right; min-width:150px");
+            builder.AddContent(9, BuyButton(item, 1));
+            builder.AddContent(10, BuyButton(item, 5));
+            builder.AddContent(11, BuyButton(item, buyAmount));
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    public RenderFragment BuyButton(GameItem item, int amount)
+    {
+        return builder =>
+        {
+            builder.OpenElement(8, "button");
+            builder.AddAttribute(9, "class", "btn btn-primary");
+            builder.AddAttribute(10, "onclick", new Action((() => BuyItem(item, amount))));
+
+
+            if (item.Value * amount > GameState.GetPlayerInventory().GetCoins() || amount <= 0)
+            {
+                builder.AddAttribute(11, "disabled", true);
+                if (amount > 0)
+                {
+                    builder.AddAttribute(12, "title", "You don't have enough money to buy this.");
+                }
+                else
+                {
+                    builder.AddAttribute(132, "title", "There's no point in buying none or less than none of something.");
+                }
+            }
+            else if((GameState.GetPlayerInventory().GetAvailableSpaces() < amount && (item.IsStackable == false)) ||
+            (item.IsStackable && GameState.GetPlayerInventory().GetAvailableSpaces() == 0 && GameState.GetPlayerInventory().HasItem(item) == false))
+            {
+                builder.AddAttribute(14, "disabled", true);
+                builder.AddAttribute(15, "title", "You don't have enough inventory space to buy this.");
+            }
+            builder.AddContent(16, "" + amount);
+            builder.CloseElement();
+        };
+    }
+    public RenderFragment LoadAlchemyStation()
+    {
+        return builder =>
+        {
+            if (thisBuilding != null && thisBuilding.HasAlchemyStation)
+            {
+                if (alchemyStage == 0)
+                {
+                    bool hasBars = false;
+                    foreach (GameItem item in Program.itemDatabase.GetSmithingBars())
+                    {
+                        if (GameState.GetPlayerInventory().HasItem(item))
+                        {
+                            hasBars = true;
+                            builder.OpenElement(0, "button");
+                            builder.AddAttribute(1, "class", "btn btn-primary");
+                            builder.AddAttribute(2, "style", "margin:10px");
+                            if (GameState.GetPlayerInventory().HasItem(item) == false || GameState.GetPlayer().GetLevel("Alchemy") < item.RequiredLevel - 5)
+                            {
+                                builder.AddAttribute(3, "disabled", true);
+                                builder.AddAttribute(4, "title", "You need level " + (item.RequiredLevel - 5) + " Alchemy to perform alchemy on this bar.");
+                            }
+                            builder.AddAttribute(5, "onclick", new Action(() => SetMetal(item)));
+                            builder.AddContent(6, item.ItemName);
+                            builder.CloseElement();
+                            builder.OpenElement(7, "br");
+                            builder.CloseElement();
+                        }
+
+                    }
+                    if (!hasBars)
+                    {
+                        builder.OpenElement(0, "p");
+                        builder.AddContent(1, "You don't have any bars with you to do alchemy with.");
+                        builder.CloseElement();
+                        builder.OpenElement(2, "br");
+                        builder.CloseElement();
+                    }
+                }
+                else if (alchemyStage == 1)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int temp = i;
+                        builder.OpenElement(0, "button");
+                        builder.AddAttribute(1, "class", "btn btn-primary");
+                        builder.AddAttribute(2, "style", "margin:10px");
+                        //Check for Carquen and next 3 elements.
+                        if (GameState.GetPlayerInventory().HasItem(temp + 62) == false)
+                        {
+                            builder.AddAttribute(3, "disabled", true);
+                        }
+                        builder.AddAttribute(4, "onclick", new Action(() => SetElement(Program.itemDatabase.GetItemByID(temp + 62))));
+                        builder.AddContent(4, Program.itemDatabase.GetItemByID(temp + 62).ItemName);
+                        builder.CloseElement();
+                        builder.OpenElement(5, "br");
+                        builder.CloseElement();
+                    }
+                }
+                else if (alchemyStage == 2)
+                {
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(1, "class", "btn btn-primary");
+                    builder.AddAttribute(2, "style", "margin:10px");
+
+                    if (currentMetalBar == null || currentElement == null)
+                    {
+                        builder.AddAttribute(3, "disabled", true);
+                    }
+                    builder.AddAttribute(4, "onclick", new Action(() => Alchemize(currentMetalBar, currentElement)));
+                    builder.AddContent(4, "Alchemize " + currentMetalBar.ItemName + " and " + currentElement.ItemName);
+                    builder.CloseElement();
+                    builder.OpenElement(5, "br");
+                    builder.CloseElement();
+                }
+            }
+        };
+    }
+    public RenderFragment LoadInn()
+    {
+        return builder =>
+        {
+            if (thisBuilding.IsInn)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(1, "class", "btn btn-primary");
+                builder.AddAttribute(2, "onclick", new Action(() => StayAtInn()));
+                if(GameState.GetPlayerInventory().GetCoins() < 100)
+                {
+                    builder.AddAttribute(3, "disabled", true);
+                    builder.AddAttribute(4, "title", "You don't have enough money to do that.");
+                }
+                builder.AddContent(5, "Rest here for 100 coins");
+                builder.CloseElement();
+            }
+        };
+    }
+    private void StayAtInn()
+    {
+        GameState.GetPlayer().CurrentHP = GameState.GetPlayer().MaxHP;
+        GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetGold(), 100);
+        MessageManager.AddMessage("You stay at the inn for a night.");
+        GameState.UpdateState();
+    }
+    private void SetMetal(GameItem metal)
+    {
+        currentMetalBar = metal;
+        alchemyStage++;
+        MessageManager.AddMessage("You place the " + metal.ItemName + " in front of the vent.");
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private void SetElement(GameItem element)
+    {
+        currentElement = element;
+        alchemyStage++;
+        MessageManager.AddMessage("You place the " + element.ItemName + " on the " + currentMetalBar.ItemName + ".");
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private void Alchemize(GameItem metal, GameItem element)
+    {
+        int totalQueplarValue = metal.QueplarValue + element.QueplarValue + thisBuilding.QueplarValue;
+        GameItem itemCreated = Program.itemDatabase.GetItemByQueplarValue(totalQueplarValue);
+        GameState.GetPlayerInventory().RemoveOneOfItem(metal);
+        GameState.GetPlayerInventory().RemoveOneOfItem(element);
+        GameState.GetPlayerInventory().AddItem(itemCreated);
+        GameState.GetPlayer().GainExperience("Alchemy", metal.Value);
+        GameState.GetPlayer().LearnNewAlchemyRecipe(metal, element, thisBuilding, itemCreated);
+        MessageManager.AddMessage("You merge the metal and element together and produce " + itemCreated.ItemName + ".");
+        alchemyStage = 0;
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void ResetAlchemy()
+    {
+        alchemyStage = 0;
+        currentMetalBar = null;
+        currentElement = null;
+    }
+    public void EnterBuilding(string buildingURL)
+    {
+        GameState.previousURL = "/Inside/" + thisBuilding.URL;
+        ResetAlchemy();
+        UriHelper.NavigateTo("/Inside/" + buildingURL);
+    }
+    public void SetBuilding(string url)
+    {
+        thisBuilding = Program.buildingManager.GetBuildingByURL(url);
+        if (thisBuilding.IsShop)
+        {
+            GameState.canSell = true;
+        }
+    }
+    public RenderFragment LoadNPCs()
+    {
+        return builder =>
+        {
+            foreach (int n in thisBuilding.NPCIDs ?? Enumerable.Empty<int>())
+            {
+                NPC npc = Program.npcManager.GetNPCByID(n);
+                proofstring = npc.Name;
+                if (npc.IsInteractable == true)
+                {
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(1, "style", "margin-bottom:10px");
+                    builder.AddAttribute(2, "class", "btn btn-warning");
+                    builder.AddAttribute(3, "onclick", new Action(() => SpeakToNPC(npc)));
+                    if (npc.UnlockAreaIDs != null && npc.UnlockAreaIDs.Length > 0)
+                    {
+                        foreach (int a in npc.UnlockAreaIDs)
+                        {
+                            builder.AddAttribute(4, "onclick", new Action(() => UnlockArea(Program.areaManager.GetAreaByID(a))));
+                        }
+                    }
+                    if (npc.UnlockBuildingIDs != null && npc.UnlockBuildingIDs.Length > 0)
+                    {
+                        foreach (int b in npc.UnlockBuildingIDs)
+                        {
+                            builder.AddAttribute(5, "onclick", new Action(() => UnlockBuilding(Program.buildingManager.GetBuildingByID(b))));
+                        }
+                    }
+                    if (npc.UnlockNPCIDs != null && npc.UnlockNPCIDs.Length > 0)
+                    {
+                        foreach (int i in npc.UnlockNPCIDs)
+                        {
+                            builder.AddAttribute(6, "onclick", new Action(() => UnlockNPC(Program.npcManager.GetNPCByID(i))));
+                        }
+                    }
+                    builder.AddContent(7, "Speak to " + npc.Name);
+                    builder.CloseElement();
+                    builder.OpenElement(8, "br");
+                    builder.CloseElement();
+                    foreach (int followerID in npc.UnlockFollowerIDs ?? Enumerable.Empty<int>())
+                    {
+                        Follower f = Program.followerManager.GetFollowerByID(followerID);
+                        GameItem itemToPay = Program.itemDatabase.GetItemByID(f.CostItemID);
+                        if (f.IsUnlocked == false)
+                        {
+                            builder.OpenElement(9, "button");
+                            builder.AddAttribute(10, "style", "margin-bottom:10px");
+                            builder.AddAttribute(11, "class", "btn btn-primary");
+                            builder.AddAttribute(12, "onclick", new Action(() => UnlockAndPayForFollower(followerID)));
+                            if (GameState.GetPlayerInventory().GetAmountOfItem(itemToPay) < f.Cost)
+                            {
+                                builder.AddAttribute(13, "disabled", true);
+                            }
+
+                            builder.AddAttribute(15, "title", f.Name + " will help you with " + f.AutoCollectSkill + " up to level " + f.AutoCollectLevel + ".");
+
+                            builder.AddContent(14, "Buy " + f.Name + " for " + f.Cost + " " + itemToPay.ItemName);
+                            builder.CloseElement();
+                            builder.OpenElement(15, "br");
+                            builder.CloseElement();
+                        }
+
+                    }
+                    foreach (int itemID in npc.PurchaseItemIDs ?? Enumerable.Empty<int>())
+                    {
+                        GameItem item = Program.itemDatabase.GetItemByID(itemID);
+                        builder.OpenElement(16, "button");
+                        builder.AddAttribute(17, "style", "margin-bottom:10px");
+                        builder.AddAttribute(18, "class", "btn btn-primary");
+                        builder.AddAttribute(19, "onclick", new Action(() => BuyItem(item, 1)));
+                        if (GameState.GetPlayerInventory().GetCoins() < item.Value || GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
+                        {
+                            builder.AddAttribute(20, "disabled", true);
+                        }
+                        builder.AddContent(21, "Buy " + item.ItemName + " for " + String.Format("{0:n0}",item.Value) + " gp");
+                        builder.CloseElement();
+                        builder.OpenElement(22, "br");
+                        builder.CloseElement();
+                    }
+                }
+            }
+        };
+    }
+    public RenderFragment LoadBuildings()
+    {
+        return builder =>
+        {
+            foreach (string s in thisBuilding.Buildings ?? Enumerable.Empty<string>())
+            {
+                Building building = Program.buildingManager.GetBuildingByURL(s);
+                if (building != null)
+                {
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(1, "style", "margin-bottom:10px");
+                    builder.AddAttribute(2, "class", "btn btn-primary");
+                    builder.AddAttribute(3, "onclick", new Action(() => EnterBuilding(s)));
+                    if (building.ButtonText == null || building.ButtonText.Length < 1)
+                    {
+                        builder.AddContent(4, building.Name);
+                    }
+                    else
+                    {
+                        builder.AddContent(5, building.ButtonText);
+                    }
+                    builder.CloseElement();
+                }
+                builder.OpenElement(6, "br");
+                builder.CloseElement();
+            }
+        };
+    }
+    public RenderFragment LoadRoadblocks()
+    {
+        return builder =>
+        {
+            foreach (string s in thisBuilding.UnlockableAreas ?? Enumerable.Empty<string>())
+            {
+                string[] splitData = s.Split(',');
+                string areaToUnlock = splitData[0];
+                string buttonText = splitData[1];
+                string requiredLevel = splitData[2];
+                string requiredAction = splitData[3];
+                Area area = Program.areaManager.GetAreaByName(areaToUnlock);
+                if (area.IsUnlocked == false)
+                {
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(0, "style", "margin-bottom:10px");
+                    builder.AddAttribute(0, "class", "btn btn-success");
+                    builder.AddAttribute(0, "onclick", new Action(() => UnlockArea(area)));
+                    if (GameState.GetPlayer().HasLevelForRoadblock(requiredLevel) == false ||
+                    GameState.GetPlayerInventory().ActionIsEnabled(requiredAction) == false)
+                    {
+                        builder.AddAttribute(0, "disabled", true);
+                        if (GameState.GetPlayer().HasLevelForRoadblock(requiredLevel) == false)
+                        {
+                            builder.AddAttribute(0, "title", "You lack the levels to do this." + "(" + requiredLevel + ")");
+                        }
+                        else if (GameState.GetPlayerInventory().ActionIsEnabled(requiredAction) == false)
+                        {
+                            builder.AddAttribute(0, "title", "You do not have an item that lets you do this." + "(" + requiredAction + ")");
+                        }
+                    }
+                    builder.AddContent(0, buttonText);
+                    builder.CloseElement();
+                }
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+            }
+        };
+    }
+    public RenderFragment LoadSushiTraining()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "p");
+
+            builder.OpenElement(1, "button");
+            builder.AddAttribute(2, "class", "btn btn-primary");
+            builder.AddAttribute(3, "style", "align-text:right");
+            builder.AddAttribute(4, "onclick", new Action(() => LoadSushiHouseRice()));
+            if(GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Rice")) == 0)
+            {
+                builder.AddAttribute(5, "disabled", true);
+                builder.AddAttribute(6, "title", "You don't have any rice with you.");
+            }
+            builder.AddContent(7, "Deposit Rice");
+            builder.CloseElement();
+            builder.AddContent(8, " Rice Stored:" + GameState.sushiHouseRice);
+            builder.CloseElement();
+            builder.OpenElement(9, "p");
+
+            builder.OpenElement(10, "button");
+            builder.AddAttribute(11, "class", "btn btn-primary");
+            builder.AddAttribute(12, "style", "align-text:right");
+            builder.AddAttribute(13, "onclick", new Action(() => LoadSushiHouseSeaweed()));
+            if(GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Seaweed")) == 0)
+            {
+                builder.AddAttribute(14, "disabled", true);
+                builder.AddAttribute(15, "title", "You don't have any seaweed with you.");
+            }
+            builder.AddContent(16, "Deposit Seaweed");
+            builder.CloseElement();
+            builder.AddContent(17, " Seaweed Stored:" + GameState.sushiHouseSeaweed);
+            builder.CloseElement();
+            builder.OpenElement(18, "br");
+            builder.CloseElement();
+            builder.OpenElement(19, "button");
+            builder.AddAttribute(20, "class", "btn btn-primary");
+            builder.AddAttribute(21, "style", "align-text:right");
+
+            if(GameState.CanLeave() == true)
+            {
+                builder.AddAttribute(22, "onclick", new Action(() => BeginMakingSushi()));
+                if(FindFishInInventory() == false)
+                {
+                    builder.AddAttribute(23, "disabled", true);
+                    builder.AddAttribute(24, "title", "You don't have any fish to make sushi with at your level.");
+                }
+                else if((GameState.sushiHouseRice == 0 || GameState.sushiHouseSeaweed == 0) && GameState.autoBuySushiSupplies == false)
+                {
+                    builder.AddAttribute(23, "disabled", true);
+                    builder.AddAttribute(24, "title", "You don't have enough rice or seaweed to make sushi.");
+                }
+                builder.AddContent(25, "Begin Making Sushi");
+            }
+            else
+            {
+                builder.AddAttribute(26, "onclick", new Action(() => GameState.StopActions()));
+                builder.AddContent(27, "Stop Making Sushi");
+            }
+            builder.CloseElement();
+
+        };
+    }
+    public RenderFragment LoadTannery()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "p");
+            builder.OpenElement(1, "button");
+            builder.AddAttribute(2, "class", "btn btn-primary");
+            builder.AddAttribute(3, "style", "align-text:right");
+            builder.AddAttribute(4, "onclick", new Action(() => LoadTannerySalt()));
+            if(GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Salt")) == 0)
+            {
+                builder.AddAttribute(5, "disabled", true);
+                builder.AddAttribute(6, "title", "You don't have any salt with you.");
+            }
+            builder.AddContent(7, "Deposit Salt");
+            builder.CloseElement();
+            builder.AddContent(8, "Salt:" + thisBuilding.Salt);
+            builder.CloseElement();
+
+            if(showItemTanningMenu == false)
+            {
+                for (int i = 0; i < thisBuilding.TannerySlots; i++)
+                {
+                    int temp = i;
+                    builder.OpenElement(9, "p");
+                    builder.OpenElement(10, "button");
+                    builder.AddAttribute(11, "class", "btn btn-primary");
+                    builder.AddAttribute(12, "style", "align-text:right");
+                    if (thisBuilding.TanneryItems.Count > temp)
+                    {
+                        builder.AddAttribute(13, "onclick", new Action(() => WithdrawTanneryItem(temp)));
+                        int amountToWithdraw = Math.Min(GameState.GetPlayerInventory().GetAvailableSpaces(),thisBuilding.TanneryItems[temp].Item.Value);
+                        if(thisBuilding.TanneryItems[temp].EndTime.CompareTo(DateTime.UtcNow) > 0)
+                        {
+                            builder.AddAttribute(14, "disabled", true);
+                            builder.AddAttribute(15, "title", "It isn't ready yet. " + (DateTime.UtcNow - thisBuilding.TanneryItems[temp].EndTime));
+
+                        }
+                        else if(GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
+                        {
+                            builder.AddAttribute(14, "disabled", true);
+                            builder.AddAttribute(15, "title", "Your inventory is full.");
+                        }
+                        else if(thisBuilding.TanneryItems[temp].Item.Value > GameState.GetPlayerInventory().GetAvailableSpaces())
+                        {
+                            builder.AddAttribute(15, "title", "You don't have the inventory space to withdraw all of them.");
+                        }
+                        builder.AddContent(16, "Withdraw " + amountToWithdraw + " " + Program.itemDatabase.GetItemByID(thisBuilding.TanneryItems[temp].Item.Key).ItemName);
+
+                    }
+                    else
+                    {
+                        builder.AddAttribute(17, "onclick", new Action(() => ShowDepositMenu()));
+                        if(thisBuilding.Salt == 0)
+                        {
+                            builder.AddAttribute(18, "disabled", true);
+                        }
+                        builder.AddContent(19, "Cure or Tan item");
+                    }
+                    builder.CloseElement();
+                    if(thisBuilding.TanneryItems.Count > temp && thisBuilding.TanneryItems[temp].EndTime.CompareTo(DateTime.UtcNow) > 0)
+                    {
+                        TimeSpan remainingTime = thisBuilding.TanneryItems[temp].EndTime.Subtract(DateTime.UtcNow);
+                        string timeLeft = "" + remainingTime.Hours.ToString("00") + ":" + remainingTime.Minutes.ToString("00") + ":" + remainingTime.Seconds.ToString("00");
+                        builder.AddContent(20, "Time Remaining:" + timeLeft);
+
+                    }
+
+                    builder.CloseElement();
+                }
+            }
+            else
+            {
+                foreach(KeyValuePair<GameItem, int> i in GameState.GetPlayerInventory().GetItems())
+                {
+                    if(i.Key.IsTannable || i.Key.IsCurable)
+                    {
+                        builder.AddContent(21, LoadTanningButton(i.Key));
+                    }
+                }
+                builder.OpenElement(22, "p");
+                builder.OpenElement(23, "button");
+                builder.AddAttribute(24, "class", "btn btn-primary");
+                builder.AddAttribute(25, "style", "align-text:right");
+                builder.AddAttribute(26, "onclick", new Action(() => HideDepositMenu()));
+                builder.AddContent(27, "Cancel");
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+
+        };
+    }
+    public RenderFragment LoadTanningButton(GameItem item)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "p");
+            builder.OpenElement(1, "button");
+            builder.AddAttribute(2, "class", "btn btn-primary");
+            builder.AddAttribute(3, "style", "align-text:right");
+            builder.AddAttribute(4, "onclick", new Action(() => DepositTanneryItem(item)));
+            if(item.RequiredLevel > GameState.GetPlayer().GetLevel("Leatherworking"))
+            {
+                builder.AddAttribute(5, "disabled", true);
+                builder.AddAttribute(6, "title", "You don't have the leatherworking level for that.(" + item.RequiredLevel + ")");
+            }
+            builder.AddContent(7, "Deposit " + item.ItemName);
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    public void ShowDepositMenu()
+    {
+        showItemTanningMenu = true;
+    }
+    public void HideDepositMenu()
+    {
+        showItemTanningMenu = false;
+    }
+    public void DepositTanneryItem(GameItem item)
+    {
+        int depositAmount = Math.Min(thisBuilding.Salt, GameState.GetPlayerInventory().GetAmountOfItem(item));
+        MessageManager.AddMessage("You deposited " + depositAmount + " " + item.ItemName);
+        if(thisBuilding.Salt == 0)
+        {
+            MessageManager.AddMessage("You have run out of salt!");
+        }
+
+        thisBuilding.TanneryItems.Add(new TanningSlot(item.Id, depositAmount, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(6)));
+        GameState.GetPlayerInventory().RemoveItems(item, depositAmount);
+        thisBuilding.Salt -= depositAmount;
+        showItemTanningMenu = false;
+        this.StateHasChanged();
+        GameState.UpdateState();
+    }
+    public void WithdrawTanneryItem(int i)
+    {
+        GameItem jerky = Program.itemDatabase.GetItemWithIngredientID(thisBuilding.TanneryItems[i].Item.Key);
+        if(jerky == null)
+        {
+
+            return;
+        }
+        if(GameState.GetPlayerInventory().GetAvailableSpaces() >= thisBuilding.TanneryItems[i].Item.Value)
+        {
+            GameState.GetPlayerInventory().AddMultipleOfItem(jerky, thisBuilding.TanneryItems[i].Item.Value);
+            GameState.GetPlayer().GainExperienceFromMultipleItems(jerky.ExperienceGained, thisBuilding.TanneryItems[i].Item.Value);
+            thisBuilding.TanneryItems.RemoveAt(i);
+        }
+        else
+        {
+            int amountToWithdraw = GameState.GetPlayerInventory().GetAvailableSpaces();
+            int amountInTannery = thisBuilding.TanneryItems[i].Item.Value;
+            int id = thisBuilding.TanneryItems[i].Item.Key;
+            GameState.GetPlayerInventory().AddMultipleOfItem(jerky, amountToWithdraw);
+            GameState.GetPlayer().GainExperienceFromMultipleItems(jerky.ExperienceGained, amountToWithdraw);
+            thisBuilding.TanneryItems[i] = new TanningSlot(id, amountInTannery - amountToWithdraw, DateTime.MinValue, DateTime.MinValue);
+        }
+
+
+        this.StateHasChanged();
+        GameState.UpdateState();
+    }
+    public void LoadTannerySalt()
+    {
+        int saltAmount = GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Salt"));
+        thisBuilding.Salt += saltAmount;
+        GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetItemByName("Salt"), saltAmount);
+        StateHasChanged();
+        GameState.UpdateState();
+
+    }
+    public void LoadSushiHouseRice()
+    {
+        int riceAmount = GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Rice"));
+        GameState.sushiHouseRice += riceAmount;
+        GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetItemByName("Rice"), riceAmount);
+        StateHasChanged();
+        GameState.UpdateState();
+
+    }
+    public void LoadSushiHouseSeaweed()
+    {
+        int seaweedAmount = GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByName("Seaweed"));
+        GameState.sushiHouseSeaweed += seaweedAmount;
+        GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetItemByName("Seaweed"), seaweedAmount);
+        StateHasChanged();
+        GameState.UpdateState();
+
+    }
+    public void BeginMakingSushi()
+    {
+        GameState.StopActions();
+        GameState.isGathering = true;
+        MessageManager.AddMessage("You set to work with the master as your guide.");
+        GameState.gatherTimer = new Timer(new TimerCallback(_ =>
+        {
+            if(GameState.sushiHouseRice == 0 || GameState.sushiHouseSeaweed == 0)
+            {
+                if(GameState.autoBuySushiSupplies == false)
+                {
+                    GameState.StopActions();
+                    this.StateHasChanged();
+                }
+                else if(TryBuyingSupplies())
+                {
+                    if (FindRollToMake())
+                    {
+                        this.StateHasChanged();
+                    }
+                    else
+                    {
+                        MessageManager.AddMessage("You don't have any fish to make sushi with at your level.");
+                        GameState.StopActions();
+                    }
+                }
+            }
+            else
+            {
+                FindRollToMake();
+            }
+            GameState.UpdateState();
+            StateHasChanged();
+        }), null, 7000, 7000);
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private bool FindFishInInventory()
+    {
+        int[,] fishIDs = Extensions.To2DArray(Program.itemDatabase.GetItemByID(122).UsableIDs);
+        for(int i = 0; i < fishIDs.GetLength(0); i++)
+        {
+            GameItem resource = Program.itemDatabase.GetItemByID(fishIDs[i, 0]);
+            GameItem result = Program.itemDatabase.GetItemByID(fishIDs[i, 1]);
+            if (GameState.GetPlayerInventory().HasItem(resource) && GameState.GetPlayer().HasRequiredLevel(result))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    private bool FindRollToMake()
+    {
+        //Rice roll is id 122.
+        int[,] fishIDs = Extensions.To2DArray(Program.itemDatabase.GetItemByID(122).UsableIDs);
+        for(int i = 0; i < fishIDs.GetLength(0); i++)
+        {
+            GameItem resource = Program.itemDatabase.GetItemByID(fishIDs[i, 0]);
+            GameItem result = Program.itemDatabase.GetItemByID(fishIDs[i, 1]);
+            if (GameState.GetPlayerInventory().HasItem(resource) && GameState.GetPlayer().HasRequiredLevel(result))
+            {
+                GameState.GetPlayerInventory().RemoveOneOfItem(resource);
+                GameState.GetPlayerInventory().AddItem(result);
+                GameState.GetPlayer().GainExperience(result.ExperienceGained);
+                GameState.sushiHouseRice--;
+                GameState.sushiHouseSeaweed--;
+                MessageManager.AddMessage("You create a " + result.ItemName + " under the supervision of the old man.");
+                GameState.UpdateState();
+                return true;
+            }
+        }
+        GameState.UpdateState();
+        return false;
+    }
+    private bool TryBuyingSupplies()
+    {
+        if(GameState.sushiHouseRice == 0)
+        {
+            if(GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetGold()) >= 250)
+            {
+                GameState.sushiHouseRice++;
+                GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetGold(), 250);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if(GameState.sushiHouseSeaweed == 0)
+        {
+            if(GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetGold()) >= 300)
+            {
+                GameState.sushiHouseSeaweed++;
+                GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetGold(), 300);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    protected override void OnParametersSet()
+    {
+        SetBuilding(buildingURL);
+        if (thisBuilding.IsTannery)
+        {
+            GameState.UIRefreshTimer = new Timer(new TimerCallback(_ =>
+            {
+                StateHasChanged();
+
+            }),null, 1000, 1000);
+        }
+    }
+    private void BuyItem(GameItem item, int amount)
+    {
+        if(amount < 0)
+        {
+            amount = 0;
+            buyAmount = 0;
+        }
+        int cost = item.Value;
+        if (thisBuilding.IsExpensive)
+        {
+            cost *= 3;
+        }
+        if (GameState.GetPlayerInventory().GetCoins() >= cost * amount)
+        {
+            GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetGold(), cost * amount);
+            if (item.IsStackable)
+            {
+                GameState.GetPlayerInventory().AddItemStackable(item, amount);
+            }
+            else
+            {
+                GameState.GetPlayerInventory().AddMultipleOfItem(item, amount);
+            }
+
+            MessageManager.AddMessage("You bought " + amount + " " + item.ItemName);
+        }
+        else
+        {
+            MessageManager.AddMessage("You can't afford that.");
+        }
+
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void Return(string url)
+    {
+        GameState.previousURL = "/Inside/" + thisBuilding.URL;
+        GameState.StopActions();
+        ResetAlchemy();
+        UriHelper.NavigateTo(url);
+    }
+    public void UnlockArea(string areaName)
+    {
+        Program.areaManager.GetAreaByName(areaName).IsUnlocked = true;
+        UriHelper.NavigateTo("/GatherMenu/" + Program.areaManager.GetAreaByName(areaName).AreaURL);
+    }
+    public void UnlockArea(Area area)
+    {
+        area.IsUnlocked = true;
+        UriHelper.NavigateTo("/GatherMenu/" + area.AreaURL);
+    }
+    public void UnlockBuilding(Building building)
+    {
+        building.IsUnlocked = true;
+        GameState.UpdateState();
+    }
+    public void UnlockNPC(NPC npc)
+    {
+        npc.IsInteractable = true;
+        GameState.UpdateState();
+    }
+    public void UnlockAndPayForFollower(int followerID)
+    {
+        Follower f = Program.followerManager.GetFollowerByID(followerID);
+        GameItem itemToPay = Program.itemDatabase.GetItemByID(f.CostItemID);
+        GameState.GetPlayerInventory().RemoveItems(itemToPay, f.Cost);
+        UnlockFollower(followerID);
+    }
+    public void UnlockFollower(int followerID)
+    {
+        if (Program.followerManager.GetNumberOfUnlockedFollowers() == 0)
+        {
+            MessageManager.AddMessage(Program.followerManager.GetFollowerByID(followerID).Name + " will now follow you. Go to your bank and select \"Followers\" at the top of the screen to set them as your follower.");
+        }
+        else
+        {
+            MessageManager.AddMessage(Program.followerManager.GetFollowerByID(followerID).Name + " will now follow you.");
+        }
+        Program.followerManager.GetFollowerByID(followerID).IsUnlocked = true;
+        GameState.UpdateState();
+    }
+    public void SpeakToNPC(NPC npc)
+    {
+        MessageManager.AddMessage(npc.SpokenText);
+        GameState.UpdateState();
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+
+
+        this.StateHasChanged();
+        GameState.UpdateState();
+    }
+    public void DebugGoToNextBuilding()
+    {
+        UriHelper.NavigateTo("/Inside/" + Program.buildingManager.GetBuildingByID(thisBuilding.ID + 1).URL);
+    }
+    public void Dispose()
+    {
+        if(GameState.UIRefreshTimer != null)
+        {
+            GameState.UIRefreshTimer.Dispose();
+            GameState.UIRefreshTimer = null;
+        }
+        GameState.StopActions();
+        GameState.canSell = false;
+        ResetAlchemy();
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

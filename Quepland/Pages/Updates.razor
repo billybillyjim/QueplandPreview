@@ -1,0 +1,179 @@
+﻿@page "/Updates"
+@inject HttpClient Http
+@inject GameState GameState
+@inject MessageManager MessageManager
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@implements IDisposable
+
+<h1>Updates</h1>
+<h2>Version @GameState.updateVersionString The Pet Update + Bug Fixes</h2>
+
+<p><a href="https://www.reddit.com/r/Quepland/" target="_blank">Reddit</a></p>
+<p><a href="https://www.patreon.com/billybillyjim" target="_blank">Patreon</a></p>
+<p><a href="https://docs.google.com/spreadsheets/d/1yoEcNe82BvJWLywg9RLLYdjxYCOpLHzY0DDh37dKCTA/edit#gid=1503717891" target="_blank">Game Resource Guide</a></p>
+
+
+<h2>Future Planned Updates</h2>
+<p>Ability to fully idle all skills</p>
+<p style="text-decoration:line-through">Improved item crafting interface</p>
+<p>The City of Chickenpull</p>
+<p>Magic and Construction Skills</p>
+<p style="text-decoration:line-through">Cloud Saves</p>
+
+<h2>8/6/2019</h2>
+<p>Pets are here! Find the shopkeeper somewhere on Quepland Mountain to open his shop.</p>
+<p>There are a total of 15 pets, 9 are available with in-game coins, the last 6 are buyable with Kreds.</p>
+<p>You should be able to play the game without ever paying for a pet, the 6 paid pets are not inherently better than the free ones, but having more will be advantageous.</p>
+<p>Pets will make you level up more quickly, so the next few updates are going to be for adding content in the level 90-150 range for gathering and crafting skills.</p>
+<p>I've laid out my thoughts on paid content here:<a href="/PetUpdate">The Pet Update</a></p>
+<p>Healing items now show how much they heal by and for how long. Mousing over them shows what skill they boost and for how long.</p>
+<p>Auto buying supplies at the sushi shop now saves with your save file.</p>
+<p>A new area is available in Sahota Tir! It includes a fishing update for higher level fishing (87-110). You'll need to use fish as bait to catch things, though! At below level 100 this method might not be worth your time, but it's the fastest experience method available.</p>
+<p>The wild boar enemy now has a chance of dropping pelts.</p>
+<p>The new area also has a mid-level hunting area and polar bears, which are the new highest level creature to hunt.</p>
+<p>Skill necklaces have been added to the game, but aren't accessible yet. Expect ways to unlock them soon!</p>
+<p>The crafting menu now lets you choose to craft one or many of an item.</p>
+<p>The sidebar now collapses if you click an area a second time. Let me know what you think of this change!</p>
+<p>The game now shows item values with one decimal place. No more Sell for 0!</p>
+<p>Construction is still in the works! Expect to hear more about it soon.</p>
+<p>Bison and wild boar pelts now have proper level requirements.</p>
+<p>The gem mine can now be found in Sahota Tir. Search for gem deposits and mine them out! The speed at which you mine will rise as you dig deeper into the deposit, then slow down when it begins to run out. Keep your eye out for the motherlode!</p>
+<p>The game now tracks your kills on individual enemies. Check them out on the stats page!</p>
+<p>The way that gather speed works has been modified. Let me know if you notice anything different.</p>
+<p>The experience info at the top of the screen now has a lock to keep it to a specific skill.</p>
+<p>Alchemy halls now only show you the bars you have in your inventory.</p>
+<p>The way battles were coded has been completely changed. You shouldn't notice any difference, but let me know if I broke something!</p>
+<p>I've found an issue with the way alchemy recipes were being saved. I'll get it fixed ASAP, but for now they will not be saved between loads.</p>
+<p>A number of bug fixes also come with today's update, but I forgot to keep track of them.</p>
+
+<p>A bug with gem mining text not lining up with reality has been fixed.</p>
+<p>Hide locked items now persists between menus.</p>
+<p>Lower level rods can be bought at the fish shop in the Rocky Shores.</p>
+<p>Added a level up text for pets.</p>
+<p>The gem mine now works properly.</p>
+<p>Killing enemies now updates the high score properly again.</p>
+<p>Split view now works with the new buttons.</p>
+<p>Hunting in Sahota Caverns no longer crashes the game.</p>
+<p>Bait fishing is now much improved, should work more as intended.</p>
+<p>Mousing over a pet's skill will now tell you how much it's boosting experience gains by.</p>
+<p>Fixed all sorts of bugs dealing with switching between split views.</p>
+<p>Fixed a bug that let you bait fish infinitely.</p>
+<p>Fixed the hunting bug for the new area! Sorry to all those affected.</p>
+
+<h2>7/16/2019</h2>
+<p>Steel is now usable in alchemy.</p>
+<p>The More Loading message now also lets players know if they need to enable third party cookies.</p>
+<p>Cloud save and loading is in the testing stage! If you're logged in, you'll now find a load from cloud button in the settings menu. Don't press it unless you have a back up!</p>
+<p>You can now hide locked items with a checkbox in the inventory screen.</p>
+<p>The experience card at the top now shows you your current level.</p>
+<p>First shot from archery in battles now is slightly slower, and requires arrows.</p>
+<p>Items must now be equipped to be used for gathering.</p>
+<p>Changing followers now stops gathering.</p>
+
+<h2>7/15/2019</h2>
+<p>A few issues with the crafting system have been fixed.</p>
+<p>Slight weapon balancing. Aluminum weapons are a little bit slower.</p>
+<p>Fixed a bug that made Quepland Fields not visible on some browsers.</p>
+<p>Fixed a bug that made the game not auto save if loaded from the settings menu.</p>
+<p>Playfab saving is here! Playfab loading, not yet. The 10,000 byte limit for the save data can be exceeded, which would make cloud saves break. It shouldn't take too long to make a workaround, though.</p>
+<p>Carving higher level totems is now slightly slower.</p>
+
+<h2>7/14/2019</h2>
+<p>Huge UI update!</p>
+<p>Finally made the inventory positioning work properly. Let me know if you find anything else wrong with it.</p>
+<p>Followers have been moved to a new button by the inventory and skills buttons.</p>
+<p>A new Crafting menu is now available. Simply select the item you wish to make from the list of possible items. Let me know what you think!</p>
+<p>Tooth droprates have been greatly increased.</p>
+<p>Using a bow now gives a first strike in battles.</p>
+<p>Text gaps in the inventory menu have been decreased.</p>
+<p>Another step has been taken to connect the PlayFab API for cloud saving. Hopefully I didn't break everything...</p>
+<p>Added a little counter for experience gains in the top right.</p>
+
+<h2>7/13/2019</h2>
+<p>Fixed a bug that made items sometimes stuck in one spot in the inventory.</p>
+<p>Made it not possible to auto battle and do other things at the same time.</p>
+<p>The first half of cloud saving is done! Expect to see it in the next few days.</p>
+<p>Added a new NPC in Sahota Tir who can sharpen swords into more powerful versions, for a price. The NPC is named after one of my supporters on Patreon. If you'd like to see your name or name an NPC yourself, check out my Patreon!</p>
+<p>Added a Bandit King with a rare drop to Higashi Bridge.</p>
+<p>Added a new monster to Route 7 and Shoe Lake who can absorb your HP.</p>
+<p>Fixed a bug that made mining veins found when searching have no button text.</p>
+<p>Changed the UI for switching between inventory and skills. Let me know what you think!</p>
+<p>Fixed a bug that sometimes made the game not load properly.</p>
+
+<h2>7/11/2019</h2>
+<p>Mousing over an item's amount in your bank now also tells you its value.</p>
+<p>Small arrows above and below an item's lock will let you move the items up and down in your inventory, which now will maintain item locations, and always add new items to the end.</p>
+<p>I was hoping to make the inventory drag-and-dropable but one small difficulty has kept me from implementing it that way. If I can figure out a workaround, I'll add that in.</p>
+<p>Items now have a sell limit that can be set in the settings. Any item below the price limit will ask for confirmation from the inventory before selling.</p>
+
+<h2>7/10/2019</h2>
+<p>Mousing over an item's amount in your inventory now tells you its value.</p>
+<p>Totems now have level requirements to use again.</p>
+<p>Alchemy now has a level requirement to be performed.</p>
+<p>Added a new type of arrow that can freeze enemies in their place!</p>
+<p>Hopefully fixed a bug that would sometimes lock people's games if they were autosmithing steel.</p>
+<p>Jumpy the Gnome is now available in Sahota.</p>
+<p>More behind the scenes stuff has been prepared for construction.</p>
+
+<h2>7/9/2019</h2>
+<p>Added a new region! Right now, there's only one area, but there are new things to kill and some ice to mine. You can find it at the bottom of a mine shaft in Mt Yama cave.</p>
+<p>Added new icy weapons, which have the ability to freeze monsters, preventing them from attacking! They're about as strong as their steel counterparts.</p>
+<p>Reworked the battle messaging system to use a few less lines per hit.</p>
+
+<h2>7/8/2019</h2>
+<p>Bank tabs can now be deleted and changed. Unfortunately another change makes the new tabs incompatible with the old tabs. Sorry to everyone who has to remake their tabs!</p>
+<p>Added a camel ray roll that boosts your hunting level.</p>
+<p>You can now smith nails. They don't do anything, yet.</p>
+<p>Fixed a bug with nails.</p>
+<p>Everything else in today's update is work on the construction update.</p>
+
+<h2>7/7/2019</h2>
+<p>The bank has been reworked! Compact view should be quite a bit more compact, and also there are bank tabs.</p>
+<p>Damage calculation is now slightly more consistent.</p>
+<p>The tanning timer now shows the time in a less weird way.</p>
+
+<h2>7/6/2019</h2>
+<p>The experience cap has been increased. The new max level is about 398. You'll be able to gain a lot more experience now.</p>
+<p>Work has been started on the construction update! I'll let you know a time frame sometime soon, once I figure out how long this will take.</p>
+<p>Armor now actually checks if it is equipped to protect you. Whoops!</p>
+<p>I'm another step closer to Kongregate Highscores! There's no real way for me to test if they work without just adding them in, so if it works you should see a high score page next time you reload. Let me know what kind of things you'd like to see on the high score page!</p>
+<p>Maybe fixed a bug with leathermaking that sometimes prevented making anything at all.</p>
+<p>HP has been completely reworked. You now gain 5 HP per level and 15 every 5th level. To compensate, most monsters now have higher dps and armor, and knives have been slightly nerfed. I'm still very open to modifying these numbers, so let me know what you think of these changes!</p>
+<p>The minimum number of animals you catch while hunting is now based on your archery level multiplied by hours hunted, so an 8 hour hunt guarantees a minimum of 8 animals.</p>
+<p>Food now heal a lot more. Let me know if you think it's too much/not enough!</p>
+<p>Added an NPC in the Quepland Woods to help hint at how to make arrows.</p>
+<p>Fixed a bug that limited food healing to your level.</p>
+
+<h2>7/5/2019</h2>
+<p>I'm back from vacation! Ready to begin work on the construction update. In the meantime, here are some bug fixes.</p>
+<p>The nature of the bug fixes makes me a little nervous, as it's quite possible I've added some crashes into the game. Please let me know if I broke something!</p>
+<p>Reworked the tannery to make it possible to withdraw a partial load of items, to unscrew people who had the inventory bug.</p>
+<p>Maybe fixed the inventory bug. I still haven't been able to reproduce it myself, but I think I found the cause.</p>
+<p>Fixed a rare bug that caused a crash when the game tried to save at exactly the same time as an item was removed from the inventory. This is an exceptionally rare bug that I can't easily test, so let me know if I broke something for you.</p>
+<p>You can no longer use the forward and backward buttons to do everything at once.</p>
+<p>The load button now waits until the game finishes loading to appear. This should help prevent people from clicking it too early and thinking their save is deleted.</p>
+<p>Increased the odds of finding higher level animals when hunting.</p>
+
+
+<a href="OldUpdates">See Old Updates</a>
+
+@functions{
+
+
+    private async void ShowUsername()
+    {
+        string name = await JSRuntime.InvokeAsync<string>("kongregateFunctions.getUsername");
+        MessageManager.AddMessage("Your username is " + name);
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

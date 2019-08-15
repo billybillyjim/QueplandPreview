@@ -1,0 +1,57 @@
+@inject GameState GameState
+@inject MessageManager MessageManager
+@implements IDisposable
+
+@ShowMessages()
+
+@functions{
+
+    Message mostRecent;
+    public RenderFragment ShowMessages()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "modal-footer");
+            builder.AddAttribute(2, "style", "display:contents");
+            builder.OpenElement(3, "table");
+            if(MessageManager != null && MessageManager.GetMessages().Count > 0)
+            {
+                mostRecent = MessageManager.GetMessages().Last();
+            }
+
+            foreach(Message message in MessageManager.GetReversedMessages())
+            {
+                builder.OpenElement(4, "tr");
+                builder.OpenElement(5, "td");
+                string style = "";
+                if(message == mostRecent)
+                {
+                    style += "font-weight:bold;";
+                }
+                if (message.color != null)
+                {
+                    style +=  "color:" + message.color + ";";
+                }
+
+                builder.AddAttribute(6, "style", style);
+                builder.AddContent(7, message.messageText);
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+
+            builder.CloseElement();
+
+            builder.CloseElement();
+        };
+    }
+    protected override void OnInitialized()
+    {
+        MessageManager.StateChanged += OnMessageStateChanged;
+    }
+    void IDisposable.Dispose()
+    {
+        MessageManager.StateChanged -= OnMessageStateChanged;
+    }
+    void OnMessageStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

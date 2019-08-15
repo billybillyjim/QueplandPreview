@@ -1,0 +1,82 @@
+﻿@inject HttpClient Http
+@inject GameState GameState
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@implements IDisposable
+
+<p><MenuButtons splitViewPosition="@splitViewPosition"></MenuButtons></p>
+<h1>Followers</h1>
+<br />
+<div class="table table-hover">
+    <table style="width:100%">
+        <thead>
+            <tr>
+                <th align="left">Follower</th>
+                <th>Assisting Stat</th>
+                <th>Level</th>
+                <th style="text-align:right">Follow?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Follower follower in Program.followerManager.GetFollowers())
+            {
+                if (follower.IsUnlocked)
+                {
+                    @if (GameState.GetPlayer().activeFollower != follower)
+                    {
+                        <tr>
+                            <td>@follower.Name</td>
+                            <td>@follower.AutoCollectSkill</td>
+                            <td>@follower.AutoCollectLevel</td>
+
+                            <td><button class="btn btn-primary" onclick="@(new Action(()=>Assign(follower)))">Assign</button></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr style="background-color:aquamarine">
+                            <td>@follower.Name</td>
+                            <td>@follower.AutoCollectSkill</td>
+                            <td>@follower.AutoCollectLevel</td>
+
+                            <td><button class="btn btn-primary" onclick="@(new Action(()=>Unassign()))">Unfollow</button></td>
+                        </tr>
+
+                            }
+                        
+
+                    }
+
+            }
+
+        </tbody>
+    </table>
+</div>
+@functions{
+        [Parameter]
+    private int splitViewPosition { get; set; }
+
+    private void Assign(Follower follower)
+    {
+        GameState.GetPlayer().activeFollower = follower;
+        GameState.StopActions();
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void Unassign()
+    {
+        GameState.GetPlayer().activeFollower = null;
+        GameState.StopActions();
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

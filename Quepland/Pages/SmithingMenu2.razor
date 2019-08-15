@@ -1,0 +1,838 @@
+﻿@page "/SmithingMenu/"
+@inject GameState  GameState
+@inject MessageManager  MessageManager
+@using System.Threading;
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+
+<h1>Inside the Smithy</h1>
+<p>An entire working forge lays before you. Pick any metal to begin.</p>
+
+
+<div class="progress">
+    <div class="progress-bar bg-success" style="@GetWidthString();transition:none;" role="progressbar" aria-valuenow=@GetValueString() aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<div class="main">
+
+    @if (autoSmith)
+    {
+        <button class="btn btn-primary" style="margin-bottom:10px" onclick="@(new Action(() => StopAutoSmithing()))">Quit Smithing</button>
+        @LoadAutoSmithingMenu();
+    }
+    else
+    {
+        @if (smithingStage == 0)
+        {
+            @if (GameState.GetPlayer().activeFollower != null && GameState.GetPlayer().activeFollower.AutoCollectSkill == "Smithing")
+            {
+                <button class="btn btn-primary" style="margin-bottom:10px" onclick="@(new Action(() => EnableAutoSmith()))">Auto Smith</button>
+            }
+            else
+            {
+                <button class="btn btn-primary" style="margin-bottom:10px" disabled title="You don't have the right follower to do this." onclick="@(new Action(() => EnableAutoSmith()))">Auto Smith</button>
+            }
+        }
+
+        @LoadActions()
+    }
+
+
+
+</div>
+
+
+
+@functions{
+
+    private bool waitingForAutoCollectMessage = true;
+    private GameItem currentSmithingBar;
+    private GameItem currentSmithingItem;
+    private string lastSmithedBar;
+
+    private int smithingStage = 0;
+    private int progress = 0;
+    private int autoSmithProgress = 0;
+
+    private bool isAutoSmithing = false;
+    private bool isUsingBar = false;
+    private bool autoSmithItemSelected = false;
+    private bool metalChanged = false;
+
+    private bool justSmithBars = false;
+
+    private bool barWithdrawn = false;
+    private bool autoSmith = false;
+
+    private double speedMulti = 1;
+
+    Random rand = new Random();
+    private string areaURL;
+
+    public RenderFragment LoadActions()
+    {
+        return builder =>
+        {
+
+            builder.OpenElement(0, "br");
+            builder.CloseElement();
+
+            if (GameState.isHunting == false && smithingStage == 0 && !isAutoSmithing)
+            {
+                foreach (GameItem i in Program.itemDatabase.GetSmithingBars())
+                {
+
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(0, "class", "btn btn-primary");
+                    builder.AddAttribute(0, "style", "margin-bottom:10px");
+                    builder.AddAttribute(0, "onclick", new Action(() => SetCurrentSmithingBar(i)));
+                    if (GameState.GetPlayer().HasRequiredLevel(i) == false)
+                    {
+                        builder.AddAttribute(0, "title", "You lack the levels to smelt this bar.(" + i.ActionRequired + ":" + i.RequiredLevel + ")");
+                        builder.AddAttribute(0, "disabled", true);
+                    }
+                    else if (GameState.GetPlayer().HasIngredients(i.IngredientIDs) == false && GameState.GetPlayerInventory().HasItem(i) == false)
+                    {
+                        builder.AddAttribute(0, "title", "You lack the ingredients to smelt this bar.");
+                        builder.AddAttribute(0, "disabled", true);
+                    }
+                    builder.AddContent(0, i.ItemName);
+                    builder.CloseElement();
+
+                    builder.OpenElement(0, "br");
+                    builder.CloseElement();
+
+
+                }
+
+            }
+            else if (GameState.isHunting == false && smithingStage == 1 && currentSmithingBar != null && !isAutoSmithing)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(0, "class", "btn btn-primary");
+                builder.AddAttribute(0, "style", "margin-bottom:10px");
+                builder.AddAttribute(0, "onclick", new Action(() => SmithUsingOre()));
+                if (progress == 0 || progress >= 100)
+                {
+
+                }
+                else
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                }
+                if(GameState.GetPlayer().HasIngredients(currentSmithingBar.IngredientIDs) == false)
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                    builder.AddAttribute(0, "title", "You don't have the materials to do this.");
+                }
+                builder.AddContent(0, "Insert " + Extensions.GetIngredientsAsString(currentSmithingBar, Program.itemDatabase) + " into furnace");
+                builder.CloseElement();
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+                if (GameState.GetPlayerInventory().HasItem(currentSmithingBar))
+                {
+                    builder.OpenElement(0, "button");
+                    builder.AddAttribute(0, "class", "btn btn-primary");
+                    builder.AddAttribute(0, "style", "margin-bottom:10px");
+                    builder.AddAttribute(0, "onclick", new Action(() => SmithUsingBar()));
+                    if (progress == 0 || progress >= 100)
+                    {
+
+                    }
+                    else
+                    {
+                        builder.AddAttribute(0, "disabled", true);
+                    }
+                    builder.AddContent(0, "Insert " + currentSmithingBar.ItemName + " into furnace");
+                    builder.CloseElement();
+
+                    builder.OpenElement(0, "br");
+                    builder.CloseElement();
+                }
+
+
+            }
+            else if (GameState.isHunting == false && smithingStage == 2 && currentSmithingBar != null && !isAutoSmithing)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(0, "class", "btn btn-primary");
+                builder.AddAttribute(0, "style", "margin-bottom:10px");
+                builder.AddAttribute(0, "onclick", new Action(() => IncrementSmithingStage()));
+                if (progress == 0 || progress >= 100)
+                {
+
+                }
+                else
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                }
+                builder.AddContent(0, "Remove " + currentSmithingBar.ItemName + " from furnace");
+
+                builder.CloseElement();
+
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+
+            }
+            else if (GameState.isHunting == false && smithingStage == 3 && currentSmithingBar != null && !isAutoSmithing)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(0, "class", "btn btn-primary");
+                builder.AddAttribute(0, "style", "margin-bottom:10px");
+
+                builder.AddAttribute(0, "onclick", new Action(() => ResetSmithingStage()));
+                if (progress == 0 || progress >= 100)
+                {
+
+                }
+                else
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                }
+                builder.AddContent(0, "Smith another bar");
+                builder.CloseElement();
+                builder.OpenElement(0, "p");
+                builder.AddContent(0, "Hammer " + currentSmithingBar.ItemName + " into a...");
+                builder.CloseElement();
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+                foreach (GameItem i in Program.itemDatabase.GetSmithingItems())
+                {
+                    if (i.IngredientIDs[0] == currentSmithingBar.Id)
+                    {
+                        builder.OpenElement(0, "button");
+                        builder.AddAttribute(0, "class", "btn btn-primary");
+                        builder.AddAttribute(0, "style", "margin-bottom:10px");
+
+                        builder.AddAttribute(0, "onclick", new Action(() => SetCurrentSmithingItem(i)));
+                        if (progress == 0 || progress >= 100)
+                        {
+
+                        }
+                        else
+                        {
+                            builder.AddAttribute(0, "disabled", true);
+                        }
+                        builder.AddContent(0, i.ItemName);
+                        builder.CloseElement();
+
+                        builder.OpenElement(0, "br");
+                        builder.CloseElement();
+                    }
+                }
+
+
+            }
+            else if (GameState.isHunting == false && smithingStage == 4 && currentSmithingItem != null && !isAutoSmithing)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(0, "class", "btn btn-primary");
+                builder.AddAttribute(0, "style", "margin-bottom:10px");
+
+                builder.AddAttribute(0, "onclick", new Action(() => IncrementSmithingStage()));
+                if (progress == 0 || progress >= 100)
+                {
+
+                }
+                else
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                }
+                builder.AddContent(0, "Cool " + currentSmithingItem.ItemName + " in water");
+                builder.CloseElement();
+
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+
+            }
+            else if (GameState.isHunting == false && smithingStage == 5 && currentSmithingItem != null && !isAutoSmithing)
+            {
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(0, "class", "btn btn-primary");
+                builder.AddAttribute(0, "style", "margin-bottom:10px");
+
+                builder.AddAttribute(0, "onclick", new Action(() => CollectItem()));
+                if (progress == 0 || progress >= 100)
+                {
+
+                }
+                else
+                {
+                    builder.AddAttribute(0, "disabled", true);
+                }
+                builder.AddContent(0, "Withdraw " + currentSmithingItem.ItemName);
+                builder.CloseElement();
+
+                builder.OpenElement(0, "br");
+                builder.CloseElement();
+
+            }
+        };
+    }
+    public RenderFragment LoadAutoSmithingMenu()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "p");
+
+            builder.OpenElement(1, "div");
+            builder.AddAttribute(2, "class", "dropdown");
+            builder.AddAttribute(2, "style", "margin-bottom:10px");
+            builder.OpenElement(3, "button");
+
+            builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(5, "type", "button");
+            builder.AddAttribute(6, "id", "dropdownMenuButton");
+            builder.AddAttribute(7, "data-toggle", "dropdown");
+            builder.AddAttribute(8, "aria-haspopup", "true");
+            builder.AddAttribute(9, "aria-expanded", "false");
+            if (isAutoSmithing)
+            {
+                builder.AddAttribute(9, "disabled", true);
+            }
+            if(currentSmithingBar == null)
+            {
+                builder.AddContent(10, "Choose a material");
+            }
+            else
+            {
+                builder.AddContent(10, currentSmithingBar.ItemName);
+            }
+
+            builder.CloseElement();
+
+            builder.OpenElement(11, "div");
+            builder.AddAttribute(12, "class", "dropdown-menu");
+            builder.AddAttribute(13, "aria-labelledby", "dropdownMenuButton");
+
+
+            foreach(GameItem bar in Program.itemDatabase.GetSmithingBars())
+            {
+                if((GameState.GetPlayerInventory().HasItem(bar) || GameState.GetPlayerInventory().HasBarIngredients(bar)) && GameState.GetPlayer().HasRequiredLevel(bar) )
+                {
+                    builder.OpenElement(14, "a");
+                    builder.AddAttribute(15, "class", "dropdown-item");
+                    // builder.AddAttribute(16, "href", "#");
+                    builder.AddAttribute(17, "onclick", new Action(() => SetCurrentSmithingBarAuto(bar)));
+                    builder.AddContent(18, bar.ItemName);
+                    builder.CloseElement();
+                }
+
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.OpenElement(19, "div");
+            builder.AddAttribute(20, "class", "dropdown");
+            builder.AddAttribute(20, "style", "margin-bottom:10px");
+
+            builder.OpenElement(21, "button");
+            builder.AddAttribute(22, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(23, "type", "button");
+            builder.AddAttribute(24, "id", "itemMenuButton");
+            builder.AddAttribute(25, "data-toggle", "dropdown");
+            builder.AddAttribute(26, "aria-haspopup", "true");
+            builder.AddAttribute(27, "aria-expanded", "false");
+            if(currentSmithingBar == null)
+            {
+                builder.AddAttribute(28, "disabled", true);
+                builder.AddAttribute(29, "title", "You must set a bar first");
+            }
+            else if (isAutoSmithing)
+            {
+                builder.AddAttribute(29, "disabled", true);
+            }
+
+            if (justSmithBars)
+            {
+                builder.AddContent(30, currentSmithingBar);
+            }
+            else if(currentSmithingItem == null)
+            {
+                builder.AddContent(30, "Choose an item");
+            }
+            else
+            {
+                builder.AddContent(30, currentSmithingItem.ItemName);
+            }
+            builder.CloseElement();
+
+            builder.OpenElement(31, "div");
+            builder.AddAttribute(32, "class", "dropdown-menu");
+            builder.AddAttribute(33, "aria-labelledby", "itemMenuButton");
+            builder.AddAttribute(33, "style", "margin-bottom:10px");
+
+            foreach(GameItem item in Program.itemDatabase.GetSmithingItems())
+            {
+                if((currentSmithingBar != null && item.IngredientIDs[0] == currentSmithingBar.Id)  && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
+                {
+                    builder.OpenElement(34, "a");
+                    builder.AddAttribute(35, "class", "dropdown-item");
+                    // builder.AddAttribute(36, "href", "#");
+                    builder.AddAttribute(37, "onclick", new Action(() => SetCurrentSmithingItemAuto(item)));
+                    builder.AddContent(38, item.ItemName);
+                    builder.CloseElement();
+                }
+
+            }
+            if(currentSmithingBar != null && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
+            {
+                //Just smith bars option
+                builder.OpenElement(39, "a");
+                builder.AddAttribute(40, "class", "dropdown-item");
+                // builder.AddAttribute(36, "href", "#");
+                builder.AddAttribute(41, "onclick", new Action(() => JustSmithBars()));
+                builder.AddContent(42, currentSmithingBar.ItemName);
+                builder.CloseElement();
+            }
+
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.OpenElement(43, "button");
+            builder.AddAttribute(44, "class", "btn btn-primary");
+            builder.AddAttribute(45, "style", "margin-bottom:10px");
+            builder.AddAttribute(46, "onclick", new Action(() => BeginAutoSmithing()));
+            if(currentSmithingBar == null || (currentSmithingItem == null && !justSmithBars))
+            {
+                builder.AddAttribute(47, "disabled", true);
+                builder.AddAttribute(48, "title", "Please select a bar and material.");
+            }
+            builder.AddContent(49, "Begin Smithing");
+            builder.CloseElement();
+
+            builder.CloseElement();
+            builder.OpenElement(50, "br");
+            builder.CloseElement();
+            builder.OpenElement(51, "br");
+            builder.CloseElement();
+            builder.OpenElement(52, "br");
+            builder.CloseElement();
+            builder.OpenElement(53, "br");
+            builder.CloseElement();
+            builder.OpenElement(54, "br");
+            builder.CloseElement();
+        };
+    }
+    private void JustSmithBars()
+    {
+        justSmithBars = true;
+    }
+    private void EnableAutoSmith()
+    {
+        autoSmith = true;
+    }
+    private void SetAutoSmithItem(GameItem item)
+    {
+        autoSmithItemSelected = true;
+        SetCurrentSmithingItem(item);
+    }
+    private bool CheckForMaterials()
+    {
+        bool barFound = false;
+
+        if (GameState.GetPlayerInventory().HasBarIngredients(currentSmithingBar))
+        {
+            isUsingBar = false;
+            barFound = true;
+        }
+        else if (GameState.GetPlayerInventory().HasItem(currentSmithingBar))
+        {
+            barFound = true;
+            isUsingBar = true;
+        }
+
+        return barFound;
+    }
+
+    public void BeginAutoSmithing()
+    {
+        StopSmithing();
+        GameState.isSmithing = true;
+        autoSmithProgress = 0;
+        isAutoSmithing = true;
+
+        bool barFound = CheckForMaterials();
+        if (!barFound)
+        {
+            if (!GetOresFromBank())
+            {
+                MessageManager.AddMessage("You have run out of materials.");
+                StopAutoSmithing();
+                return;
+            }
+            else
+            {
+                MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " heads to the bank and returns with more materials to smith.");
+                BeginAutoSmithing();
+                return;
+            }
+        }
+
+        MessageManager.AddMessage("You begin to smith with " + GameState.GetPlayer().activeFollower.Name);
+        GameState.autoSmithingTimer = new Timer(new TimerCallback(_ =>
+        {
+            if (isAutoSmithing)
+            {
+                if (autoSmithProgress == 6)
+                {
+                    autoSmithProgress = 0;
+                    GameState.autoSmithingTimer.Dispose();
+                    BeginAutoSmithing();
+
+                }
+                else if (autoSmithProgress == 5)
+                {
+                    MessageManager.AddMessage("You take the " + currentSmithingItem + " out and place it in your inventory.");
+                    AutoCollectItem();
+                    autoSmithProgress++;
+
+                }
+                else if (autoSmithProgress == 4)
+                {
+                    MessageManager.AddMessage("You put the " + currentSmithingItem + " in water to cool.");
+                    autoSmithProgress++;
+                }
+                else if (autoSmithProgress == 3)
+                {
+                    MessageManager.AddMessage("You hammer the " + currentSmithingBar + " into a " + currentSmithingItem.ItemName);
+                    GameState.GetPlayerInventory().RemoveOneOfItem(currentSmithingBar);
+                    autoSmithProgress++;
+                }
+                else if (autoSmithProgress == 2)
+                {
+
+                    GameState.GetPlayerInventory().AddItem(currentSmithingBar);
+                    barWithdrawn = true;
+                    MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " withdraws a " + currentSmithingBar + " and hands it to you. You don't get any experience, because you didn't do anything.");
+
+                    if (justSmithBars)
+                    {
+                        autoSmithProgress = 6;
+                    }
+                    else
+                    {
+                        autoSmithProgress++;
+                    }
+
+
+                }
+                else if (autoSmithProgress == 1)
+                {
+                    if (isUsingBar && !justSmithBars)
+                    {
+                        MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " puts the " + currentSmithingBar + " in the furnace.");
+                        UseBar();
+                        autoSmithProgress++;
+                    }
+                    else
+                    {
+                        MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " puts the " + Extensions.GetIngredientsAsString(currentSmithingBar, Program.itemDatabase) + " in the furnace.");
+                        UseOre();
+                        autoSmithProgress++;
+                    }
+                    barWithdrawn = false;
+
+                }
+                else if (autoSmithProgress == 0)
+                {
+                    if(justSmithBars && GameState.GetPlayerInventory().HasBarIngredients(currentSmithingBar) == false)
+                    {
+                        MessageManager.AddMessage("You don't have any ores to just make bars.");
+                        StopAutoSmithing();
+                    }
+                    else
+                    {
+                        autoSmithProgress++;
+                    }
+
+                }
+            }
+            GameState.UpdateState();
+            StateHasChanged();
+        }), null, 1500, 1500);
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void SetCurrentSmithingBar(GameItem i)
+    {
+        if (i == null)
+        {
+            return;
+        }
+        currentSmithingBar = i;
+        smithingStage++;
+        StateHasChanged();
+        //IncrementSmithingStage();
+    }
+    private void SetCurrentSmithingBarAuto(GameItem i)
+    {
+        if (i == null)
+        {
+            return;
+        }
+        currentSmithingBar = i;
+        StateHasChanged();
+    }
+    private void SetCurrentSmithingItemAuto(GameItem i)
+    {
+        if (i == null)
+        {
+            return;
+        }
+
+        currentSmithingItem = i;
+        StateHasChanged();
+    }
+    private void SetCurrentSmithingItem(GameItem i)
+    {
+        if (i == null)
+        {
+            return;
+        }
+
+        currentSmithingItem = i;
+        GameState.GetPlayerInventory().RemoveItemsByID(i.IngredientIDs);
+        StateHasChanged();
+        IncrementSmithingStage();
+    }
+    private void SmithUsingOre()
+    {
+        GameState.GetPlayerInventory().RemoveItemsByID(currentSmithingBar.IngredientIDs);
+        isUsingBar = false;
+        IncrementSmithingStage();
+    }
+    private void SmithUsingBar()
+    {
+        GameState.GetPlayerInventory().RemoveItemByID(currentSmithingBar.Id);
+        isUsingBar = true;
+        IncrementSmithingStage();
+    }
+    private void UseOre()
+    {
+        GameState.GetPlayerInventory().RemoveItemsByID(currentSmithingBar.IngredientIDs);
+    }
+    private void UseBar()
+    {
+        GameState.GetPlayerInventory().RemoveItemByID(currentSmithingBar.Id);
+    }
+    private void IncrementSmithingStage()
+    {
+        if (isAutoSmithing)
+        {
+            return;
+        }
+        if (GameState.smithingTimer != null)
+        {
+            GameState.smithingTimer.Dispose();
+            GameState.smithingTimer = null;
+        }
+
+        progress = 0;
+        SendMessage();
+        GameState.isSmithing = true;
+        GameState.smithingTimer = new Timer(new TimerCallback(_ =>
+        {
+            if (progress >= 100)
+            {
+                if (smithingStage == 2)
+                {
+                    GameState.GetPlayerInventory().AddItem(currentSmithingBar);
+                    if (!isUsingBar)
+                    {
+                        GameState.GetPlayer().GainExperience(currentSmithingBar.ExperienceGained);
+                    }
+
+                }
+                GameState.smithingTimer.Dispose();
+                GameState.smithingTimer = null;
+                smithingStage++;
+                GameState.isSmithing = false;
+                StateHasChanged();
+                GameState.UpdateState();
+            }
+            progress += 2;
+            StateHasChanged();
+            GameState.UpdateState();
+        }), null, 20, 20);
+
+        StateHasChanged();
+        GameState.UpdateState();
+    }
+    private void CollectItem()
+    {
+        smithingStage = 0;
+        int numToMake = Math.Max(currentSmithingItem.MadeOnCreation, 1);
+        GameState.GetPlayerInventory().AddMultipleOfItem(currentSmithingItem, numToMake);
+        GameState.GetPlayer().GainExperience(currentSmithingBar.ExperienceGained);
+        lastSmithedBar = currentSmithingBar.ItemName;
+        currentSmithingItem = null;
+        currentSmithingBar = null;
+        GameState.isSmithing = false;
+        StateHasChanged();
+        GameState.UpdateState();
+
+    }
+    private void AutoCollectItem()
+    {
+        smithingStage = 0;
+        int numToMake = Math.Max(currentSmithingItem.MadeOnCreation, 1);
+        GameState.GetPlayerInventory().AddMultipleOfItem(currentSmithingItem, numToMake);
+        GameState.GetPlayer().GainExperience(currentSmithingBar.ExperienceGained);
+        StateHasChanged();
+        GameState.UpdateState();
+    }
+    private void SendMessage()
+    {
+        string message = "";
+        if (smithingStage == 0)
+        {
+            message = "You prepare to smelt the ore.";
+        }
+        else if (smithingStage == 1)
+        {
+            message = "You place the ore in the furnace.";
+        }
+        else if (smithingStage == 2)
+        {
+            message = "You remove the bar from the furnace.";
+        }
+        else if (smithingStage == 3)
+        {
+            message = "You hammer the bar into a " + currentSmithingItem.ItemName + ".";
+        }
+        else if (smithingStage == 4)
+        {
+            message = "You place the " + currentSmithingItem.ItemName + " in water to cool.";
+        }
+        else if (smithingStage == 5)
+        {
+            message = "You withdraw the " + currentSmithingItem.ItemName + " from the water.";
+        }
+        MessageManager.AddMessage(message);
+    }
+    private void ResetSmithingStage()
+    {
+        smithingStage = 0;
+    }
+    private void SkipToHammerStage()
+    {
+        smithingStage = 2;
+    }
+    private string GetWidthString()
+    {
+        return "width: " + progress + "%";
+    }
+    private string GetValueString()
+    {
+        return "" + progress;
+    }
+    private string DepositAll()
+    {
+        GameState.GetPlayerBank().GetInventory().AddItems(GameState.GetPlayerInventory().GetUnequippedItems());
+        GameState.GetPlayerInventory().EmptyInventoryOfUnequippedItems();
+        GameState.UpdateState();
+        StateHasChanged();
+        return "";
+    }
+    private int WithdrawItemsFromBank(GameItem item)
+    {
+        int amountToWithdraw = Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(item), GameState.GetPlayerInventory().GetAvailableSpaces());
+        GameState.GetPlayerInventory().AddMultipleOfItem(item, amountToWithdraw);
+        GameState.GetPlayerBank().GetInventory().RemoveItems(item, amountToWithdraw);
+        GameState.UpdateState();
+        this.StateHasChanged();
+        return amountToWithdraw;
+    }
+    private int WithdrawItemsFromBank(GameItem item, int maxAmount)
+    {
+        int amountToWithdraw = Math.Min(Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(item), GameState.GetPlayerInventory().GetAvailableSpaces()), maxAmount);
+        GameState.GetPlayerInventory().AddMultipleOfItem(item, amountToWithdraw);
+        GameState.GetPlayerBank().GetInventory().RemoveItems(item, amountToWithdraw);
+        GameState.UpdateState();
+        this.StateHasChanged();
+        return amountToWithdraw;
+    }
+    private bool GetOresFromBank()
+    {
+        if (GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
+        {
+            MessageManager.AddMessage("Your inventory is too full to get any more smithing materials.");
+            return false;
+        }
+        if (currentSmithingBar != null && GameState.GetPlayerBank().GetInventory().HasBarIngredients(currentSmithingBar) && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
+        {
+            int maxIngredients = Math.Min(GameState.GetPlayerBank().GetInventory().GetMaxBarIngredients(currentSmithingBar), GameState.GetPlayerInventory().GetAvailableSpaces()) / currentSmithingBar.IngredientIDs.Length;
+            if(maxIngredients == 0 || (maxIngredients == 1 && currentSmithingBar.IngredientIDs.Length > 1))
+            {
+                return false;
+            }
+            foreach (int id in currentSmithingBar.IngredientIDs)
+            {
+                maxIngredients = WithdrawItemsFromBank(Program.itemDatabase.GetItemByID(id), maxIngredients);
+            }
+            MessageManager.AddMessage("" + GameState.GetPlayer().activeFollower.Name + " heads off to the bank and returns with " + maxIngredients + " ores.");
+            isUsingBar = false;
+            return true;
+        }
+        else if (currentSmithingBar != null && GameState.GetPlayerBank().GetInventory().HasItem(currentSmithingBar) && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar) && justSmithBars == false)
+        {
+            int maxIngredients = WithdrawItemsFromBank(currentSmithingBar);
+            MessageManager.AddMessage("" + GameState.GetPlayer().activeFollower.Name + " heads off to the bank and returns with " + maxIngredients + " bars.");
+            isUsingBar = true;
+            return true;
+        }
+
+        return false;
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        GameState.canSell = false;
+        speedMulti = 1;
+        this.StateHasChanged();
+        GameState.UpdateState();
+    }
+    private void StopSmithing()
+    {
+        if (GameState.smithingTimer != null)
+        {
+            GameState.smithingTimer.Dispose();
+            GameState.smithingTimer = null;
+        }
+        if (GameState.autoSmithingTimer != null)
+        {
+            GameState.autoSmithingTimer.Dispose();
+            GameState.autoSmithingTimer = null;
+        }
+        GameState.isSmithing = false;
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void StopAutoSmithing()
+    {
+        if (GameState.smithingTimer != null)
+        {
+            GameState.smithingTimer.Dispose();
+            GameState.smithingTimer = null;
+        }
+        if (GameState.autoSmithingTimer != null)
+        {
+            GameState.autoSmithingTimer.Dispose();
+            GameState.autoSmithingTimer = null;
+        }
+        GameState.isSmithing = false;
+        isAutoSmithing = false;
+        autoSmith = false;
+        autoSmithProgress = 0;
+        currentSmithingBar = null;
+        currentSmithingItem = null;
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        StopAutoSmithing();
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

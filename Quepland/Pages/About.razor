@@ -1,0 +1,29 @@
+﻿@page "/About"
+@inject HttpClient Http
+@inject GameState GameState
+@implements IDisposable
+
+<h1>About</h1>
+
+<p><b>What is Quepland?</b></p>
+<p>Quepland is a game I made to learn Blazor, a relatively new framework that lets developers code websites using C# instead of Javascript.</p>
+
+<p><b>What is the future for Quepland?</b></p>
+<p>Quepland is basically in a beta stage. Everything is working like it should and there aren't many bugs, but there is a lot more I would love to do with the game.</p>
+
+<p><b>Credits</b></p>
+<p>All of the item icons in this game were pulled from a set made by Lorc. You can find more by him by googling Lorc Icons.</p>
+
+@functions{
+
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}
