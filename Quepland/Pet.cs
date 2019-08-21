@@ -72,10 +72,13 @@ public class Pet
     }
     private void GainExperience(Skill skill, long amount)
     {
-        Console.WriteLine(skill.SkillName);
         if (skill == null || skill.IsBlocked)
         {
-            Console.WriteLine("Gained " + amount + " experience in unfound skill.");
+            if(skill == null)
+            {
+                Console.WriteLine("Pet gained " + amount + " experience in unfound skill.");
+            }
+            
             return;
         }
         if (IsInSpecialty(skill))
@@ -124,6 +127,14 @@ public class Pet
             return null;
         }
         return skills.Aggregate((i, j) => i.GetSkillLevelUnboosted() > j.GetSkillLevelUnboosted() ? i : j);    
+    }
+    public int GetHighestSkillLevel()
+    {
+        if (GetTotalLevels() == skills.Count)
+        {
+            return 1;
+        }
+        return skills.Aggregate((i, j) => i.GetSkillLevelUnboosted() > j.GetSkillLevelUnboosted() ? i : j).GetSkillLevelUnboosted();
     }
     public float GetSkillBoost(Skill skill)
     {

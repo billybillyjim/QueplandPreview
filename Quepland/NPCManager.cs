@@ -44,11 +44,35 @@ public class NPCManager
             }
             catch
             {
-                Console.WriteLine("Failed to parse bool for " + s);
-
-
+                Console.WriteLine("Failed to parse bool for NPC " + iterator + " with value " + s);
             }
             iterator++;
         }
+    }
+    public void TestLoadNPCData(string data)
+    {
+        if (data == null || data.Length == 0)
+        {
+            Console.WriteLine("NPC data was empty.");
+            return;
+        }
+        string[] lines = data.Split(',');
+        int iterator = 0;
+        foreach (string s in lines)
+        {
+            try
+            {
+                bool.Parse(s);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to parse bool for NPC " + iterator + " with value " + s);
+            }
+            iterator++;
+        }
+    }
+    public List<NPC> GetNPCs()
+    {
+        return NPCs;
     }
 }

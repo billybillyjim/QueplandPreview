@@ -459,11 +459,117 @@
     "spokenText": "You look like an adventurer. Any interest in buying a pet? Come to my store anytime and we'll see if we can find you something you like.",
     "isInteractable": true
   },
-    {
+  {
     "name": "Thunkirn the Dwarf",
     "id": 66,
     "spokenText": "Well what are you waiting for? I can smell the money on you. You know the drill, pay me a pile of gold and I'll work for you. I'm the best ore hauler you've ever met, probably.",
     "unlockFollowerIDs": [ 20 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "The Pet Forgetter",
+    "id": 67,
+    "spokenText": "Hi, I'm the pet forgetter. I'll take care of all your pet needs. Just show me your pet and tell me what you want it to forget, and I'll take it out back and help it forget. We have two courses to choose from. Would you like your pet to forget one level, or make them forget all the way back to level 1?",
+    "isInteractable": true
+  },
+  {
+    "name": "The Pet Forgetter2",
+    "id": 68,
+    "buttonText": "Ask how it works",
+    "spokenText": "The exact method is a trade secret, but I'm quite skilled in a number of fields of magic. This big stick helps a lot, too.",
+    "isInteractable": true
+  },
+  {
+    "name": "Kaiken",
+    "id": 69,
+    "spokenText": "Welcome to our humble dojo. If you'd like, you may challenge us for our dojo's title. I'll warn you though, an untrained novice will not easily defeat us.",
+    "isInteractable": true
+  },
+  {
+    "name": "Anthropos en tayn Agros the Scout",
+    "id": 70,
+    "spokenText": "They call me Anthropos. I'd consider working for you, if you prove your worth. Bring me dojo tokens as evidence of your fighting abilities.",
+    "unlockFollowerIDs": [ 19 ],
+    "isInteractable": true,
+    "hideOnFollow": true
+  },
+  {
+    "name": "Token",
+    "id": 71,
+    "spokenText": "Welcome to our dojo. You will find it much more difficult to defeat us than the dojo of the knives on Mt. Queple. Prepare yourself!",
+    "isInteractable": true
+  },
+  {
+    "name": "Belt Man the Proud",
+    "id": 72,
+    "spokenText": "I was so close to beating the dojo! It's so frustrating. They don't even give out consolation tokens. Hey, do you have any dojo tokens? I'll trade you with some stuff I found!",
+    "isInteractable": true,
+    "purchaseItemIDs": [ 486, 487, 488, 489, 490, 491, 492, 493, 494 ],
+    "currencyID": 485
+  },
+  {
+    "name": "Betty May",
+    "id": 73,
+    "spokenText": "Are you interested in entering Koncave city? Maybe we can strike a deal. I'm looking for some seeds from the Great Tree, but the best place to find them is crawling with strange creatures.",
+    "isInteractable": true,
+    "purchaseItemIDs": [ 580 ],
+    "itemPaymentIDs": [
+      [ 579, 0 ]
+    ],
+    "specialCosts": [ 10, 1000000 ],
+    "hasSpecialCosts": true
+  },
+  {
+    "name": "Hitty May",
+    "id": 74,
+    "spokenText": "Wanna buy a passport to Koncave city? I'll sell you mine, I don't need it anymore.",
+    "purchaseItemIDs": [ 580 ],
+    "isInteractable": true
+  },
+  {
+    "name": "City Guard",
+    "id": 75,
+    "spokenText": "Only citizens of Koncave city are allowed to enter. I don't recognize you, where's your passport?",
+    "isInteractable": true
+  },
+  {
+    "name": "Smokey",
+    "id": 76,
+    "spokenText": "Welcome to our dojo. We're pretty chill as far as dojos go, but that doesn't mean we'll go easy on you!",
+    "isInteractable": true
+  },
+  {
+    "name": "Jason",
+    "id": 77,
+    "spokenText": "Hi! We aren't quite open for business yet, please come back in a few days.",
+    "isInteractable": true
+  },
+  {
+    "name": "Alphonse",
+    "id": 78,
+    "spokenText": "That's what I've been saying this whole time! There's no point to it, none at all!",
+    "buttonText": "Listen to the younger man",
+    "isInteractable": true
+  },
+  {
+    "name": "Edward",
+    "id": 79,
+    "spokenText": "You just need to be patient! In a short while we'll figure this all out, preparation is a necessity!",
+    "buttonText": "Listen to the older man",
+    "isInteractable": true
+  },
+  {
+    "name": "Not Dead Jed",
+    "id": 80,
+    "spokenText": "Hello, welcome to Don't Die Inc. How can I help you survive today?",
+    "isInteractable": true
+  },
+  {
+    "name": "Pumpy the Gnome",
+    "id": 81,
+    "spokenText": "Hey. You look pretty ENERGIZED to me! I would love to haul logs for you. Just give me some money first, okay? I'm pumped up! Yeah!",
+    "unlockFollowerIDs": [ 22 ],
     "isInteractable": true,
     "hideOnFollow": true
   }

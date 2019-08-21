@@ -10,6 +10,7 @@ using System.Threading;
 public class BattleManager
 {
     private List<Monster> monsters = new List<Monster>();
+    private List<Dojo> dojos = new List<Dojo>();
     public GameState gameState;
     IJSRuntime JSRuntime;
     public MessageManager messageManager;
@@ -18,7 +19,11 @@ public class BattleManager
     public bool battleFound;
     public bool battleStarted;
     public Monster opponent;
+    public Monster autoBattleOpponent;
     public bool autoFight;
+    public bool isDojoBattle;
+    public Dojo currentDojo;
+    public int currentDojoWave;
     public List<Monster> possibleMonsters = new List<Monster>();
 
     public BattleManager()
@@ -29,6 +34,8 @@ public class BattleManager
     {
         Monster[] monsterArray = await Http.GetJsonAsync<Monster[]>("data/Monsters.json");
         monsters = monsterArray.ToList();
+        Dojo[] dojoArray = await Http.GetJsonAsync<Dojo[]>("data/dojos.json");
+        dojos = dojoArray.ToList();
         gameState = state;
         messageManager = mm;
         itemDatabase = database;
@@ -84,10 +91,29 @@ public class BattleManager
     }
     public void FindBattle()
     {
-        opponent = possibleMonsters[rand.Next(0, possibleMonsters.Count)];
+        if (autoBattleOpponent != null)
+        {
+            opponent = autoBattleOpponent;
+        }
+        else
+        {
+            opponent = possibleMonsters[rand.Next(0, possibleMonsters.Count)];
+        }
+        
         messageManager.AddMessage("You encounter a " + opponent.Name);
         opponent.CurrentHP = opponent.HP;
         battleFound = true;
+    }
+    public void StartDojoBattle(Dojo dojo)
+    {
+        opponent = GetMonsterByID(dojo.OpponentIDs[currentDojoWave]);
+        isDojoBattle = true;
+        opponent.CurrentHP = opponent.HP;
+        opponent.ChangingStances = false;
+        opponent.CurrentStance = 0;
+        battleFound = true;
+        currentDojo = dojo;
+       StartBattle();
     }
     public void StartBattle()
     {
@@ -131,6 +157,7 @@ public class BattleManager
         gameState.UpdateState();
 
     }
+
     public void Attack()
     {
         if (battleFound)
@@ -184,13 +211,33 @@ public class BattleManager
                 {
                     battleString = "You dealt " + dmgDealt + " damage to the " + opponent.Name + ".";
                 }
+                string weakness = opponent.Weakness;
+                string strength = opponent.Strength;
+                if (opponent.ChangesStances)
+                {
+                    weakness = opponent.Weakness.Split(' ')[opponent.CurrentStance];
 
-                if (opponent.Weakness.Contains(weapon.ActionRequired))
+                    if (weapon.ActionRequired == weakness && !opponent.ChangingStances)
+                    {
+                        opponent.AttacksUntilChangeStance = 4;
+                        messageManager.AddMessage(opponent.Name + " looks like they are about to change their stance to " + GetStyleName(GetNewStance(opponent, weapon)) + "!", "red");
+                        opponent.ChangingStances = true;
+                    }
+
+                    opponent.AttacksUntilChangeStance--;
+                        
+                    if(opponent.AttacksUntilChangeStance <= 0 && opponent.ChangingStances)
+                    {
+                        ChangeStances(opponent, weapon);
+                    }
+
+                }
+                if (weakness.Contains(weapon.ActionRequired))
                 {
                     gameState.GetPlayer().GainExperienceFromWeapon(weapon, dmgDealt * 2);
                     battleString += " It seemed to be very effective!";
                 }
-                else if (opponent.Strength.Contains(weapon.ActionRequired))
+                else if (strength.Contains(weapon.ActionRequired))
                 {
                     gameState.GetPlayer().GainExperienceFromWeapon(weapon, dmgDealt / 2);
                     battleString += " It didn't seem to be very effective...";
@@ -205,8 +252,23 @@ public class BattleManager
                 gameState.GetPlayer().GainExperience("Strength", dmgDealt * 3);
                 battleString = "You punch the " + opponent.Name + " for " + dmgDealt + " damage.";
             }
+            if (isDojoBattle)
+            {
+                battleString = battleString.Replace(" the ", " ");
+            }
+            if(opponent.StatusEffect != null && opponent.StatusEffect == "Dodge")
+            {
+                if(rand.Next(0, 10) > 7)
+                {
+                    dmgDealt = 0;
+                    battleString = opponent.Name + " dodged your attack!";
+                    color = "red";
+                }
+            }
             messageManager.AddMessage(battleString, color);
             opponent.CurrentHP -= dmgDealt;
+
+
 
             if (opponent.CurrentHP <= 0)
             {
@@ -220,34 +282,66 @@ public class BattleManager
         if (battleFound)
         {
             opponent.StatusEffectTimeLeft--;
+            string color = "black";
             if (opponent.CurrentStatusEffect == "Freeze" && opponent.StatusEffectTimeLeft > 0)
             {
                 messageManager.AddMessage(opponent.Name + " is frozen and could not attack.");
                 return;
             }
+
             int dmg = Math.Max(1, Extensions.GetGaussianRandomInt(opponent.Damage, opponent.Damage / 2d));
             dmg = (int)(dmg * Math.Max(1 - Extensions.CalculateArmorDamageReduction(gameState.GetPlayer()), 0.05d));
-            gameState.GetPlayer().GainExperience("HP", Math.Min(gameState.GetPlayer().CurrentHP, dmg) * 8);
-            gameState.GetPlayer().CurrentHP -= dmg;
-            messageManager.AddMessage("You took " + dmg + " damage from the " + opponent.Name + "'s attack.");
-
-            if (gameState.GetPlayer().CurrentHP <= 0)
-            {
-                LoseBattle();
-            }
+                    
             if (opponent.StatusEffect != null && battleFound)
             {
                 if (opponent.StatusEffect == "Drain")
                 {
-
                     int maxHP = opponent.HP - opponent.CurrentHP;
                     opponent.CurrentHP += Math.Min(maxHP, dmg);
                     if (Math.Min(maxHP, dmg) > 0)
                     {
-                        messageManager.AddMessage(opponent.Name + " absorbed " + Math.Min(maxHP, dmg) + " HP!");
+                        messageManager.AddMessage(opponent.Name + " absorbed " + Math.Min(maxHP, dmg) + " HP!", "red");
                     }
 
                 }
+                else if(opponent.StatusEffect == "Cleave")
+                {
+                    if(rand.Next(0,10) > 5)
+                    {
+                        dmg = (int)(dmg * (1 + Extensions.CalculateArmorDamageReduction(gameState.GetPlayer())));
+                        messageManager.AddMessage(opponent.Name + " cleaved through your armor!", "red");
+                        color = "red";
+                    }
+                    
+                }
+                else if(opponent.StatusEffect == "Empty")
+                {
+                    if(rand.Next(0,10) > 8)
+                    {
+                        if(gameState.buffSecondsLeft > 0)
+                        {
+                            gameState.buffSecondsLeft = 1;
+                            messageManager.AddMessage(opponent.Name + " hit you in the gut! You feel emptied, somehow", "red");
+                            color = "red";
+                        }
+
+                    }
+                }
+                
+            }
+            gameState.GetPlayer().GainExperience("HP", Math.Min(gameState.GetPlayer().CurrentHP, dmg) * 8);
+            gameState.GetPlayer().CurrentHP -= dmg;
+            if (isDojoBattle)
+            {
+                messageManager.AddMessage("You took " + dmg + " damage from " + opponent.Name + "'s attack.", color);
+            }
+            else
+            {
+                messageManager.AddMessage("You took " + dmg + " damage from the " + opponent.Name + "'s attack.", color);
+            }
+            if (gameState.GetPlayer().CurrentHP <= 0)
+            {
+                LoseBattle();
             }
         }
 
@@ -256,7 +350,28 @@ public class BattleManager
     {
         gameState.totalKills++;
         gameState.IncrementKillCount(opponent.ID);
-        messageManager.AddMessage("You defeated the " + opponent.Name);
+        if (isDojoBattle)
+        {
+            messageManager.AddMessage("You defeated " + opponent.Name);
+        }
+        else
+        {
+            messageManager.AddMessage("You defeated the " + opponent.Name);
+        }
+        
+        if (isDojoBattle)
+        {
+            currentDojoWave++;
+            if(currentDojoWave >= currentDojo.OpponentIDs.Count)
+            {
+                messageManager.AddMessage("You've defeated everyone at the " + currentDojo.Name + "! You earned " + currentDojo.DojoTokens + " dojo tokens and " + currentDojo.AmountEarned + " " + itemDatabase.GetItemByID(currentDojo.ItemEarned).ItemName);
+                currentDojo.LastWonTime = DateTime.UtcNow;
+                currentDojoWave = 0;
+                currentDojo.BeginChallenge = false;
+                gameState.GetPlayerInventory().AddMultipleOfItem(itemDatabase.GetItemByID(currentDojo.ItemEarned), currentDojo.AmountEarned);
+                gameState.GetPlayerInventory().AddMultipleOfItem(itemDatabase.GetItemByID(485), currentDojo.DojoTokens);
+            } 
+        }
         if (opponent.AlwaysDrops != null)
         {
             if (gameState.GetPlayerInventory().AddOneOfMultipleItems(itemDatabase.GetItems(opponent.AlwaysDrops)))
@@ -305,6 +420,11 @@ public class BattleManager
         battleFound = false;
         battleStarted = false;
         autoFight = false;
+        if (isDojoBattle)
+        {
+            currentDojoWave = 0;
+            currentDojo.BeginChallenge = false;
+        }
         EndTimers();
         gameState.isFighting = false;
     }
@@ -351,7 +471,15 @@ public class BattleManager
             {
                 int maxHPGain = gameState.GetPlayer().MaxHP - gameState.GetPlayer().CurrentHP;
                 gameState.GetPlayer().CurrentHP += Math.Min(dmgDealt / duration, maxHPGain);
-                messageManager.AddMessage("You absorbed " + Math.Min(dmgDealt / duration, maxHPGain) + " HP from the " + opponent.Name, "red");
+                if (isDojoBattle)
+                {
+                    messageManager.AddMessage("You absorbed " + Math.Min(dmgDealt / duration, maxHPGain) + " HP from " + opponent.Name, "red");
+                }
+                else
+                {
+                    messageManager.AddMessage("You absorbed " + Math.Min(dmgDealt / duration, maxHPGain) + " HP from the " + opponent.Name, "red");
+                }
+                
             }
             else
             {
@@ -372,5 +500,137 @@ public class BattleManager
 
         }
 
+    }
+    private void ChangeStances(Monster opponent, GameItem weapon)
+    {
+        opponent.CurrentStance = GetNewStance(opponent, weapon);
+        opponent.AttackSpeed = GetAttackSpeed(opponent.CurrentStance);
+        opponent.ChangingStances = false;
+        messageManager.AddMessage(opponent.Name + " changed stances to " + GetStyleName(opponent.CurrentStance) + "!", "red");
+    }
+
+    private int GetNewStance(Monster opponent, GameItem weapon)
+    {
+        
+        string[] weaknesses = opponent.Weakness.Split(' ');
+        int i = 0;
+        foreach(string s in weaknesses)
+        {
+            if(weapon.ActionRequired != s)
+            {
+                return i;
+                
+            }
+            i++;
+        }
+        return 0;
+    }
+    public string GetStyleName(int i)
+    {
+        if(i < 0 || i > opponent.Strength.Split(' ').Length)
+        {
+            return "No style";
+        }
+        string strength = opponent.Strength.Split(' ')[i];
+        string style = "An unknown style";
+        if (strength == "Knifesmanship")
+        {
+            style = "Houchou style";
+        }
+        else if (strength == "Swordsmanship")
+        {
+            style = "Ittou style";
+        }
+        else if (strength == "Axemanship")
+        {
+            style = "Ono style";
+        }
+        else if (strength == "Hammermanship")
+        {
+            style = "Zuchi style";
+        }
+        return style;
+    }
+    private int GetAttackSpeed(int i)
+    {
+        string strength = opponent.Strength.Split(' ')[i];
+        int speed = 4;
+        if (strength == "Knifesmanship")
+        {
+            speed = 1;
+        }
+        else if (strength == "Swordsmanship")
+        {
+            speed = 2;
+        }
+        else if (strength == "Axemanship")
+        {
+            speed = 3;
+        }
+        else if (strength == "Hammermanship")
+        {
+            speed = 4;
+        }
+        return speed;
+    }
+    //
+  
+        public Dojo GetDojoByID(int id)
+    {
+        return dojos[id];
+    }
+    public string GetDojoSaveData()
+    {
+        string data = "";
+        foreach(Dojo d in dojos)
+        {
+            data += d.LastWonTime + ",";
+        }
+        return data;
+    }
+    public void LoadDojoSaveData(string data)
+    {
+        string[] lines = data.Split(',');
+        int it = 0;
+        foreach(Dojo d in dojos)
+        {
+            if(lines.Length > it && lines[it] != "")
+            {
+                if (DateTime.TryParse(lines[it], out DateTime time))
+                {
+                    d.LastWonTime = time;
+
+                }
+            }
+
+            it++;
+        }
+    }
+    public void TestLoadDojoSaveData(string data)
+    {
+        string[] lines = data.Split(',');
+        int it = 0;
+        foreach (Dojo d in dojos)
+        {
+            if (DateTime.TryParse(lines[it], out DateTime time))
+            {
+               
+
+            }
+            else
+            {
+                if(lines.Length > it && lines[it] != "")
+                {
+                    messageManager.AddMessage("Dojo Data:Failed to parse:" + lines[it]);
+                    Console.WriteLine("Dojo Data:Failed to parse:" + lines[it]);
+                }
+
+            }
+            it++;
+        }
+    }
+    public List<Dojo> GetDojos()
+    {
+        return dojos;
     }
 }

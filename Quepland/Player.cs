@@ -41,7 +41,6 @@ public class Player
     {
         Skill[] skillArray = await Http.GetJsonAsync<Skill[]>("data/skills.json");
         skills = skillArray.ToList();
-        Console.WriteLine(skills[0].GetSkillLevel());
         hasLoadedSkills = true;
     }
     private void IncreaseMaxHPBy(int amount)
@@ -233,6 +232,64 @@ public class Player
         
         
     }
+    public void TestLoadPetsFromString(string data)
+    {
+        string[] lines = data.Split((char)17)[0].Split((char)16);
+        foreach (string line in lines)
+        {
+            if (line.Length > 1)
+            {
+                string[] info = new string[10];
+                try
+                {
+                    info = line.Split((char)15)[0].Split((char)14);
+                }
+                catch
+                {
+                    messageManager.AddMessage("Saved pet data failed:" + line, "red");
+                    Console.WriteLine("Pet Data:Failed to load pet info:" + line);
+                }
+                try
+                {
+                    Pet newPet = new Pet();
+
+                    newPet.Name = info[0];
+                    newPet.Description = info[1];
+                    newPet.Nickname = info[2];
+
+                    newPet.MinLevel = int.Parse(info[3]);
+
+                    newPet.Affinity = info[4];
+
+                    newPet.Identifier = info[5];
+                    string skillString = line.Split((char)15)[1];
+
+                    newPet.SetSkills(Extensions.GetSkillsFromString(skillString));
+                }
+                catch
+                {
+                    messageManager.AddMessage("Pet data failed on setting:" + line, "red");
+                    Console.WriteLine("Pet Data:Failed to set pet info:" + line);
+                }
+
+            }
+
+        }
+        if (data.Split((char)17).Length > 1)
+        {
+            try
+            {
+                if (data.Split((char)17)[1] == "None")
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Assigned Pet:Failed to load data:" + data.Split((char)17)[1]);
+            }
+        }
+    }
     public int GetLevel(string skillName)
     {
         foreach(Skill skill in skills)
@@ -278,7 +335,7 @@ public class Player
     {
         if (skill == null)
         {
-            Console.WriteLine("Gained " + amount + " experience in unfound skill.");
+            Console.WriteLine("Player gained " + amount + " experience in unfound skill.");
             return;
         }
         if(amount <= 0)
@@ -437,13 +494,14 @@ public class Player
         }
         return true;
     }
+
     public int GetDamageDealt(Monster opponent)
     {
         int str = GetSkill("Strength").GetSkillLevel();
         int deft = GetSkill("Deftness").GetSkillLevel();
-        float baseDamage = 1 + (str / 4);
-
-        int equipmentBonus = GetEquipmentBonus();
+        float baseDamage = 1 + (str / 4);      
+        float armorReduction = 1 - (float)Extensions.CalculateArmorDamageReduction(opponent);
+        int equipmentBonus = (int)(GetEquipmentBonus() * armorReduction);
 
         if (GetWeapon() != null)
         {
@@ -480,6 +538,37 @@ public class Player
                 }
 
             }
+
+            baseDamage = CalculateEffectiveness(opponent, action, baseDamage);
+                     
+            return Math.Max(Extensions.GetGaussianRandomInt(baseDamage + equipmentBonus, baseDamage / 3f), 1);
+        }
+        baseDamage *= armorReduction;
+        return Math.Max(Extensions.GetGaussianRandomInt(baseDamage + equipmentBonus, baseDamage / 3f), 1);
+    }
+    private float CalculateEffectiveness(Monster opponent, string action, float baseDamage)
+    {
+        if (opponent.ChangesStances)
+        {
+            string weakness = opponent.Weakness.Split(' ')[opponent.CurrentStance];
+            string strength = opponent.Strength.Split(' ')[opponent.CurrentStance];
+            if (weakness.Contains(action))
+            {
+                baseDamage *= 1.75f;
+                baseDamage *= 1 - ((float)Extensions.CalculateArmorDamageReduction(opponent) / 3f);
+            }
+            else if (strength.Contains(action))
+            {
+                baseDamage /= 1.75f;
+                baseDamage *= 1 - (float)Extensions.CalculateArmorDamageReduction(opponent);
+            }
+            else
+            {
+                baseDamage *= 1 - (float)Extensions.CalculateArmorDamageReduction(opponent);
+            }
+        }
+        else
+        {
             if (opponent.Weakness.Contains(action))
             {
                 baseDamage *= 1.75f;
@@ -494,11 +583,9 @@ public class Player
             {
                 baseDamage *= 1 - (float)Extensions.CalculateArmorDamageReduction(opponent);
             }
-            
-            return Math.Max(Extensions.GetGaussianRandomInt(baseDamage + equipmentBonus, baseDamage / 3f), 1);
         }
-        baseDamage *= 1 - (float)Extensions.CalculateArmorDamageReduction(opponent);
-        return Math.Max(Extensions.GetGaussianRandomInt(baseDamage + equipmentBonus, baseDamage / 3f), 1);
+        baseDamage -= opponent.Armor;
+        return baseDamage;
     }
     public int GetEquipmentBonus()
     {
@@ -625,5 +712,31 @@ public class Player
             total += s.GetSkillLevelUnboosted();
         }
         return total;
+    }
+    public List<Pet> GetPetsSorted(int sortStyle)
+    {
+        List<Pet> sortedPets = new List<Pet>();
+        sortedPets.AddRange(Pets);
+        if(sortStyle == 0)
+        {
+            sortedPets = sortedPets.OrderBy(x => x.Name).ToList();
+        }
+        else if(sortStyle == 1)
+        {
+            sortedPets = sortedPets.OrderBy(x => x.GetTotalLevels()).Reverse().ToList();          
+        }
+        else if(sortStyle == 2)
+        {
+            sortedPets = sortedPets.OrderBy(x => x.Affinity).ToList();
+        }
+        else if(sortStyle == 3)
+        {
+            sortedPets = sortedPets.OrderBy(x => x.GetHighestSkillLevel()).Reverse().ToList();
+        }
+        else if(sortStyle == 4)
+        {
+            sortedPets = sortedPets.OrderBy(x => x.MinLevel).Reverse().ToList();
+        }
+        return sortedPets;
     }
 }

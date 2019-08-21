@@ -102,7 +102,7 @@ else
 
     public void AddRoomToHouse()
     {
-        GameState.GetPlayer().house.AddRoom(Program.roomManager.GetRoomByID(0));
+        GameState.GetPlayer().house.Rooms.Add(Program.roomManager.GetByID(0));
     }
     public void GetItem()
     {
@@ -219,12 +219,12 @@ else
         }
         else if (Program.playfabManager.IsConnected)
         {
-            Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+            Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
         }
     }
     public string GetSaveDataString()
     {
-        return GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, true);
+        return GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, true);
     }
     private void LoadDataFromString(string data)
     {
@@ -303,6 +303,10 @@ else
             if (settings.Length > 7 && settings[7] != null)
             {
                 GameState.totalDeaths = int.Parse(settings[7]);
+            }	            
+            if (settings.Length > 8 && settings[8] != null)		
+            {		
+                GameState.submitHighScores = bool.Parse(settings[8]);		
             }
         }
         if (lines.Length > 10 && lines[10] != null)
@@ -337,15 +341,15 @@ else
                 {
                     Building t = Program.buildingManager.GetBuildingByID(int.Parse(tannery.Split('>')[0]));
                     string[] tanneryData = tannery.Split('>')[1].Split('_');
-
+                    int i = 0;
                     foreach (string s in tanneryData)
                     {
-                        if (s.Length > 0)
+                        if (s.Length > 0 && i < t.TannerySlots)
                         {
                             TanningSlot slot = new TanningSlot();
                             slot.SetDataFromString(s);
                             t.TanneryItems.Add(slot);
-
+                            i++;
                         }
 
                     }
@@ -378,6 +382,10 @@ else
         if (lines.Length > 17 && lines[17] != null)
         {
             GameState.LoadKC(lines[17]);
+        }	        
+        if (lines.Length > 18 && lines[18] != null)		
+        {		
+            Program.battleManager.LoadDojoSaveData(lines[18]);		
         }
         MessageManager.AddMessage("Save game loaded.");
         Console.WriteLine(GameState.isHunting + ", " + GameState.CanLeave() + ", " + GameState.huntingAreaID);
@@ -415,7 +423,7 @@ else
                 }
                 else if (Program.playfabManager.IsConnected)
                 {
-                    Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+                    Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
                 }
 
                 GameState.saveToPlayFab = 0;
@@ -429,7 +437,7 @@ else
     {
         await ConnectToKongregate();
         await Program.playfabManager.TryLogin(GameState.userID, GameState.token);
-        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
     }
     protected override void OnInitialized()
     {
@@ -446,14 +454,13 @@ else
         GameState.JSRuntime = JSRuntime;
         await ConnectToKongregate();
         GameState.saveGameExists = saveGameExists;
-        Console.WriteLine("Game data loaded:" + GameState.gameDataLoaded);
+
         if (GameState.gameDataLoaded == false)
         {
             Program.gatherManager.SetGameState(GameState);
             Program.huntingManager.SetGameState(GameState);
 
             GameState.LoadPlayerData(Http);
-            Console.WriteLine("Loaded player data");
             await Program.itemDatabase.LoadItems(Http);
             await Program.areaManager.LoadAreas(Http);
             await Program.buildingManager.LoadBuildings(Http);
@@ -502,7 +509,7 @@ else
                     }
                     else if (Program.playfabManager.IsConnected)
                     {
-                        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+                        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager,  false));
                     }
 
                     GameState.saveToPlayFab = 0;

@@ -193,7 +193,7 @@ else
         isRestoringPurchases = true;
         GameState.UpdateState();
         restoringPurchasesString = "Restoring purchases... This may take a while.";
-        //await JSRuntime.InvokeAsync<object>("kongregateFunctions.restorePurchases", new DotNetObjectRef(new PetPurchase(GameState)));
+        await JSRuntime.InvokeAsync<object>("kongregateFunctions.restorePurchases", DotNetObjectRef.Create(new PetPurchase(GameState)));
 
         isRestoringPurchases = false;
         GameState.UpdateState();
@@ -203,7 +203,7 @@ else
 
         if(GameState.userID == null || GameState.userID == "")
         {
-            //await JSRuntime.InvokeAsync<object>("kongregateFunctions.showRegistration", new DotNetObjectRef(new PetPurchase(GameState)));
+            await JSRuntime.InvokeAsync<object>("kongregateFunctions.showRegistration", DotNetObjectRef.Create(new PetPurchase(GameState)));
             GameState.UpdateState();
             return;
         }
@@ -213,7 +213,7 @@ else
         }
         currentPetToBuy = pet;
         GameState.petToBuy = pet;
-        //await JSRuntime.InvokeAsync<object>("kongregateFunctions.purchasePet", pet.Identifier, new DotNetObjectRef(new PetPurchase(GameState)));
+        await JSRuntime.InvokeAsync<object>("kongregateFunctions.purchasePet", pet.Identifier, DotNetObjectRef.Create(new PetPurchase(GameState)));
         GameState.UpdateState();
     }
 
@@ -323,7 +323,7 @@ else
 
         }
         await Program.playfabManager.TryLogin(GameState.userID, GameState.token);
-        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, false));
+        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
         GameState.UpdateState();
     }
     protected override void OnInitialized()

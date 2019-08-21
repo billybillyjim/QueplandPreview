@@ -55,8 +55,38 @@ public class FollowerManager
         int i = 0;
         foreach(string line in dataArray)
         {
-            followers[i].IsUnlocked = bool.Parse(line.Split(',')[1]);
-            i++;
+            if(i < followers.Count)
+            {
+                followers[i].IsUnlocked = bool.Parse(line.Split(',')[1]);
+                i++;
+            }
+
+        }
+    }
+    public void TestLoadSaveData(string data)
+    {
+        if (data == null || data.Length < 1)
+        {
+            Console.WriteLine("Follower data was empty.");
+            return;
+        }
+        string[] dataArray = data.Split('/');
+        int i = 0;
+        foreach (string line in dataArray)
+        {
+            if (i < followers.Count)
+            {
+                try
+                {
+                    bool b = bool.Parse(line.Split(',')[1]);
+                }
+                catch
+                {
+                    Console.WriteLine("Follower data:"+line.Split(',')[1] + " is not a valid bool.");
+                }
+                i++;
+            }
+
         }
     }
 }

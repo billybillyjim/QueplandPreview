@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Houchou Dojo",
+    "id": 0,
+    "description": "The walls of the hall are covered in knives. Each member of the dojo stands in line, awaiting their next challenger. Defeat all of them to earn the dojo's title!",
+    "opponentIDs": [ 47, 48, 49, 50, 51, 52 ],
+    "npcIDs": [ 69 ],
+    "itemEarned": 0,
+    "amountEarned": 10000,
+    "dojoTokens": 500
+  },
+  {
+    "name": "Ittou Dojo",
+    "id": 1,
+    "description": "A single sword sits above the back wall of the dojo. Members sit with their legs crossed, lining the sides of the hall.",
+    "opponentIDs": [ 53, 54, 55, 56, 57, 58, 59 ],
+    "npcIDs": [ 71 ],
+    "itemEarned": 0,
+    "amountEarned": 25000,
+    "dojoTokens": 2500
+  },
+  {
+    "name": "Ono Dojo",
+    "id": 2,
+    "description": "You find the halls of this dojo lined with weapons, most of which are axes.",
+    "opponentIDs": [ 60, 61, 62, 63, 64, 65, 66, 67 ],
+    "itemEarned": 0,
+    "amountEarned": 65000,
+    "dojoTokens": 5000
+  },
+  {
+    "name": "Zuchi Dojo",
+    "id": 3,
+    "description": "The floor of the hall is covered in various hammers. The largest one sits in the center, and looks like it would take 10 men to lift.",
+    "opponentIDs": [ 72, 73, 74, 75, 76, 77, 78, 79 ],
+    "itemEarned": 163,
+    "amountEarned": 1000,
+    "dojoTokens": 7000
+  },
+  {
+    "name": "Tsuyo Dojo",
+    "id": 4,
+    "description": "The walls of the hall are lined with weight-lifting equipment. A very large man stands in the center of the room lifting weights.",
+    "opponentIDs": [ 80, 81, 82, 83, 84, 85, 86, 87 ],
+    "itemEarned": 554,
+    "amountEarned": 50,
+    "dojoTokens": 9000
+  }
+
+]

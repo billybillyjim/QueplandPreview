@@ -3,7 +3,7 @@
 public class Skill
 {
     public string SkillName { get; set; }
-    public int SkillLevel { get; set; }
+    private int SkillLevel { get; set; }
     private long skillExperience;
     public bool IsBlocked { get; set; }
 

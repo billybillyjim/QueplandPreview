@@ -22,7 +22,6 @@ public class ItemDatabase
 
     public async System.Threading.Tasks.Task LoadItems(HttpClient Http)
     {
-        
         GameItem[] newItems = await Http.GetJsonAsync<GameItem[]>("data/items.json");
         items.AddRange(newItems);
         foreach(GameItem i in items)

@@ -30,6 +30,7 @@
 
 
     private bool autoFight;
+    private Monster autoBattleMonster;
     private List<Monster> possibleMonsters = new List<Monster>();
     private string areaURL;
     private string winString = "";
@@ -47,18 +48,32 @@
                 builder.AddAttribute(0, "disabled", true);
                 builder.AddAttribute(0, "title", "You can't do this while battling!");
             }
+            else if (BM.autoBattleOpponent != null)
+            {
+                builder.AddAttribute(0, "disabled", true);
+                builder.AddAttribute(0, "title", "You can't do this with an auto battle opponent selected.");
+            }
+            else if (BM.autoFight)
+            {
+                builder.AddAttribute(0, "disabled", true);
+                builder.AddAttribute(0, "title", "You must stop auto battling to manually battle.");
+            }
             builder.AddContent(0, "Find Battle");
             builder.CloseElement();
 
             builder.OpenElement(0, "br");
             builder.CloseElement();
 
+            builder.AddContent(0, LoadOpponentList());
+
+
             builder.OpenElement(0, "button");
             builder.AddAttribute(0, "class", "btn btn-primary");
             builder.AddAttribute(0, "style", "margin-bottom:10px");
             builder.AddAttribute(0, "onclick", new Action(() => BM.StartAutoFighting()));
-            //If there is a battle, the player has no follower, or the player's follower is not a fighter, or is already auto fighting.
-            if (BM.battleStarted ||
+        //If there is a battle, the player has no follower, or the player's follower is not a fighter, or is already auto fighting.
+        if ((BM.battleFound && BM.autoFight == false) ||
+                BM.battleStarted ||
                 (GameState.GetPlayer().activeFollower == null) ||
                 (GameState.GetPlayer().activeFollower != null && GameState.GetPlayer().activeFollower.AutoCollectSkill != "Fighting") ||
                 BM.autoFight)
@@ -80,6 +95,65 @@
                 builder.AddContent(0, "Stop Battling");
                 builder.CloseElement();
             }
+        };
+    }
+    private RenderFragment LoadOpponentList()
+    {
+        return builder =>
+        {
+            if (GameState.GetPlayer().activeFollower != null &&
+                GameState.GetPlayer().activeFollower.AutoCollectSkill == "Fighting" &&
+                GameState.GetPlayer().activeFollower.AutoCollectLevel > 0)
+            {
+                builder.OpenElement(0, "p");
+
+                builder.OpenElement(1, "div");
+                builder.AddAttribute(2, "class", "dropdown");
+                builder.AddAttribute(2, "style", "margin-bottom:10px");
+                builder.OpenElement(3, "button");
+
+                builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+                builder.AddAttribute(5, "type", "button");
+                builder.AddAttribute(6, "id", "dropdownMenuButton");
+                builder.AddAttribute(7, "data-toggle", "dropdown");
+                builder.AddAttribute(8, "aria-haspopup", "true");
+                builder.AddAttribute(9, "aria-expanded", "false");
+
+                if (BM.autoBattleOpponent == null)
+                {
+                    builder.AddContent(10, "Select an opponent to fight");
+                }
+                else
+                {
+                    builder.AddContent(10, BM.autoBattleOpponent.Name);
+                }
+                builder.CloseElement();
+
+                builder.OpenElement(12, "div");
+                builder.AddAttribute(13, "class", "dropdown-menu");
+                builder.AddAttribute(14, "aria-labelledby", "dropdownMenuButton");
+
+                builder.OpenElement(15, "a");
+                builder.AddAttribute(16, "class", "dropdown-item");
+                builder.AddAttribute(17, "onclick", new Action(() => SetOpponent(null)));
+                builder.AddContent(18, "Deselect");
+                builder.CloseElement();
+                foreach (int i in area.MonsterIDs)
+                {
+                    Monster monster = Program.battleManager.GetMonsterByID(i);
+                    builder.OpenElement(15, "a");
+                    builder.AddAttribute(16, "class", "dropdown-item");
+                    builder.AddAttribute(17, "onclick", new Action(() => SetOpponent(monster)));
+                    builder.AddContent(18, monster.Name);
+                    builder.CloseElement();
+
+                }
+
+                builder.CloseElement();
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+
         };
     }
     private RenderFragment LoadBattle()
@@ -152,6 +226,11 @@
             builder.CloseElement();
         };
     }
+    private void SetOpponent(Monster monster)
+    {
+        BM.autoBattleOpponent = monster;
+        GameState.UpdateState();
+    }
     protected override void OnParametersSet()
     {
         SetArea(thisArea);
@@ -160,6 +239,8 @@
     {
         area = Program.areaManager.GetAreaByURL(areaString);
         GameState.currentArea = area;
+        Program.battleManager.isDojoBattle = false;
+        Program.battleManager.autoBattleOpponent = null;
         possibleMonsters = Program.battleManager.GetMonstersForArea(area);
     }
     protected override void OnInitialized()

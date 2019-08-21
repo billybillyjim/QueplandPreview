@@ -16,6 +16,7 @@
     @LoadRoadblocks()
     @LoadSmithingButton()
     @LoadRegions()
+    @LoadDojo()
 }
 
 @functions{
@@ -79,9 +80,32 @@
         GameState.previousURL = "/" + area.AreaURL;
         UriHelper.NavigateTo("/" + area.AreaURL + "/GemMining");
     }
+    public void EnterDojo()
+    {
+        GameState.previousURL = "/" + area.AreaURL;
+        UriHelper.NavigateTo("/" + area.AreaURL + "/Dojo");
+    }
     protected override void OnParametersSet()
     {
         SetArea(thisArea);
+    }
+    public RenderFragment LoadDojo()
+    {
+        return builder =>
+        {
+            if (area.HasDojo)
+            {
+                builder.OpenElement(0, "p");
+                builder.OpenElement(1, "button");
+                builder.AddAttribute(2, "class", "btn btn-primary");
+                builder.AddAttribute(3, "style", "");
+                builder.AddAttribute(4, "title", "");
+                builder.AddAttribute(5, "onclick", new Action(() => EnterDojo()));
+                builder.AddContent(6, "Enter " + Program.battleManager.GetDojoByID(area.DojoID).Name);
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+        };
     }
     public RenderFragment LoadActions()
     {
@@ -102,6 +126,11 @@
                     else if (actionString == "Smithing")
                     {
 
+                    }
+                    else if(actionString == "Pet Forgetter")
+                    {
+                        builder.OpenComponent<PetForgetter>(2);
+                        builder.CloseComponent();
                     }
                     else if (actionString == "Strength")
                     {
@@ -186,7 +215,7 @@
                         {
                             builder.AddAttribute(6, "disabled", true);
                         }
-                        else if(GameState.GetPlayer().GetLevel("Fishing") < 87)
+                        else if (GameState.GetPlayer().GetLevel("Fishing") < 87)
                         {
                             builder.AddAttribute(6, "disabled", true);
                             builder.AddAttribute(7, "title", "You don't have the fishing level to do this. (87)");
@@ -206,7 +235,7 @@
                         {
                             builder.AddAttribute(6, "disabled", true);
                         }
-                        else if(GameState.GetPlayer().GetLevel("Mining") < 97)
+                        else if (GameState.GetPlayer().GetLevel("Mining") < 97)
                         {
                             builder.AddAttribute(6, "disabled", true);
                             builder.AddAttribute(7, "title", "You don't have the mining level to do this. (97)");
@@ -259,7 +288,7 @@
                                 builder.AddAttribute(6, "disabled", true);
                                 builder.AddAttribute(7, "title", "You don't have the tool to do this.");
                             }
-                            if(GameState.GetPlayer().GetLevel("Woodworking") < Program.itemDatabase.GetRewardByName(actionString.Split(':')[1]).MinimumLevel)
+                            if (GameState.GetPlayer().GetLevel("Woodworking") < Program.itemDatabase.GetRewardByName(actionString.Split(':')[1]).MinimumLevel)
                             {
                                 builder.AddAttribute(6, "disabled", true);
                                 builder.AddAttribute(7, "title", "You don't have the level to do this.(" + Program.itemDatabase.GetRewardByName(actionString.Split(':')[1]).MinimumLevel + ")");
@@ -269,7 +298,7 @@
                             builder.OpenElement(9, "br");
                             builder.CloseElement();
                         }
-                        else if(GameState.gatherItem == "Carving")
+                        else if (GameState.gatherItem == "Carving")
                         {
                             builder.OpenElement(2, "button");
                             builder.AddAttribute(3, "style", "margin-bottom:10px");
@@ -358,7 +387,7 @@
                                 builder.AddContent(15, action);
 
                             }
-                            else if(GameState.gatherItem == itemString)
+                            else if (GameState.gatherItem == itemString)
                             {
                                 builder.AddAttribute(16, "onclick", new Action(() => StopGathering()));
                                 builder.AddContent(17, "Stop");
@@ -367,7 +396,7 @@
                             else
                             {
 
-                                builder.AddAttribute(13, "title", "You don't have the levels to do this.(" + item.ActionRequired + ":" + item.RequiredLevel+")");
+                                builder.AddAttribute(13, "title", "You don't have the levels to do this.(" + item.ActionRequired + ":" + item.RequiredLevel + ")");
                                 builder.AddAttribute(14, "disabled", true);
                                 builder.AddContent(15, action);
                             }
@@ -404,7 +433,7 @@
             builder.AddAttribute(1, "style", "margin-bottom:10px");
             builder.AddAttribute(2, "class", "btn btn-primary");
             builder.AddAttribute(3, "onclick", new Action(() => StartSearchForMiningVein()));
-            if (isLookingForVein )
+            if (isLookingForVein)
             {
                 builder.AddAttribute(4, "disabled", true);
             }
@@ -456,7 +485,7 @@
                         builder.AddAttribute(20, "title", "You lack the level to do this. (" + item.RequiredLevel + ")");
                         builder.AddContent(21, "Mine " + item.ItemName);
                     }
-                    else if(GameState.gatherItem == item.ItemName)
+                    else if (GameState.gatherItem == item.ItemName)
                     {
                         builder.AddAttribute(22, "onclick", new Action(() => StopGathering()));
                         builder.AddContent(23, "Stop");
@@ -746,7 +775,14 @@
                             builder.AddAttribute(6, "onclick", new Action(() => SpeakToAndUnlockNPCs(npc, i)));
                         }
                     }
-                    builder.AddContent(7, "Speak to " + npc.Name);
+                    if(npc.ButtonText != null)
+                    {
+                        builder.AddContent(7, npc.ButtonText);
+                    }
+                    else		
+                    {		
+                        builder.AddContent(7, "Speak to " + npc.Name);		
+                    }  
                     builder.CloseElement();
                     builder.OpenElement(8, "br");
                     builder.CloseElement();
@@ -786,15 +822,15 @@
                             builder.OpenElement(18, "button");
                             builder.AddAttribute(19, "style", "margin-bottom:10px");
                             builder.AddAttribute(20, "class", "btn btn-primary");
-                            builder.AddAttribute(21, "onclick", new Action(() => BuyItem(item, 1, Program.itemDatabase.GetGold())));
+                            builder.AddAttribute(21, "onclick", new Action(() => BuyItem(item, 1, Program.itemDatabase.GetItemByID(npc.CurrencyID))));
 
-                            if (GameState.GetPlayerInventory().GetCoins() < item.Value || GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
+                            if (GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByID(npc.CurrencyID)) < item.Value || GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
                             {
                                 builder.AddAttribute(22, "disabled", true);
                                 builder.AddAttribute(23, "title", "You don't have everything you need to buy this.");
                             }
 
-                            builder.AddContent(24, "Buy " + item.ItemName + " for " + item.Value + " coins");
+                            builder.AddContent(24, "Buy " + item.ItemName + " for " + item.Value  + " " + Program.itemDatabase.GetItemByID(npc.CurrencyID).ItemName + "s");
                             builder.CloseElement();
                             builder.OpenElement(25, "br");
                             builder.CloseElement();
@@ -848,7 +884,7 @@
                 {
                     buyString += costs[i] + " " + cItem.ItemName + ", ";
                     i++;
-                    if(i >= costs.Length)
+                    if (i >= costs.Length)
                     {
                         i = 0;
                     }
@@ -917,7 +953,7 @@
             builder.AddAttribute(0, "tabindex", "0");
             builder.AddAttribute(0, "data-toggle", "tooltip");
 
-            if(playerHasLevels && GameState.GetPlayerInventory().ActionIsEnabled(item.ActionRequired, false))
+            if (playerHasLevels && GameState.GetPlayerInventory().ActionIsEnabled(item.ActionRequired, false))
             {
                 builder.AddAttribute(0, "title", "You need to equip your tool to do this." + "(" + item.ActionRequired + ")");
             }
@@ -1090,7 +1126,7 @@
     {
         GameState.StopActions();
         MessageManager.AddMessage("You look for fish to harpoon.");
-        if(GameState.GetPlayer().activeFollower != null && GameState.GetPlayer().activeFollower.AutoCollectSkill == "Fishing")
+        if (GameState.GetPlayer().activeFollower != null && GameState.GetPlayer().activeFollower.AutoCollectSkill == "Fishing")
         {
             MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " doesn't understand how to carry harpooned items to the bank, and stares at you blankly.");
         }
@@ -1101,7 +1137,7 @@
             GameState.UpdateState();
             StateHasChanged();
 
-        }), null, (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")),  (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")));
+        }), null, (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")), (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")));
 
         GameState.UpdateState();
         StateHasChanged();
@@ -1111,7 +1147,7 @@
         GameItem gainedItem = (Program.itemDatabase.GetItemByID(Extensions.GetRandomReward(Program.itemDatabase.GetRewardByName("Harpoon Fishing"))));
         if (GameState.GetPlayerInventory().AddItem(gainedItem))
         {
-            if(gainedItem.ExperienceGained != null && gainedItem.ExperienceGained.Contains("Fishing"))
+            if (gainedItem.ExperienceGained != null && gainedItem.ExperienceGained.Contains("Fishing"))
             {
                 GameState.GetPlayer().GainExperience(gainedItem.ExperienceGained);
             }
@@ -1408,9 +1444,9 @@
         {
             npc.IsInteractable = false;
         }
-        if(npc.ID == 65)
+        if (npc.ID == 65)
         {
-            if(GameState.PetShopUnlocked == false)
+            if (GameState.PetShopUnlocked == false)
             {
                 MessageManager.AddMessage("The pet shop is now unlocked! You can visit it any time by clicking \"Pet Shop\" at the top of the page.");
             }
@@ -1447,7 +1483,7 @@
     private void BuyItemMultipleCosts(GameItem item, List<GameItem> costItems, int[] specialCosts)
     {
         int it = 0;
-        foreach(GameItem costItem in costItems)
+        foreach (GameItem costItem in costItems)
         {
             if (GameState.GetPlayerInventory().GetAmountOfItem(costItem) >= specialCosts[it])
             {
@@ -1455,7 +1491,7 @@
 
             }
             it++;
-            if(it >= specialCosts.Length)
+            if (it >= specialCosts.Length)
             {
                 it = 0;
             }
@@ -1467,7 +1503,7 @@
     }
     private string SaveDataEncrypted()
     {
-        localStorage.SetItem("eSave", GameState.GetSaveString(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager));
+        localStorage.SetItem("eSave", GameState.GetSaveString(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager));
         MessageManager.AddMessage("Your game has been saved.");
         return "";
     }

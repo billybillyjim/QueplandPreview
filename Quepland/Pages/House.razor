@@ -28,6 +28,10 @@ else
 
     private string newRoomName;
     private Room currentRoom;
+    private int loadedPlanks;		
+    private int loadedBars;		
+    private bool isConstructing = false;
+
     private RenderFragment LoadHouse()
     {
         return builder =>
@@ -48,7 +52,7 @@ else
             builder.OpenElement(11, "div");
             builder.AddAttribute(12, "class", "dropdown-menu");
             builder.AddAttribute(13, "aria-labelledby", "dropdownMenuButton");
-            foreach (Room room in GameState.GetPlayer().house.GetRooms())
+            foreach (Room room in GameState.GetPlayer().house.Rooms)
             {
 
                 builder.OpenElement(14, "a");
@@ -92,7 +96,7 @@ else
             builder.OpenElement(11, "div");
             builder.AddAttribute(12, "class", "dropdown-menu");
             builder.AddAttribute(13, "aria-labelledby", "dropdownMenuButton");
-            foreach (Room room in Program.roomManager.GetRooms())
+            foreach (Room room in Program.roomManager.Rooms)
             {
 
                 builder.OpenElement(14, "a");
@@ -135,6 +139,18 @@ else
         };
 
     }
+    private RenderFragment LoadPlanksButton()		
+    {		
+        return builder =>		
+        {		
+        };		
+    }		
+    private RenderFragment LoadBarsButton()		
+    {		
+        return builder =>		
+        {		
+        };		
+    }
     private RenderFragment WorkOnRoomButton()
     {
         return builder =>
@@ -142,7 +158,7 @@ else
             builder.OpenElement(1, "button");
             builder.AddAttribute(2, "class", "btn btn-primary");
             builder.AddAttribute(3, "style", "margin:10px");
-            if (GameState.isGathering == false)
+            if (GameState.isGathering == false && isConstructing == false)
             {
                 if (GameState.GetPlayerInventory().GetBestNails() == null)
                 {
@@ -170,21 +186,20 @@ else
         {
             if (string.IsNullOrEmpty(newRoomName) == false)
             {
-                Room room = Program.roomManager.GetRoomByName(newRoomName);
                 builder.OpenElement(0, "p");
-                builder.AddContent(1, room.Name);
+                builder.AddContent(1, GameState.currentRoom.Name);
                 builder.CloseElement();
                 builder.OpenElement(2, "p");
-                builder.AddContent(3, "Level Required:" + room.ConstructionLevelRequired);
+                builder.AddContent(3, "Level Required:" + GameState.currentRoom.ConstructionLevelRequired);
                 builder.CloseElement();
                 builder.OpenElement(4, "p");
-                builder.AddContent(5, "Planks:" + room.PlanksRequired + " " + GetPlankString(room.MinimumPlankLevel) + " or better.");
+                builder.AddContent(5, "Planks:" + GameState.currentRoom.PlanksRequired + " " + GetPlankString(GameState.currentRoom.MinimumPlankLevel) + " or better.");
                 builder.CloseElement();
                 builder.OpenElement(6, "p");
-                builder.AddContent(7, "Bars:" + room.BarsRequired + " " + GetBarString(room.MinimumBarLevel) + "s or better.");
+                builder.AddContent(7, "Bars:" + GameState.currentRoom.BarsRequired + " " + GetBarString(GameState.currentRoom.MinimumBarLevel) + "s or better.");
                 builder.CloseElement();
                 builder.OpenElement(8, "p");
-                builder.AddContent(9, "Work Remaining:" + room.WorkRemaining);
+                builder.AddContent(9, "Work Remaining:" + GameState.currentRoom.WorkRemaining);	
                 builder.CloseElement();
             }
         };
@@ -199,27 +214,29 @@ else
     }
     private void BeginBuildingNewRoom()
     {
-        Room newRoom = Program.roomManager.GetRoomByName(newRoomName);
+        Room newRoom = Program.roomManager.GetByName(newRoomName);
         currentRoom = newRoom;
         newRoom.WorkRemaining = (newRoom.PlanksRequired * 4 * (newRoom.MinimumPlankLevel + 1)) + (newRoom.BarsRequired * 10 * (newRoom.MinimumBarLevel + 1));
         StateHasChanged();
     }
     private void BuildNewRoom()
     {
-        Room newRoom = Program.roomManager.GetRoomByName(newRoomName);
-        GameState.GetPlayer().house.AddRoom(newRoom);
+        Room newRoom = Program.roomManager.GetByName(newRoomName);
+        GameState.GetPlayer().house.Rooms.Add(newRoom);
         currentRoom = newRoom;
         StateHasChanged();
     }
     private void CompleteNewRoom()
     {
         currentRoom.IsComplete = true;
-        GameState.GetPlayer().house.AddRoom(currentRoom);
+        GameState.GetPlayer().house.Rooms.Add(currentRoom);
         StateHasChanged();
     }
 
     private void Construct()
     {
+        	        isConstructing = true;		
+        GameState.isGathering = true;
         GameState.gatherTimer = new Timer(new TimerCallback(_ =>
         {
             if (currentRoom.IsComplete == false)
@@ -242,6 +259,14 @@ else
         }), null, 1000, 1000);
         GameState.UpdateState();
     }
+       private void LoadBars()		
+    {		
+        GameState.currentRoom.BarsRequired -= 1;		
+    }		
+    private void LoadPlanks()		
+    {		
+        GameState.currentRoom.PlanksRequired -= 1;		
+    }
     private void StopConstruction()
     {
         if (GameState.gatherTimer != null)
@@ -249,6 +274,7 @@ else
             GameState.gatherTimer.Dispose();
             GameState.gatherTimer = null;
         }
+        	        isConstructing = false;
         GameState.isGathering = false;
         StateHasChanged();
         GameState.UpdateState();
@@ -264,6 +290,10 @@ else
     }
     protected override void OnInitialized()
     {
+        	        if(GameState.currentRoom != null)		
+        {		
+            currentRoom = GameState.currentRoom;		
+        }
         GameState.StateChanged += OnGameStateChanged;
         this.StateHasChanged();
     }
