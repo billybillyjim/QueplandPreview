@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class Player
 {
@@ -37,7 +38,7 @@ public class Player
         house = new House();
     
 	}
-    public async void LoadSkills(HttpClient Http)
+    public async Task LoadSkills(HttpClient Http)
     {
         Skill[] skillArray = await Http.GetJsonAsync<Skill[]>("data/skills.json");
         skills = skillArray.ToList();
@@ -193,7 +194,7 @@ public class Player
         }
         return petString;
     }
-    public void LoadPetsFromString(string data)
+    public void LoadPetsFromString(string data, PetManager petManager)
     {
         string[] lines = data.Split((char)17)[0].Split((char)16);
         foreach(string line in lines)
@@ -203,7 +204,7 @@ public class Player
                 Pet newPet = new Pet();
                 string[] info = line.Split((char)15)[0].Split((char)14);
                 newPet.Name = info[0];
-                newPet.Description = info[1];
+                newPet.Description = petManager.GetPetDescription(newPet.Name);
                 newPet.Nickname = info[2];
 
                 newPet.MinLevel = int.Parse(info[3]);
@@ -254,7 +255,7 @@ public class Player
                     Pet newPet = new Pet();
 
                     newPet.Name = info[0];
-                    newPet.Description = info[1];
+                    //newPet.Description = info[1];
                     newPet.Nickname = info[2];
 
                     newPet.MinLevel = int.Parse(info[3]);

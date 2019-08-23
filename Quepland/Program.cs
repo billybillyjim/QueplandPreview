@@ -16,7 +16,7 @@ namespace Quepland
         public static FurnitureManager furnitureManager = new FurnitureManager();
         public static PlayfabManager playfabManager = new PlayfabManager();
         public static PetManager petManager = new PetManager();
-        public static SaveManager saveManager = new SaveManager(areaManager, followerManager, npcManager, buildingManager, battleManager, itemDatabase, huntingManager, playfabManager);
+        public static SaveManager saveManager = new SaveManager(areaManager, followerManager, npcManager, buildingManager, battleManager, itemDatabase, huntingManager, playfabManager, petManager);
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();

@@ -24,5 +24,15 @@ public class PetManager
     {
         return Pets;
     }
-
+    public string GetPetDescription(string petName)
+    {
+        if(Pets.Find(x => x.Name == petName) != null)
+        {
+            return Pets.Find(x => x.Name == petName).Description;
+        }
+        else
+        {
+            return "";
+        }
+    }
 }

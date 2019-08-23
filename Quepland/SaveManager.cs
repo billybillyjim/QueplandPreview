@@ -15,6 +15,7 @@ public class SaveManager
     public HuntingManager huntingManager;
     public ItemDatabase itemDatabase;
     public PlayfabManager playfabManager;
+    public PetManager petManager;
     public Blazored.LocalStorage.ISyncLocalStorageService localStorage;
 
     public MessageManager messageManager;
@@ -24,7 +25,7 @@ public class SaveManager
 
     public SaveManager(AreaManager areaManager, FollowerManager followerManager, 
         NPCManager npcManager, BuildingManager buildingManager, BattleManager battleManager, 
-        ItemDatabase itemDatabase, HuntingManager huntingManager, PlayfabManager playfabManager)
+        ItemDatabase itemDatabase, HuntingManager huntingManager, PlayfabManager playfabManager, PetManager petManager)
     {
         this.areaManager = areaManager;
         this.followerManager = followerManager;
@@ -34,6 +35,8 @@ public class SaveManager
         this.npcManager = npcManager;
         this.huntingManager = huntingManager;
         this.playfabManager = playfabManager;
+        this.petManager = petManager;
+        
     }
 
     public string GetSaveStringEncrypted(bool encrypt)
@@ -319,7 +322,7 @@ public class SaveManager
         }
         if (lines.Length > 16 && lines[16] != null)
         {
-            gameState.GetPlayer().LoadPetsFromString(lines[16]);
+            gameState.GetPlayer().LoadPetsFromString(lines[16], petManager);
         }
         if (lines.Length > 17 && lines[17] != null)
         {

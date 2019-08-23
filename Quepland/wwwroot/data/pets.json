@@ -61,7 +61,62 @@
     "cost": 10000000,
     "minLevel": 30,
     "affinity": "Archery"
+  },
+  {
+    "name": "Scarab",
+    "Description": "The scarab is a shiny companion. His hard outer shell makes it hard to be friends with him, but he'll help you grow in your skills a little more quickly. He has a natural affinity for Woodworking, as it's his favorite food.",
+    "cost": 10,
+    "minLevel": 1,
+    "affinity": "Woodworking",
+    "isBuyable": true,
+    "identifier": "scarab"
+  },
+  {
+    "name": "Frog",
+    "description": "The frog is a slimy companion. He loves to eat bugs and teach people about things from the well where he lives. He'll help your skills grow a little bit more quickly. He has a natural affinity for Mining, though no one is quite sure why.",
+    "cost": 10,
+    "minLevel": 1,
+    "affinity": "Mining",
+    "isBuyable": true,
+    "identifier": "frog"
+  },
+  {
+    "name": "Falcon",
+    "description": "The Falcon is a feathery companion. As a trained flying bird, he'll help you grow in your skills exceptionally quickly. He has a natural gift for Smithing, in part thanks to his excellent eyesight.",
+    "cost": 30,
+    "minLevel": 20,
+    "affinity": "Smithing",
+    "isBuyable": true,
+    "identifier": "falcon"
+  },
+  {
+    "name": "Tetropus",
+    "description": "The Tetropus is a quadrupedal companion. He'll help you learn exceptionally more quickly with his four arms. He has a natural ability for wielding axes, which came from many, many mistakes using axes. He wasn't always a tetropus...",
+    "cost": 30,
+    "minLevel": 20,
+    "affinity": "Axemanship",
+    "isBuyable": true,
+    "identifier": "tetropus"
+  },
+  {
+    "name": "Nail Boy",
+    "description": "Nail Boy is a huggable companion. The smartest of all the pets in Quepland, Nail Boy knows how to help you improve your skills extremely quickly. He has a natural affinity for Woodcutting thanks to his ability to hammer himself to any tree he's chopping.",
+    "cost": 50,
+    "minLevel": 30,
+    "affinity": "Woodcutting",
+    "isBuyable": true,
+    "identifier": "nailboy"
+  },
+  {
+    "name": "Dragon",
+    "description": "The dragon is a beastly companion. The largest and most powerful pet you can own. He'll help you grow extremely quickly. He has a natural talent for Swordsmanship because of all the swordsmen he's eaten.",
+    "cost": 50,
+    "minLevel": 30,
+    "affinity": "Swordsmanship",
+    "isBuyable": true,
+    "identifier": "dragon"
   }
+
 
  
 ]

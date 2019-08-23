@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 public class Skill
 {
+
     public string Name { get; set; }
-    private int Level { get; set; }
+
+    public int Level { get; set; }
+    public int startExperience { get; set; }
     private long _experience;
     public bool IsBlocked { get; set; }
 

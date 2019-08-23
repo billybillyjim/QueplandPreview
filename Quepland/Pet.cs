@@ -11,6 +11,7 @@ public class Pet
     public int MinLevel { get; set; }
     public string Affinity { get; set; }
     public string Identifier { get; set; }
+    public bool IsBuyable { get; set; }
     public MessageManager messageManager;
     public List<Skill> skills = new List<Skill>();
 
@@ -18,7 +19,7 @@ public class Pet
     {
         string data = "";
         data += Name + (char)14;
-        data += Description + (char)14;
+        data += " " + (char)14;
         data += Nickname + (char)14;
         data += MinLevel.ToString() + (char)14;
         data += Affinity + (char)14;

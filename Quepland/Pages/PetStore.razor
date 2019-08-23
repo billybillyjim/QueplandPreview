@@ -33,7 +33,7 @@ else
 
 
 
-@functions{
+@code{
 
     private bool showLocalStore = true;
     private Pet currentPetToBuy;
@@ -68,7 +68,7 @@ else
 
             foreach (Pet pet in Program.petManager.GetPets())
             {
-                if (GameState.GetPlayer().HasPet(pet) == false)
+                if (GameState.GetPlayer().HasPet(pet) == false && pet.IsBuyable == false)
                 {
                     builder.OpenElement(13, "tr");
                     builder.AddAttribute(13, "class", "buddy-top");
@@ -201,13 +201,13 @@ else
     public async void TryBuyPetFromKong(Pet pet)
     {
 
-        if(GameState.userID == null || GameState.userID == "")
+        if (GameState.userID == null || GameState.userID == "")
         {
             await JSRuntime.InvokeAsync<object>("kongregateFunctions.showRegistration", DotNetObjectRef.Create(new PetPurchase(GameState)));
             GameState.UpdateState();
             return;
         }
-        else if(Program.playfabManager.IsConnected == false)
+        else if (Program.playfabManager.IsConnected == false)
         {
             await ConnectToPlayFab();
         }
@@ -241,60 +241,14 @@ else
     private async void LoadBuyablePets(HttpClient Http)
     {
         buyablePets = new List<Pet>();
-        Pet scarab = new Pet();
-        scarab.Name = "Scarab";
-        scarab.Nickname = "";
-        scarab.Affinity = "Woodworking";
-        scarab.Description = "The scarab is a shiny companion. His hard outer shell makes it hard to be friends with him, but he'll help you grow in your skills a little more quickly. He has a natural affinity for Woodworking, as it's his favorite food.";
-        scarab.MinLevel = 1;
-        scarab.Cost = 10;
-        scarab.Identifier = "scarab";
-        buyablePets.Add(scarab);
-        Pet frog = new Pet();
-        frog.Name = "Frog";
-        frog.Nickname = "";
-        frog.Affinity = "Mining";
-        frog.Description = "The frog is a slimy companion. He loves to eat bugs and teach people about things from the well where he lives. He'll help your skills grow a little bit more quickly. He has a natural affinity for Mining, though no one is quite sure why.";
-        frog.MinLevel = 1;
-        frog.Cost = 10;
-        frog.Identifier = "frog";
-        buyablePets.Add(frog);
-        Pet falcon = new Pet();
-        falcon.Name = "Falcon";
-        falcon.Nickname = "";
-        falcon.Affinity = "Smithing";
-        falcon.Description = "The Falcon is a feathery companion. As a trained flying bird, he'll help you grow in your skills exceptionally quickly. He has a natural gift for Smithing, in part thanks to his excellent eyesight.";
-        falcon.MinLevel = 20;
-        falcon.Cost = 30;
-        falcon.Identifier = "falcon";
-        buyablePets.Add(falcon);
-        Pet tetropus = new Pet();
-        tetropus.Name = "Tetropus";
-        tetropus.Nickname = "";
-        tetropus.Affinity = "Axemanship";
-        tetropus.Description = "The Tetropus is a quadrupedal companion. He'll help you learn exceptionally more quickly with his four arms. He has a natural ability for wielding axes, which came from many, many mistakes using axes. He wasn't always a tetropus...";
-        tetropus.MinLevel = 20;
-        tetropus.Cost = 30;
-        tetropus.Identifier = "tetropus";
-        buyablePets.Add(tetropus);
-        Pet nailBoy = new Pet();
-        nailBoy.Name = "Nail Boy";
-        nailBoy.Nickname = "";
-        nailBoy.Affinity = "Woodcutting";
-        nailBoy.Description = "Nail Boy is a huggable companion. The smartest of all the pets in Quepland, Nail Boy knows how to help you improve your skills extremely quickly. He has a natural affinity for Woodcutting thanks to his ability to hammer himself to any tree he's chopping.";
-        nailBoy.MinLevel = 30;
-        nailBoy.Cost = 50;
-        nailBoy.Identifier = "nailboy";
-        buyablePets.Add(nailBoy);
-        Pet dragon = new Pet();
-        dragon.Name = "Dragon";
-        dragon.Nickname = "";
-        dragon.Affinity = "Swordsmanship";
-        dragon.Description = "The dragon is a beastly companion. The largest and most powerful pet you can own. He'll help you grow extremely quickly. He has a natural talent for Swordsmanship because of all the swordsmen he's eaten.";
-        dragon.MinLevel = 30;
-        dragon.Cost = 50;
-        dragon.Identifier = "dragon";
-        buyablePets.Add(dragon);
+        foreach (Pet p in Program.petManager.GetPets())
+        {
+            if (p.IsBuyable)
+            {
+                buyablePets.Add(p);
+            }
+        }
+
         foreach (Pet p in buyablePets)
         {
 
