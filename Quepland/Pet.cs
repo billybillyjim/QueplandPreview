@@ -26,7 +26,7 @@ public class Pet
         string skillString = "";
         foreach (Skill skill in skills)
         {
-            skillString += skill.SkillName + "," + skill.SkillExperience + "," + skill.GetSkillLevelUnboosted() + "," + skill.IsBlocked.ToString() +  "/";
+            skillString += skill.Name + "," + skill.Experience + "," + skill.GetSkillLevelUnboosted() + "," + skill.IsBlocked.ToString() +  "/";
         }
         skillString = skillString.Remove(skillString.Length - 1);
         return data + (char)15 + skillString;
@@ -43,9 +43,9 @@ public class Pet
     }
     public void GainExperience(string skill, long amount)
     {
-        if (skills.Find(x => x.SkillName == skill) != null)
+        if (skills.Find(x => x.Name == skill) != null)
         {
-            GainExperience(skills.Find(x => x.SkillName == skill), amount);
+            GainExperience(skills.Find(x => x.Name == skill), amount);
         }
     }
     public void GainExperience(string skill)
@@ -56,7 +56,7 @@ public class Pet
         }
         if (int.TryParse(skill.Split(':')[1], out int amount))
         {
-            GainExperience(skills.Find(x => x.SkillName == skill.Split(':')[0]), amount);
+            GainExperience(skills.Find(x => x.Name == skill.Split(':')[0]), amount);
         }
     }
     public void GainExperienceFromMultipleItems(string skill, int amount)
@@ -67,7 +67,7 @@ public class Pet
         }
         if (int.TryParse(skill.Split(':')[1], out int multi))
         {
-            GainExperience(skills.Find(x => x.SkillName == skill.Split(':')[0]), multi * amount);
+            GainExperience(skills.Find(x => x.Name == skill.Split(':')[0]), multi * amount);
         }
     }
     private void GainExperience(Skill skill, long amount)
@@ -85,8 +85,8 @@ public class Pet
         {
             amount = (long)(amount * 1.25d);
         }
-        skill.SkillExperience += amount;
-        if (skill.SkillExperience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
+        skill.Experience += amount;
+        if (skill.Experience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
         {
             LevelUp(skill);
         }
@@ -94,8 +94,8 @@ public class Pet
     public void LevelUp(Skill skill)
     {
         skill.SetSkillLevel(skill.GetSkillLevelUnboosted() + 1);
-        messageManager.AddMessage(Name + " has levelled up! (" + skill.SkillName + " " + skill.GetSkillLevelUnboosted() + ")");
-        if (skill.SkillExperience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
+        messageManager.AddMessage(Name + " has levelled up! (" + skill.Name + " " + skill.GetSkillLevelUnboosted() + ")");
+        if (skill.Experience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
         {
             LevelUp(skill);
 
@@ -139,50 +139,50 @@ public class Pet
     public float GetSkillBoost(Skill skill)
     {
         float extraBoost = 1;
-        if(GetHighestSkill() != null && GetHighestSkill().SkillName == skill.SkillName)
+        if(GetHighestSkill() != null && GetHighestSkill().Name == skill.Name)
         {
             extraBoost += 0.5f;
         }
-        if(Affinity == skill.SkillName)
+        if(Affinity == skill.Name)
         {
             extraBoost += 0.8f;
         }
-        return Math.Max((skills.Find(x => x.SkillName == skill.SkillName).GetSkillLevel() / 10f), 1) * Math.Max(1, (MinLevel / 15f)) * extraBoost;
+        return Math.Max((skills.Find(x => x.Name == skill.Name).GetSkillLevel() / 10f), 1) * Math.Max(1, (MinLevel / 15f)) * extraBoost;
     }
     private bool IsInSpecialty(Skill skill)
     {
         string specialty = GetSpecialty();
         if(specialty == "Combat")
         {
-            if(skill.SkillName == "HP" ||
-                skill.SkillName == "Knifesmanship" ||
-                skill.SkillName == "Swordsmanship" ||
-                skill.SkillName == "Axemanship" ||
-                skill.SkillName == "Hammermanship" ||
-                skill.SkillName == "Deftness" ||
-                skill.SkillName == "Strength" ||
-                skill.SkillName == "Archery")
+            if(skill.Name == "HP" ||
+                skill.Name == "Knifesmanship" ||
+                skill.Name == "Swordsmanship" ||
+                skill.Name == "Axemanship" ||
+                skill.Name == "Hammermanship" ||
+                skill.Name == "Deftness" ||
+                skill.Name == "Strength" ||
+                skill.Name == "Archery")
             {
                 return true;
             }
         }
         else if(specialty == "Gathering")
         {
-            if (skill.SkillName == "Mining" ||
-               skill.SkillName == "Fishing" ||
-               skill.SkillName == "Woodcutting" ||
-               skill.SkillName == "Hunting")
+            if (skill.Name == "Mining" ||
+               skill.Name == "Fishing" ||
+               skill.Name == "Woodcutting" ||
+               skill.Name == "Hunting")
             {
                 return true;
             }
         }
         else if(specialty == "Crafting")
         {
-            if (skill.SkillName == "Smithing" ||
-               skill.SkillName == "Alchemy" ||
-               skill.SkillName == "Woodworking" ||
-               skill.SkillName == "Culinary Arts" ||
-               skill.SkillName == "Leatherworking")
+            if (skill.Name == "Smithing" ||
+               skill.Name == "Alchemy" ||
+               skill.Name == "Woodworking" ||
+               skill.Name == "Culinary Arts" ||
+               skill.Name == "Leatherworking")
             {
                 return true;
             }
@@ -192,33 +192,33 @@ public class Pet
     private int GetCombatLevels()
     {
         int total = 0;
-        total += skills.Find(x => x.SkillName == "HP").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Knifesmanship").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Swordsmanship").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Axemanship").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Hammermanship").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Deftness").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Strength").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Archery").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "HP").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Knifesmanship").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Swordsmanship").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Axemanship").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Hammermanship").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Deftness").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Strength").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Archery").GetSkillLevelUnboosted();
         return total;
     }
     private int GetGatherLevels()
     {
         int total = 0;
-        total += skills.Find(x => x.SkillName == "Mining").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Fishing").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Woodcutting").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Hunting").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Mining").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Fishing").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Woodcutting").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Hunting").GetSkillLevelUnboosted();
         return total;
     }
     private int GetCraftingLevels()
     {
         int total = 0;
-        total += skills.Find(x => x.SkillName == "Smithing").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Alchemy").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Woodworking").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Culinary Arts").GetSkillLevelUnboosted();
-        total += skills.Find(x => x.SkillName == "Leatherworking").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Smithing").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Alchemy").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Woodworking").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Culinary Arts").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Leatherworking").GetSkillLevelUnboosted();
         return total;
     }
     public int GetTotalLevels()
@@ -227,7 +227,7 @@ public class Pet
     }
     public long GetTotalExp()
     {
-        return skills.Sum(x => x.SkillExperience);
+        return skills.Sum(x => x.Experience);
     }
 
 }

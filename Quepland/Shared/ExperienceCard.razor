@@ -14,7 +14,7 @@
             if(GameState.GetPlayer().LastLevelledSkill != null)
             {
                 Skill skill = GameState.GetPlayer().GetSkill(GameState.GetPlayer().LastLevelledSkill);
-                long exp = Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.SkillExperience;
+                long exp = Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.Experience;
                 builder.OpenElement(0, "div");
                 /*builder.OpenElement(1, "img");
                 builder.AddAttribute(2, "style", "top:-15px;position:relative;left:-28px;height:18px;width:18px;");
@@ -46,7 +46,7 @@
                 builder.CloseElement();
                 builder.OpenElement(8, "div");
                 builder.AddAttribute(9, "style", "top:17px;position:absolute;right:10px");
-                builder.AddContent(10, "Current:" + String.Format("{0:n0}", skill.SkillExperience));
+                builder.AddContent(10, "Current:" + String.Format("{0:n0}", skill.Experience));
                 builder.CloseElement();
                 builder.OpenElement(11, "div");
                 builder.AddAttribute(12, "style", "top:34px;position:absolute;right:10px");

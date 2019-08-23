@@ -2,37 +2,41 @@
 
 public class Skill
 {
-    public string SkillName { get; set; }
-    private int SkillLevel { get; set; }
-    private long skillExperience;
+    public string Name { get; set; }
+    private int Level { get; set; }
+    private long _experience;
     public bool IsBlocked { get; set; }
 
-    public long SkillExperience {
-        get { return skillExperience; }
+    public long Experience {
+        get { return _experience; }
         set {
             if (value >= 0)
             {
-                skillExperience = Math.Min(value, long.MaxValue - 20000000);
+                _experience = Math.Min(value, long.MaxValue - 20000000);
             }
             else
             {
-                skillExperience = long.MaxValue - 20000000;
+                _experience = long.MaxValue - 20000000;
             }
         }
     }
-    public string SkillDescription { get; set; }
+    public string Description { get; set; }
     public int Boost { get; set; }
 
+    /// <summary>
+    /// Returns a skill's level including boost. Use GetSkillLevelUnboosted() for the real level.
+    /// </summary>
+    /// <returns></returns>
     public int GetSkillLevel()
     {
-        return SkillLevel + Boost;
+        return Level + Boost;
     }
     public int GetSkillLevelUnboosted()
     {
-        return SkillLevel;
+        return Level;
     }
     public void SetSkillLevel(int level)
     {
-        SkillLevel = level;
+        Level = level;
     }
 }

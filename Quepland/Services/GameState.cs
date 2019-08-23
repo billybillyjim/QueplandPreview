@@ -121,11 +121,6 @@ public class GameState
     {
         StateHasChanged();
     }
-    public GameState()
-    {
-
-
-    }
 
     public void RestorePet(string petID)
     {
@@ -285,142 +280,8 @@ public class GameState
         userID = await JSRuntime.InvokeAsync<string>("kongregateFunctions.getUserID");
         token = await JSRuntime.InvokeAsync<string>("kongregateFunctions.getToken");
     }
-    public string GetSaveStringEncrypted(AreaManager areaManager, FollowerManager followerManager, NPCManager npcManager, BuildingManager buildingManager, BattleManager battleManager, bool encrypt)
-    {
-
-        int pos = 0;
-        string data = "";
-
-        //Bank 0
-        data += "" + GetPlayerBank().GetInventory().ToString();
-        pos++;
-        //Skills 1
-        data += "#" + GetPlayer().GetSkillString();
-        pos++;
-        //Inventory 2
-        data += "#" + GetPlayerInventory().ToStringSorted();
-        pos++;
-        //Areas 3
-        data += "#" + areaManager.SaveAreas();
-        pos++;
-        //Followers 4
-        data += "#" + followerManager.ToString();
-        pos++;
-        //HP 5
-        data += "#" + GetPlayer().CurrentHP.ToString();
-        pos++;
-        //ActiveFollower 6
-        if (GetPlayer().activeFollower != null)
-        {
-            data += "#" + GetPlayer().activeFollower.id;
-        }
-        else
-        {
-            data += "#";
-        }
-        pos++;
-        //Recipes 7
-        data += "#";
-        /*foreach (string s in GetPlayer().GetRecipes())
-        {
-            data += s + "/";
-        }*/
-        pos++;
-        //EquippedItems 8
-        data += "#";
-        foreach (KeyValuePair<GameItem, int> pair in GetPlayerInventory().GetEquippedItems())
-        {
-            data += pair.Key.Id + "/";
-        }
-        pos++;
-        //Settings 9
-        data += "#";
-        data += isSplitView.ToString();
-        data += ",";
-        data += compactBankView.ToString();
-        data += ",";
-        data += expensiveItemThreshold;
-        data += ",";
-        data += totalKills;
-        data += ",";
-        data += PetShopUnlocked.ToString();
-        data += ",";
-        data += autoBuySushiSupplies.ToString();
-        data += ",";
-        data += totalCoinsEarned;
-        data += ",";
-        data += totalDeaths;
-        data += ",";
-        data += submitHighScores.ToString();
-        pos++;
-        //NPC data 10
-        data += "#";
-        data += npcManager.GetNPCData();
-        pos++;
-        //Sushi House Data 11
-        data += "#";
-        data += sushiHouseRice + "," + sushiHouseSeaweed;
-        pos++;
-        //Tannery Data 12
-        data += "#";
-        foreach (Building b in buildingManager.GetBuildings())
-        {
-            if (b.Salt > 0)
-            {
-                data += "" + b.ID + "," + b.Salt + "/";
-            }
-        }
-        pos++;
-        //Tannery Slot Data 13
-        data += "#";
-        foreach (Building b in buildingManager.GetBuildings())
-        {
-            if (b.IsTannery)
-            {
-                data += b.ID + ">";
-                foreach (TanningSlot slot in b.TanneryItems)
-                {
-                    data += slot.GetString() + "_";
-                }
-                data += "@";
-            }
-        }
-        pos++;
-        //GameState.isHunting 14
-        data += "#";
-        data += isHunting.ToString() + ",";
-        data += huntingAreaID + ",";
-        data += huntingStartTime.ToString() + ",";
-        data += huntingEndTime.ToString();
-        pos++;
-        //Bank Tabs 15
-        data += "#";
-        data += GetPlayerBank().GetTabsString();
-        pos++;
-        //Pets 16
-        data += "#";
-        data += GetPlayer().GetPetString();
-        pos++;
-        //KC 17
-        data += "#";
-        data += GetKCString();
-        pos++;
-        //Dojos 18
-        data += "#";
-        data += battleManager.GetDojoSaveData();
-        pos++;
-        if (encrypt)
-        {
-            data = Encryptor.EncryptToString(data);
-        }
-         
-        return data;
-    }
-    public string GetSaveString(AreaManager areaManager, FollowerManager followerManager, NPCManager npcManager, BuildingManager buildingManager, BattleManager battleManager)
-    {
-        return GetSaveStringEncrypted(areaManager, followerManager, npcManager, buildingManager, battleManager, true);
-    }
-    private string GetKCString()
+    
+    public string GetKCString()
     {
         string data = "";
         foreach(int i in killCount)

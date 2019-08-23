@@ -98,8 +98,8 @@ public static class Extensions
             {
                 string[] s = line.Split(',');
                 Skill skill = new Skill();
-                skill.SkillName = s[0];
-                skill.SkillExperience = long.Parse(s[1]);
+                skill.Name = s[0];
+                skill.Experience = long.Parse(s[1]);
                 skill.SetSkillLevel(int.Parse(s[2]));
                 if(s.Length > 3 && s[3] != null)
                 {

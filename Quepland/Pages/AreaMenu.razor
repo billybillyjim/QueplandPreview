@@ -22,7 +22,7 @@
 @functions{
 
     [Parameter]
-    private string thisArea { get; set; }
+    public string thisArea { get; set; }
     private Area area;
 
     private DateTime mineSearchStartTime;
@@ -38,7 +38,6 @@
 
     Random rand = new Random();
     private string timeToEndOfHunt;
-    private string areaURL;
 
     public void SetArea(string areaURL)
     {
@@ -1503,7 +1502,7 @@
     }
     private string SaveDataEncrypted()
     {
-        localStorage.SetItem("eSave", GameState.GetSaveString(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager));
+        localStorage.SetItem("eSave","");
         MessageManager.AddMessage("Your game has been saved.");
         return "";
     }

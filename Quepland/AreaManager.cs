@@ -13,7 +13,7 @@ public class AreaManager
 	}
     public async Task LoadAreas(HttpClient Http)
     {
-        Area[] areasArray = await Http.GetJsonAsync<Area[]>("data/areas.json");
+        Area[] areasArray = await Http.GetJsonAsync<Area[]>("data/areas2.json");
         areas = areasArray.ToList();
         areas[0].IsUnlocked = true;
     }

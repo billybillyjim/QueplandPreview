@@ -100,7 +100,7 @@
             }
             else
             {
-                builder.AddContent(10, currentSkill.SkillName);
+                builder.AddContent(10, currentSkill.Name);
             }
             builder.CloseElement();
 
@@ -124,7 +124,7 @@
                     builder.OpenElement(15, "a");
                     builder.AddAttribute(16, "class", "dropdown-item");
                     builder.AddAttribute(17, "onclick", new Action(() => SetSkill(skill)));
-                    builder.AddContent(18, skill.SkillName);
+                    builder.AddContent(18, skill.Name);
                     builder.CloseElement();
 
                 }
@@ -148,7 +148,7 @@
                     builder.AddAttribute(1, "class", "btn btn-primary");
                     builder.AddAttribute(2, "style", "");
 
-                    if(currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).GetSkillLevelUnboosted() == 1)
+                    if(currentPet.skills.Find(x => x.Name == currentSkill.Name).GetSkillLevelUnboosted() == 1)
                     {
                         builder.AddAttribute(3, "disabled", true);
                         builder.AddAttribute(4, "title", "Your pet can't forget any more than they already have.");
@@ -176,13 +176,13 @@
                     if (GameState.GetPlayerInventory().GetCoins() >= costToForget)
                     {
                         builder.AddAttribute(3, "onclick", new Action(() => Forget()));
-                        builder.AddContent(4, "Confirm Forgetting " + currentSkill.SkillName + " on " + currentPet.Name + "?");
+                        builder.AddContent(4, "Confirm Forgetting " + currentSkill.Name + " on " + currentPet.Name + "?");
                     }
                     else
                     {
                         builder.AddAttribute(3, "disabled", true);
                         builder.AddAttribute(4, "title", "You don't have enough coins.");
-                        builder.AddContent(5, "Confirm Forgetting " + currentSkill.SkillName + " on " + currentPet.Name + "?");
+                        builder.AddContent(5, "Confirm Forgetting " + currentSkill.Name + " on " + currentPet.Name + "?");
                     }
                     builder.CloseElement();
                 }
@@ -211,19 +211,19 @@
         {
             if (forgetAllLevels)
             {
-                currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).SetSkillLevel(1);
-                currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).SkillExperience = 0;
+                currentPet.skills.Find(x => x.Name == currentSkill.Name).SetSkillLevel(1);
+                currentPet.skills.Find(x => x.Name == currentSkill.Name).Experience = 0;
                 MessageManager.AddMessage("The pet forgetter takes your " + currentPet.Name + " to the back room of the cave. You hear a loud thwack! And the two return, your pet looking quite dazed but otherwise unharmed.");
 
             }
             else
             {
-                currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).SetSkillLevel(currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).GetSkillLevelUnboosted() - 1);
-                currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).SkillExperience = Extensions.GetExperienceRequired(currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName).GetSkillLevelUnboosted() - 1) + 1;
+                currentPet.skills.Find(x => x.Name == currentSkill.Name).SetSkillLevel(currentPet.skills.Find(x => x.Name == currentSkill.Name).GetSkillLevelUnboosted() - 1);
+                currentPet.skills.Find(x => x.Name == currentSkill.Name).Experience = Extensions.GetExperienceRequired(currentPet.skills.Find(x => x.Name == currentSkill.Name).GetSkillLevelUnboosted() - 1) + 1;
                 MessageManager.AddMessage("The pet forgetter takes your " + currentPet.Name + " to the back room of the cave. You hear a thwack! And the two return, your pet looking somewhat dazed but otherwise unharmed.");
             }
             GameState.GetPlayerInventory().RemoveItems(Program.itemDatabase.GetGold(), costToForget);
-            UpdateCost(currentPet.skills.Find(x => x.SkillName == currentSkill.SkillName));
+            UpdateCost(currentPet.skills.Find(x => x.Name == currentSkill.Name));
         }
         confirmed = false;
         GameState.UpdateState();

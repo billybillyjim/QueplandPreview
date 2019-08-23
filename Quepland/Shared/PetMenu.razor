@@ -111,7 +111,7 @@ else
             if(pet.GetHighestSkill() != null)
             {
                 builder.AddAttribute(19, "title", "" + Extensions.GetExperienceRequired(pet.GetHighestSkill().GetSkillLevelUnboosted()) + " exp to level");
-                builder.AddContent(19, pet.GetHighestSkill().SkillName + "(" + pet.GetHighestSkill().GetSkillLevelUnboosted() + ")");
+                builder.AddContent(19, pet.GetHighestSkill().Name + "(" + pet.GetHighestSkill().GetSkillLevelUnboosted() + ")");
             }
             else
             {
@@ -230,7 +230,7 @@ else
                 builder.AddAttribute(22, "onclick", new Action(() => ToggleSkillBlock(skill)));
                 builder.CloseElement();
                 
-                builder.AddContent(23, skill.SkillName);
+                builder.AddContent(23, skill.Name);
                 builder.CloseElement();
 
                 builder.OpenElement(24, "td");
@@ -238,11 +238,11 @@ else
                 builder.AddAttribute(26, "class", "progress");
                 if (skill.GetSkillLevel() == 1)
                 {
-                    builder.AddAttribute(27, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(1) - skill.SkillExperience));
+                    builder.AddAttribute(27, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(1) - skill.Experience));
                 }
                 else
                 {
-                    builder.AddAttribute(27, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.SkillExperience));
+                    builder.AddAttribute(27, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.Experience));
                 }
 
                 builder.OpenElement(28, "div");
@@ -257,7 +257,7 @@ else
                 builder.OpenElement(35, "font");
                 builder.AddAttribute(36, "color", "black");
 
-                builder.AddContent(37, skill.SkillExperience);
+                builder.AddContent(37, skill.Experience);
                 builder.CloseElement();
                 builder.CloseElement();
 
@@ -278,11 +278,11 @@ else
     }
     private string GetWidthString(Skill skill)
     {
-        return "width: " + Extensions.GetProgressForLevel(skill.SkillExperience, skill.GetSkillLevel()) + "%";
+        return "width: " + Extensions.GetProgressForLevel(skill.Experience, skill.GetSkillLevel()) + "%";
     }
     private string GetValueString(Skill skill)
     {
-        return "" + Extensions.GetProgressForLevel(skill.SkillExperience, skill.GetSkillLevel());
+        return "" + Extensions.GetProgressForLevel(skill.Experience, skill.GetSkillLevel());
     }
     private void AssignPet(Pet pet)
     {

@@ -20,20 +20,13 @@
 @functions{
 
     [Parameter]
-    private string thisArea { get; set; }
+    public string thisArea { get; set; }
     private Area area;
     Random rand = new Random();
-    private bool battleFound;
-    private bool battleStarted;
-    private Monster opponent;
     private BattleManager BM = Program.battleManager;
 
-
-    private bool autoFight;
     private Monster autoBattleMonster;
     private List<Monster> possibleMonsters = new List<Monster>();
-    private string areaURL;
-    private string winString = "";
 
     private RenderFragment LoadBattleMenu()
     {
@@ -252,7 +245,6 @@
     }
     public void Dispose()
     {
-        autoFight = false;
         BM.EndTimers();
         GameState.StateChanged -= OnGameStateChanged;
     }

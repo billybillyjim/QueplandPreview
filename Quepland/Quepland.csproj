@@ -16,10 +16,4 @@
     <PackageReference Include="PlayFabAllSDK" Version="1.54.190717" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="wwwroot\data\items.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

@@ -68,7 +68,7 @@
     public string GetSaveDataString()
     {
 
-        return GameState.GetSaveString(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager);
+        return Program.saveManager.GetSaveString();
 
     }
     public async void LoadDataFromCloud()
@@ -79,205 +79,18 @@
     }
     private void LoadDataFromText()
     {
-        string decryptedData = "";
+        string data = "";
         try
         {
-            decryptedData = Encryptor.DecryptString(saveModel.saveFile);
+            data = saveModel.saveFile;
         }
         catch
         {
             MessageManager.AddMessage("Failed to load from file. ");
             return;
         }
-        string[] lines = decryptedData.Split('#');
-        Dictionary<GameItem, int> bankItems = Extensions.GetItemDicFromString(lines[0], Program.itemDatabase);
-        List<Skill> skills = Extensions.GetSkillsFromString(lines[1]);
-        Dictionary<GameItem, int> invItems = Extensions.GetItemDicFromString(lines[2], Program.itemDatabase);
-
-
-        GameState.GetPlayerInventory().ResetMaxSize();
-        GameState.GetPlayerBank().GetInventory().LoadItems(bankItems);
-        GameState.GetPlayer().SetSkills(skills);
-        GameState.GetPlayerInventory().LoadItems(invItems);
-
-        Program.areaManager.LoadSaveData(lines[3]);
-        Program.followerManager.LoadSaveData(lines[4]);
-
-        if (int.TryParse(lines[5], out int hp))
-        {
-            GameState.GetPlayer().CurrentHP = hp;
-        }
-        else
-        {
-            GameState.GetPlayer().CurrentHP = GameState.GetPlayer().MaxHP;
-        }
-
-        if (int.TryParse(lines[6], out int activeFollower))
-        {
-            GameState.GetPlayer().activeFollower = Program.followerManager.GetFollowerByID(activeFollower);
-        }
-
-        List<string> recipes = lines[7].Split('/').ToList();
-        GameState.GetPlayer().LoadRecipes(recipes);
-
-
-        List<int> equippedItems = new List<int>();
-        foreach (string s in lines[8].Split('/') ?? Enumerable.Empty<string>())
-        {
-            if (int.TryParse(s, out int id))
-            {
-                equippedItems.Add(id);
-            }
-        }
-        if (equippedItems != null && equippedItems.Count > 0)
-        {
-            GameState.GetPlayer().EquipItems(equippedItems);
-        }
-        if (lines.Length > 9 && lines[9] != null)
-        {
-            string[] settings = lines[9].Split(',');
-            GameState.isSplitView = bool.Parse(settings[0]);
-            GameState.compactBankView = bool.Parse(settings[1]);
-            if (settings.Length > 2 && settings[2] != null)
-            {
-                GameState.expensiveItemThreshold = int.Parse(settings[2]);
-            }
-            if (settings.Length > 3 && settings[3] != null)
-            {
-                GameState.totalKills = int.Parse(settings[3]);
-            }
-            if (settings.Length > 4 && settings[4] != null)
-            {
-                GameState.PetShopUnlocked = bool.Parse(settings[4]);
-            }
-            if (settings.Length > 5 && settings[5] != null)
-            {
-                GameState.autoBuySushiSupplies = bool.Parse(settings[5]);
-            }
-            if (settings.Length > 6 && settings[6] != null)
-            {
-                GameState.totalCoinsEarned = long.Parse(settings[6]);
-            }
-            if (settings.Length > 7 && settings[7] != null)
-            {
-                GameState.totalDeaths = int.Parse(settings[7]);
-            }
-            if (settings.Length > 8 && settings[8] != null)
-            {
-                GameState.submitHighScores = bool.Parse(settings[8]);
-            }
-        }
-        if (lines.Length > 10 && lines[10] != null)
-        {
-            Program.npcManager.LoadNPCData(lines[10]);
-        }
-        if (lines.Length > 11 && lines[11] != null)
-        {
-            GameState.sushiHouseRice = int.Parse(lines[11].Split(',')[0]);
-            GameState.sushiHouseSeaweed = int.Parse(lines[11].Split(',')[1]);
-        }
-        if (lines.Length > 12 && lines[12] != null)
-        {
-            string[] salts = lines[12].Split('/');
-            foreach (string salt in salts)
-            {
-                if (salt.Length > 0)
-                {
-                    int id = int.Parse(salt.Split(',')[0]);
-                    int amount = int.Parse(salt.Split(',')[1]);
-                    Program.buildingManager.GetBuildingByID(id).Salt = amount;
-                }
-            }
-        }
-        if (lines.Length > 13 && lines[13] != null)
-        {
-            string[] tanneries = lines[13].Split('@');
-
-            foreach (string tannery in tanneries)
-            {
-                if (tannery.Length > 0)
-                {
-                    Building t = Program.buildingManager.GetBuildingByID(int.Parse(tannery.Split('>')[0]));
-                    string[] tanneryData = tannery.Split('>')[1].Split('_');
-                    int i = 0;
-
-                    foreach (string s in tanneryData)
-                    {
-                        if (s.Length > 0 && i < t.TannerySlots)
-                        {
-                            TanningSlot slot = new TanningSlot();
-                            slot.SetDataFromString(s);
-                            t.TanneryItems.Add(slot);
-                            i++;
-                        }
-
-                    }
-                }
-            }
-        }
-        if (lines.Length > 14 && lines[14] != null)
-        {
-            if (bool.TryParse(lines[14].Split(',')[0], out bool isHunting))
-            {
-                if (isHunting)
-                {
-                    GameState.isHunting = true;
-                    GameState.huntingAreaID = int.Parse(lines[14].Split(',')[1]);
-                    GameState.huntingEndTime = DateTime.Parse(lines[14].Split(',')[2]);
-
-                }
-            }
-        }
-        if (lines.Length > 15 && lines[15] != null)
-        {
-            GameState.GetPlayerBank().LoadTabsFromString(lines[15]);
-        }
-        if (lines.Length > 16 && lines[16] != null)
-        {
-            GameState.GetPlayer().LoadPetsFromString(lines[16]);
-        }
-        if (lines.Length > 17 && lines[17] != null)
-        {
-            GameState.LoadKC(lines[17]);
-        }
-        if (lines.Length > 18 && lines[18] != null)
-        {
-            Program.battleManager.LoadDojoSaveData(lines[18]);
-        }
-        MessageManager.AddMessage("Save game loaded.");
-
-        GameState.saveDataLoaded = true;
-        if (GameState.autoSaveTimer != null)
-        {
-            GameState.autoSaveTimer.Dispose();
-            GameState.autoSaveTimer = null;
-        }
-        GameState.autoSaveTimer = new Timer(new TimerCallback(_ =>
-        {
-            try
-            {
-                SaveData();
-            }
-            catch
-            {
-                MessageManager.AddMessage("Failed to auto save. Please make a local backup before closing the game.", "red");
-            }
-            GameState.saveToPlayFab++;
-            if (GameState.saveToPlayFab > GameState.saveToPlayFabEvery)
-            {
-                if (Program.playfabManager.IsConnected == false)
-                {
-                    ConnectToCloudAndSave();
-
-                }
-                else if (Program.playfabManager.IsConnected)
-                {
-                    Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
-                }
-
-                GameState.saveToPlayFab = 0;
-            }
-        }), null, 60000, 60000);
+        Program.saveManager.LoadDataFromString(data);
+        Program.saveManager.StartAutosaving();
         GameState.UpdateState();
         this.StateHasChanged();
     }
@@ -285,7 +98,6 @@
     {
         await ConnectToKongregate();
         await Program.playfabManager.TryLogin(GameState.userID, GameState.token);
-        Program.playfabManager.Save(GameState.GetSaveStringEncrypted(Program.areaManager, Program.followerManager, Program.npcManager, Program.buildingManager, Program.battleManager, false));
     }
     private async Task ConnectToKongregate()
     {

@@ -27,9 +27,9 @@ else
             builder.AddContent(3, "Return");
             builder.CloseElement();
             builder.OpenElement(4, "p");
-            builder.AddContent(5, currentSkill.SkillDescription);
+            builder.AddContent(5, currentSkill.Description);
             builder.CloseElement();
-            if (currentSkill.SkillName == "Alchemy")
+            if (currentSkill.Name == "Alchemy")
             {
                 builder.OpenElement(6, "button");
                 builder.AddAttribute(6, "class", "btn btn-primary");
@@ -93,7 +93,7 @@ else
 
                     builder.OpenElement(18, "td");
                     string textColor = "color:black";
-                    if(GameState.GetPlayer().GetLevel(currentSkill.SkillName) >= item.RequiredLevel)
+                    if(GameState.GetPlayer().GetLevel(currentSkill.Name) >= item.RequiredLevel)
                     {
 
                     }
@@ -102,7 +102,7 @@ else
                         textColor = "color:gray";
                     }
                     builder.AddAttribute(18, "style", textColor);
-                    if(currentSkill.SkillName == "Culinary Arts")
+                    if(currentSkill.Name == "Culinary Arts")
                     {
                         builder.AddAttribute(19, "title", "Buffs " + item.BuffedSkill + " by " + item.BuffAmount + ".");
                     }
@@ -170,7 +170,7 @@ else
                     builder.AddAttribute(19, "onclick", new Action(() => SetSkill(skill)));
                     builder.AddAttribute(20, "style", "cursor:pointer");
 
-                    builder.AddContent(21, skill.SkillName);
+                    builder.AddContent(21, skill.Name);
                     builder.CloseElement();
 
                     builder.OpenElement(22, "td");
@@ -178,11 +178,11 @@ else
                     builder.AddAttribute(24, "class", "progress");
                     if (skill.GetSkillLevel() == 1)
                     {
-                        builder.AddAttribute(24, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(1) - skill.SkillExperience));
+                        builder.AddAttribute(24, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(1) - skill.Experience));
                     }
                     else
                     {
-                        builder.AddAttribute(24, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.SkillExperience));
+                        builder.AddAttribute(24, "title", "Exp to Next Level: " + (Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()) - skill.Experience));
                     }
 
                     builder.OpenElement(25, "div");
@@ -197,7 +197,7 @@ else
                     builder.OpenElement(32, "font");
                     builder.AddAttribute(33, "color", "black");
 
-                    builder.AddContent(34, skill.SkillExperience);
+                    builder.AddContent(34, skill.Experience);
                     builder.CloseElement();
                     builder.CloseElement();
 
@@ -234,11 +234,11 @@ else
     }
     private string GetWidthString(Skill skill)
     {
-        return "width: " + Extensions.GetProgressForLevel(skill.SkillExperience, skill.GetSkillLevelUnboosted()) + "%";
+        return "width: " + Extensions.GetProgressForLevel(skill.Experience, skill.GetSkillLevelUnboosted()) + "%";
     }
     private string GetValueString(Skill skill)
     {
-        return "" + Extensions.GetProgressForLevel(skill.SkillExperience, skill.GetSkillLevelUnboosted());
+        return "" + Extensions.GetProgressForLevel(skill.Experience, skill.GetSkillLevelUnboosted());
     }
 
     protected override void OnInitialized()

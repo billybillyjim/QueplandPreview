@@ -51,18 +51,18 @@ public class Player
     {
         foreach(Skill s in skillList)
         {
-            if(skills.Find(x => x.SkillName == s.SkillName) != null)
+            if(skills.Find(x => x.Name == s.Name) != null)
             {
-                skills.Find(x => x.SkillName == s.SkillName).SkillExperience = s.SkillExperience;
-                skills.Find(x => x.SkillName == s.SkillName).SetSkillLevel(s.GetSkillLevelUnboosted());
-                if(s.SkillName == "Strength")
+                skills.Find(x => x.Name == s.Name).Experience = s.Experience;
+                skills.Find(x => x.Name == s.Name).SetSkillLevel(s.GetSkillLevelUnboosted());
+                if(s.Name == "Strength")
                 {
                     int extraSlots = (s.GetSkillLevelUnboosted() / 10) * 4;
                     //Subtract 1 to make up for starting at level 1.
                     inventory.ResetMaxSize();
                     inventory.IncreaseMaxSizeBy(s.GetSkillLevelUnboosted() + extraSlots - 1);
                 }
-                else if(s.SkillName == "HP")
+                else if(s.Name == "HP")
                 {
                     MaxHP = 50;
                     int extraHP = (s.GetSkillLevelUnboosted() / 5) * 10;
@@ -158,7 +158,7 @@ public class Player
     {
         foreach(Skill skill in skills)
         {
-            if(skill.SkillName == skillName)
+            if(skill.Name == skillName)
             {
                 return skill;
             }
@@ -170,7 +170,7 @@ public class Player
         string skillString = "";
         foreach(Skill skill in skills)
         {
-            skillString += skill.SkillName + "," + skill.SkillExperience + "," + skill.GetSkillLevelUnboosted() + "/";
+            skillString += skill.Name + "," + skill.Experience + "," + skill.GetSkillLevelUnboosted() + "/";
         }
         skillString = skillString.Remove(skillString.Length - 1);
         return skillString;
@@ -294,7 +294,7 @@ public class Player
     {
         foreach(Skill skill in skills)
         {
-            if(skill.SkillName == skillName)
+            if(skill.Name == skillName)
             {
                 return skill.GetSkillLevel();
             }
@@ -304,9 +304,9 @@ public class Player
 
     public void GainExperience(string skill, long amount)
     {
-        if (skills.Find(x => x.SkillName == skill) != null)
+        if (skills.Find(x => x.Name == skill) != null)
         {
-            GainExperience(skills.Find(x => x.SkillName == skill), amount);
+            GainExperience(skills.Find(x => x.Name == skill), amount);
         }
     }
     public void GainExperience(string skill)
@@ -317,7 +317,7 @@ public class Player
         }
         if (int.TryParse(skill.Split(':')[1], out int amount))
         {
-            GainExperience(skills.Find(x => x.SkillName == skill.Split(':')[0]), amount);
+            GainExperience(skills.Find(x => x.Name == skill.Split(':')[0]), amount);
         }
     }
     public void GainExperienceFromMultipleItems(string skill, int amount)
@@ -328,7 +328,7 @@ public class Player
         }
         if (int.TryParse(skill.Split(':')[1], out int multi))
         {
-            GainExperience(skills.Find(x => x.SkillName == skill.Split(':')[0]), multi* amount);
+            GainExperience(skills.Find(x => x.Name == skill.Split(':')[0]), multi* amount);
         }
     }
     public void GainExperience(Skill skill, long amount)
@@ -344,7 +344,7 @@ public class Player
         }
         if(LastLevelledSkillLocked == false)
         {
-            LastLevelledSkill = skill.SkillName;
+            LastLevelledSkill = skill.Name;
         }
         
         if(activePet != null)
@@ -353,15 +353,15 @@ public class Player
             {
                 activePet.messageManager = messageManager;
             }
-            activePet.GainExperience(skill.SkillName, amount / 10);
-            skill.SkillExperience += (long)(amount * GetExperienceGainBonus(skill) * activePet.GetSkillBoost(skill));
+            activePet.GainExperience(skill.Name, amount / 10);
+            skill.Experience += (long)(amount * GetExperienceGainBonus(skill) * activePet.GetSkillBoost(skill));
         }
         else
         {
-            skill.SkillExperience += (long)(amount * GetExperienceGainBonus(skill));
+            skill.Experience += (long)(amount * GetExperienceGainBonus(skill));
         }
         
-        if (skill.SkillExperience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
+        if (skill.Experience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
         {
             LevelUp(skill);
         }
@@ -413,8 +413,8 @@ public class Player
     public void LevelUp(Skill skill)
     {
         skill.SetSkillLevel(skill.GetSkillLevelUnboosted() + 1);
-        messageManager.AddMessage("You leveled up! Your " + skill.SkillName + " level is now " + skill.GetSkillLevelUnboosted() + ".");
-        if (skill.SkillName == "Strength")
+        messageManager.AddMessage("You leveled up! Your " + skill.Name + " level is now " + skill.GetSkillLevelUnboosted() + ".");
+        if (skill.Name == "Strength")
         {
             inventory.IncreaseMaxSizeBy(1);
            
@@ -428,7 +428,7 @@ public class Player
                 messageManager.AddMessage("You feel stronger. You can now carry 1 more item in your inventory.");
             }
         }
-        else if(skill.SkillName == "HP")
+        else if(skill.Name == "HP")
         {
             IncreaseMaxHPBy(5);
             if(skill.GetSkillLevelUnboosted() % 5 == 0)
@@ -442,7 +442,7 @@ public class Player
             }
         }
        
-        if (skill.SkillExperience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
+        if (skill.Experience >= Extensions.GetExperienceRequired(skill.GetSkillLevelUnboosted()))
         {         
             LevelUp(skill);
             
@@ -459,7 +459,7 @@ public class Player
         {
             return true;
         }
-        Skill skillToCheck = skills.Find(x => x.SkillName == item.ActionRequired);
+        Skill skillToCheck = skills.Find(x => x.Name == item.ActionRequired);
         if(skillToCheck != null)
         {
             return skillToCheck.GetSkillLevel() >= item.RequiredLevel;
@@ -475,7 +475,7 @@ public class Player
         }
         string skillType = skill.Split(':')[0];
         int skillLevel = int.Parse(skill.Split(':')[1]);
-        Skill skillToCheck = skills.Find(x => x.SkillName == skillType);
+        Skill skillToCheck = skills.Find(x => x.Name == skillType);
         if (skillToCheck != null)
         {
             return skillToCheck.GetSkillLevel() >= skillLevel;
@@ -605,7 +605,7 @@ public class Player
     }
     public float GetExperienceGainBonus(string skill)
     {
-        return GetExperienceGainBonus(skills.Find(x => x.SkillName == skill));
+        return GetExperienceGainBonus(skills.Find(x => x.Name == skill));
     }
     public float GetExperienceGainBonus(Skill skill)
     {
@@ -616,7 +616,7 @@ public class Player
         }
         foreach(GameItem equipped in equippedItems)
         {
-            if(equipped.ActionRequired == skill.SkillName)
+            if(equipped.ActionRequired == skill.Name)
             {
                 baseExp += equipped.ExperienceGainBonus;
             }

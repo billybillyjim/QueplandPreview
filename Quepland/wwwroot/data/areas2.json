@@ -941,7 +941,7 @@
     "description": "You climb the roots to reach a few ore veins.",
     "icon": "oi oi-badge",
     "region": "Caligin Commonwealth",
-    "actions": [ "Mine Platinum:Platinum Ore", "Mine Strongtium:Strongtium Ore", "Mine Sahotite Ore:Sahotite Ore" ],
+    "actions": [ "Mine Platinum:Platinum Ore", "Mine Strongtium:Strongtium Ore", "Mine Sahotite Ore:Sahotite Ore" ]
   }
 
 ]

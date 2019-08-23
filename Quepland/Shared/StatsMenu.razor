@@ -37,17 +37,17 @@
             builder.CloseElement();
             foreach(Skill s in GameState.GetPlayer().GetSkills())
             {
-                if(s.SkillName == "Mining" ||
-                s.SkillName == "Fishing" ||
-                s.SkillName == "Woodcutting" ||
-                s.SkillName == "Woodworking" ||
-                s.SkillName == "Culinary Arts" ||
-                s.SkillName == "Leatherworking" ||
-                s.SkillName == "Smithing")
+                if(s.Name == "Mining" ||
+                s.Name == "Fishing" ||
+                s.Name == "Woodcutting" ||
+                s.Name == "Woodworking" ||
+                s.Name == "Culinary Arts" ||
+                s.Name == "Leatherworking" ||
+                s.Name == "Smithing")
                 {
                     builder.OpenElement(4, "p");
                     builder.AddAttribute(4, "style", "margin:2px;");
-                    builder.AddContent(4, s.SkillName + " Speed:" + (2 - GameState.GetPlayer().GetGatherSpeed(s.SkillName)).ToString("P2",new NumberFormatInfo { PercentPositivePattern = 1, PercentNegativePattern = 1 }));
+                    builder.AddContent(4, s.Name + " Speed:" + (2 - GameState.GetPlayer().GetGatherSpeed(s.Name)).ToString("P2",new NumberFormatInfo { PercentPositivePattern = 1, PercentNegativePattern = 1 }));
                     builder.CloseElement();
                 }
             }

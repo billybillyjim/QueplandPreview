@@ -22,7 +22,8 @@ public class ItemDatabase
 
     public async System.Threading.Tasks.Task LoadItems(HttpClient Http)
     {
-        GameItem[] newItems = await Http.GetJsonAsync<GameItem[]>("data/items.json");
+        GameItem[] newItems = await Http.GetJsonAsync<GameItem[]>("data/items2.json");
+
         items.AddRange(newItems);
         foreach(GameItem i in items)
         {
@@ -130,7 +131,7 @@ public class ItemDatabase
 
         foreach(GameItem item in items)
         {
-            if (item.ActionRequired != null && item.ActionRequired == skill.SkillName)
+            if (item.ActionRequired != null && item.ActionRequired == skill.Name)
             {
                 itemList.Add(item);
             }
