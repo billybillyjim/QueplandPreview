@@ -1,0 +1,91 @@
+﻿@inject GameState GameState
+@inject MessageManager  MessageManager
+@using System.Threading;
+
+@LoadHarpoonFishingButtons()
+
+@code {
+
+    private RenderFragment LoadHarpoonFishingButtons()
+    {
+        return builder =>
+        {
+            if (GameState.isGathering == false)
+            {
+                builder.OpenElement(2, "button");
+                builder.AddAttribute(3, "style", "margin-bottom:10px");
+                builder.AddAttribute(4, "class", "btn btn-primary");
+                builder.AddAttribute(5, "onclick", new Action(() => BeginHarpoonFishing()));
+                if (GameState.isGathering || GameState.isHunting || GameState.isUsing || !GameState.GetPlayerInventory().ActionIsEnabled("Harpoon Fishing") || GameState.isFighting)
+                {
+                    builder.AddAttribute(6, "disabled", true);
+                    builder.AddAttribute(7, "title", "You don't have the tool to do this.");
+                }
+                builder.AddContent(8, "Harpoon Fish");
+                builder.CloseElement();
+                builder.OpenElement(9, "br");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(2, "button");
+                builder.AddAttribute(3, "style", "margin-bottom:10px");
+                builder.AddAttribute(4, "class", "btn btn-primary");
+                builder.AddAttribute(5, "onclick", new Action(() => GameState.StopActions()));
+                builder.AddContent(7, "Stop Fishing");
+                builder.CloseElement();
+                builder.OpenElement(8, "br");
+                builder.CloseElement();
+            }
+        };
+    }
+    public void BeginHarpoonFishing()
+    {
+        GameState.StopActions();
+        MessageManager.AddMessage("You look for fish to harpoon.");
+        if (GameState.GetPlayer().activeFollower != null && GameState.GetPlayer().activeFollower.AutoCollectSkill == "Fishing")
+        {
+            MessageManager.AddMessage(GameState.GetPlayer().activeFollower.Name + " doesn't understand how to carry harpooned items to the bank, and stares at you blankly.");
+        }
+        GameState.isGathering = true;
+        GameState.gatherTimer = new Timer(new TimerCallback(_ =>
+        {
+            GetRandomHarpoonItem();
+            GameState.UpdateState();
+            StateHasChanged();
+
+        }), null, (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")), (int)(8000 * GameState.GetPlayer().GetGatherSpeed("Harpoon Fishing")));
+
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void GetRandomHarpoonItem()
+    {
+        GameItem gainedItem = (Program.itemDatabase.GetItemByID(Extensions.GetRandomReward(Program.itemDatabase.GetRewardByName("Harpoon Fishing"))));
+        if (GameState.GetPlayerInventory().AddItem(gainedItem))
+        {
+            if (gainedItem.ExperienceGained != null && gainedItem.ExperienceGained.Contains("Fishing"))
+            {
+                GameState.GetPlayer().GainExperience(gainedItem.ExperienceGained);
+            }
+
+            MessageManager.AddMessage("You harpooned a " + gainedItem.ItemName);
+        }
+        else
+        {
+            MessageManager.AddMessage("You don't have any inventory space to harpoon anything.");
+            GameState.StopActions();
+        }
+
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    public void Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

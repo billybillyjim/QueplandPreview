@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Linq;
 using System.Threading;
 using Microsoft.JSInterop;
+using System.Threading.Tasks;
 
 public class GameState
 {
@@ -108,6 +109,7 @@ public class GameState
 
     public Pet petToBuy;
     public List<Pet> buyablePets = new List<Pet>();
+    public PetManager petManager;
 
     public Room currentRoom;
 
@@ -124,7 +126,7 @@ public class GameState
 
     public void RestorePet(string petID)
     {
-        foreach (Pet pet in buyablePets)
+        foreach (Pet pet in petManager.GetPets())
         {
             if (pet.Identifier == petID && GetPlayer().HasPet(pet) == false)
             {
@@ -148,9 +150,9 @@ public class GameState
     {
         return player.bank;
     }
-    public void LoadPlayerData(HttpClient Http)
+    public async Task LoadPlayerData(HttpClient Http)
     {
-        player.LoadSkills(Http);
+        await player.LoadSkills(Http);
     }
     public void LoadMonsters(List<Monster> monsters)
     {

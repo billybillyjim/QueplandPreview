@@ -1,0 +1,47 @@
+﻿@inject GameState GameState
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+
+@LoadButton()
+
+@code {
+
+    [Parameter]
+    public string buttonText { get; set; }
+    [Parameter]
+    public string levelRequirement { get; set; }
+    [Parameter]
+    public string submenuURL { get; set; }
+    
+
+
+    private RenderFragment LoadButton()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "button");
+            builder.AddAttribute(1, "style", "margin-bottom:10px");
+            builder.AddAttribute(2, "class", "btn btn-primary");
+            builder.AddAttribute(3, "onclick", new Action(() => EnterSubmenu()));
+            if (GameState.isGathering || GameState.isHunting || GameState.isUsing)
+            {
+                builder.AddAttribute(4, "disabled", true);
+            }
+            else if (levelRequirement != null && GameState.GetPlayer().GetLevel(levelRequirement.Split(':')[0]) < int.Parse(levelRequirement.Split(':')[1]))
+            {
+                builder.AddAttribute(5, "disabled", true);
+                builder.AddAttribute(6, "title", "You don't have the " + levelRequirement.Split(':')[0] + " level to do this. (" + levelRequirement.Split(':')[1] + ")");
+            }
+            builder.AddContent(7, buttonText);
+            builder.CloseElement();
+            builder.OpenElement(8, "br");
+            builder.CloseElement();
+        };
+    }
+    private void EnterSubmenu()
+    {
+    
+        GameState.previousURL = "/" + GameState.currentArea.AreaURL;
+        UriHelper.NavigateTo("/" + GameState.currentArea.AreaURL + submenuURL);
+    
+    }
+}

@@ -263,7 +263,7 @@ else
             Program.gatherManager.SetGameState(GameState);
             Program.huntingManager.SetGameState(GameState);
 
-            GameState.LoadPlayerData(Http);
+            await GameState.LoadPlayerData(Http);
             await Program.itemDatabase.LoadItems(Http);
             await Program.areaManager.LoadAreas(Http);
             await Program.buildingManager.LoadBuildings(Http);
@@ -282,6 +282,7 @@ else
             GameState.GetPlayerBank().AddItemsToCurrentTab(Program.itemDatabase.GetAllItemIDs());
             GameState.GetPlayerBank().GetInventory().isBank = true;
             GameState.LoadMonsters(Program.battleManager.GetAllMonsters());
+            GameState.petManager = Program.petManager;
             GameState.gameDataLoaded = true;
             GameState.safeToLoad = true;
         }

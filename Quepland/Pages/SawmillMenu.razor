@@ -1,0 +1,160 @@
+﻿@page "/{thisArea}/Sawmill/"
+@inject HttpClient Http
+@inject GameState GameState
+@inject MessageManager  MessageManager
+@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@using System.Threading;
+@implements IDisposable
+
+
+@LoadMenu()
+
+
+@functions{
+
+    [Parameter]
+    public string thisArea { get; set; }
+    private Area area;
+    private bool logIsLoaded;
+    private GameItem currentLog;
+
+    private RenderFragment LoadMenu()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "p");
+
+            builder.CloseElement();
+
+        };
+    }
+    public void LoadLog(GameItem log)
+    {
+        if (GameState.GetPlayerInventory().RemoveOneOfItem(log))
+        {
+            logIsLoaded = true;
+            currentLog = log;
+            MessageManager.AddMessage("You place some " + log.ItemName + " into the machine.");
+        }
+
+    }
+    public void WithdrawPlank()
+    {
+        GameItem plank = GetPlankFromLog(currentLog);
+        GameState.GetPlayerInventory().AddItem(plank);
+        MessageManager.AddMessage("You withdraw a " + plank.ItemName + ".");
+        logIsLoaded = false;
+    }
+    private RenderFragment LoadLogDropdown()
+    {
+        return builder =>
+        {
+             builder.OpenElement(0, "p");
+
+            builder.OpenElement(1, "div");
+            builder.AddAttribute(2, "class", "dropdown");
+            builder.AddAttribute(2, "style", "margin-bottom:10px");
+            builder.OpenElement(3, "button");
+
+            builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(5, "type", "button");
+            builder.AddAttribute(6, "id", "dropdownMenuButton");
+            builder.AddAttribute(7, "data-toggle", "dropdown");
+            builder.AddAttribute(8, "aria-haspopup", "true");
+            builder.AddAttribute(9, "aria-expanded", "false");
+            if (GameState.isGathering)
+            {
+                builder.AddAttribute(10, "disabled", true);
+            }
+
+            if (currentLog == null)
+            {
+                builder.AddContent(11, "Choose a log");
+            }
+            else
+            {
+                builder.AddContent(11, currentLog.ItemName);
+            }
+
+            builder.CloseElement();
+
+            builder.OpenElement(12, "div");
+            builder.AddAttribute(13, "class", "dropdown-menu");
+            builder.AddAttribute(14, "aria-labelledby", "dropdownMenuButton");
+
+            bool hasLogs = false;
+            foreach (GameItem item in GameState.GetPlayerInventory().GetItems().Keys)
+            {
+                if (item.ItemName.Contains("Logs") && item.ExperienceGained != null && item.ExperienceGained.Contains("Woodcutting"))
+                {
+                    hasLogs = true;
+                    builder.OpenElement(15, "a");
+                    builder.AddAttribute(16, "class", "dropdown-item");
+                    builder.AddAttribute(17, "onclick", new Action(() => LoadLog(item)));
+                    builder.AddContent(18, item.ItemName);
+                    builder.CloseElement();
+                }
+
+            }
+            if (hasLogs == false)
+            {
+                builder.OpenElement(14, "a");
+                builder.AddAttribute(15, "class", "dropdown-item");
+                builder.AddContent(18, "You don't have any logs with you.");
+                builder.CloseElement();
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private GameItem GetPlankFromLog(GameItem log)
+    {
+        if(log == null)
+        {
+            return null;
+        }
+        foreach(GameItem i in Program.itemDatabase.GetPlanks())
+        {
+            if(i.IngredientIDs != null && i.IngredientIDs[0] == log.Id)
+            {
+                return i;
+            }
+        }
+        Console.WriteLine("No plank found with item ID:" + log.Id);
+        return null;
+    }
+    private void SpeakToNPC(NPC npc)
+    {
+        MessageManager.AddMessage(npc.SpokenText);
+    }
+
+    public void SetArea(string areaURL)
+    {
+        area = Program.areaManager.GetAreaByURL(areaURL);
+
+        StateHasChanged();
+        GameState.UpdateState();
+    }
+    protected override void OnParametersSet()
+    {
+        SetArea(thisArea);
+    }
+
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+
+    private void Return(string url)
+    {
+        GameState.StopActions();
+        UriHelper.NavigateTo("/GatherMenu/" + url);
+    }
+    void IDisposable.Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

@@ -1,0 +1,108 @@
+﻿@inject GameState GameState
+@inject MessageManager  MessageManager
+@using System.Threading;
+
+@LoadCarvingButtons()
+
+@code {
+
+    [Parameter]
+    public string actionString { get; set; }
+
+    private RenderFragment LoadCarvingButtons()
+    {
+        return builder =>
+        {
+            if (GameState.isGathering == false)
+            {
+                builder.OpenElement(2, "button");
+                builder.AddAttribute(3, "style", "margin-bottom:10px");
+                builder.AddAttribute(4, "class", "btn btn-primary");
+                builder.AddAttribute(5, "onclick", new Action(() => BeginCarvingTotem(actionString)));
+                if (GameState.isGathering || GameState.isHunting || GameState.isUsing || !GameState.GetPlayerInventory().ActionIsEnabled("Woodworking") || GameState.isFighting)
+                {
+                    builder.AddAttribute(6, "disabled", true);
+                    builder.AddAttribute(7, "title", "You don't have the tool to do this.");
+                }
+                if (GameState.GetPlayer().GetLevel("Woodworking") < Program.itemDatabase.GetRewardByName(actionString.Split(':')[1]).MinimumLevel)
+                {
+                    builder.AddAttribute(6, "disabled", true);
+                    builder.AddAttribute(7, "title", "You don't have the level to do this.(" + Program.itemDatabase.GetRewardByName(actionString.Split(':')[1]).MinimumLevel + ")");
+                }
+                builder.AddContent(8, "Carve Totem");
+                builder.CloseElement();
+                builder.OpenElement(9, "br");
+                builder.CloseElement();
+            }
+            else if (GameState.gatherItem == "Carving")
+            {
+                builder.OpenElement(2, "button");
+                builder.AddAttribute(3, "style", "margin-bottom:10px");
+                builder.AddAttribute(4, "class", "btn btn-primary");
+                builder.AddAttribute(5, "onclick", new Action(() => GameState.StopActions()));
+                builder.AddContent(7, "Stop Carving");
+                builder.CloseElement();
+                builder.OpenElement(8, "br");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(2, "button");
+                builder.AddAttribute(3, "style", "margin-bottom:10px");
+                builder.AddAttribute(4, "class", "btn btn-primary");
+
+                builder.AddAttribute(6, "disabled", true);
+                builder.AddAttribute(7, "title", "You can't do this while doing what you're doing.");
+
+                builder.AddContent(8, "Carve Totem");
+                builder.CloseElement();
+                builder.OpenElement(9, "br");
+                builder.CloseElement();
+            }
+        };
+    }
+    
+    private void BeginCarvingTotem(string actionString)
+    {
+        GameState.StopActions();
+        string totemLevel = actionString.Split(':')[1];
+        GameState.gatherItem = "Carving";
+        MessageManager.AddMessage("You begin carving the totem.");
+        GameState.isGathering = true;
+        GameState.gatherTimer = new Timer(new TimerCallback(_ =>
+        {
+            GetRandomTotemItem(totemLevel);
+            GameState.UpdateState();
+            StateHasChanged();
+
+        }), null, 2000 + Program.itemDatabase.GetRewardByName(totemLevel).SpeedMalus, 2000 + Program.itemDatabase.GetRewardByName(totemLevel).SpeedMalus);
+
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void GetRandomTotemItem(string totemLevel)
+    {
+        GameItem gainedItem = (Program.itemDatabase.GetItemByID(Extensions.GetRandomReward(Program.itemDatabase.GetRewardByName(totemLevel))));
+        if (GameState.GetPlayerInventory().AddItem(gainedItem))
+        {
+            GameState.GetPlayer().GainExperience(gainedItem.ExperienceGained);
+            MessageManager.AddMessage("As you carve you acquire " + gainedItem.ItemName);
+        }
+        else
+        {
+            MessageManager.AddMessage("You don't have any inventory space to carve anything.");
+            GameState.StopActions();
+        }
+        this.StateHasChanged();
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnGameStateChanged;
+        this.StateHasChanged();
+    }
+    public void Dispose()
+    {
+        GameState.StateChanged -= OnGameStateChanged;
+    }
+    void OnGameStateChanged(object sender, EventArgs e) => StateHasChanged();
+}

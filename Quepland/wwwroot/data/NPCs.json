@@ -572,5 +572,18 @@
     "unlockFollowerIDs": [ 22 ],
     "isInteractable": true,
     "hideOnFollow": true
+  },
+  {
+    "name": "Sawmill Operator",
+    "id": 82,
+    "spokenText": "Welcome to the sawmill. If you know what you're doing, you can just  operate the mill on your own. Otherwise I'd be willing to assist you for a price.",
+    "isInteractable": true
+  },
+  {
+    "name": "Sawmill Operator",
+    "id": 83,
+    "buttonText": "Buy Operator for 100000000 gold coins",
+    "spokenText": "What are you talking about? You can't just buy people like cattle. I'll help you out, but you gotta pay me an hourly wage. Who would purposefully sell themselves into slavery like that?",
+    "isInteractable": true
   }
 ]

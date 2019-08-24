@@ -37,7 +37,6 @@ else
 
     private bool showLocalStore = true;
     private Pet currentPetToBuy;
-    private List<Pet> buyablePets = new List<Pet>();
     private string restoringPurchasesString = "";
     private bool isRestoringPurchases;
 
@@ -140,9 +139,9 @@ else
             builder.CloseElement();
             builder.OpenElement(15, "tbody");
 
-            foreach (Pet pet in buyablePets)
+            foreach (Pet pet in Program.petManager.GetPets())
             {
-                if (GameState.GetPlayer().HasPet(pet) == false)
+                if (GameState.GetPlayer().HasPet(pet) == false && pet.IsBuyable)
                 {
                     builder.OpenElement(16, "tr");
                     builder.AddAttribute(17, "class", "buddy-top");
@@ -238,26 +237,7 @@ else
         StateHasChanged();
         GameState.UpdateState();
     }
-    private async void LoadBuyablePets(HttpClient Http)
-    {
-        buyablePets = new List<Pet>();
-        foreach (Pet p in Program.petManager.GetPets())
-        {
-            if (p.IsBuyable)
-            {
-                buyablePets.Add(p);
-            }
-        }
 
-        foreach (Pet p in buyablePets)
-        {
-
-            Skill[] skillArray = await Http.GetJsonAsync<Skill[]>("data/skills.json");
-            p.skills = skillArray.ToList();
-
-        }
-        GameState.buyablePets = buyablePets;
-    }
     private async Task ConnectToPlayFab()
     {
         if (Program.playfabManager.IsConnected)
@@ -281,11 +261,6 @@ else
     }
     protected override void OnInitialized()
     {
-        if (buyablePets.Count == 0)
-        {
-            LoadBuyablePets(Http);
-        }
-
         GameState.StateChanged += OnGameStateChanged;
         this.StateHasChanged();
     }
