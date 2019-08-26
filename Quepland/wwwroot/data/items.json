@@ -8596,5 +8596,23 @@
     "equipSlot": "Left Hand",
     "armor": 50,
     "icon": "Shield"
+  },
+  {
+    "itemName": "White Pine Plank",
+    "itemDescription": "A piece of wood made to conform to society's standard of beauty.",
+    "id": 590,
+    "value": 10,
+    "icon": "Plank",
+    "ingredientIDs": [ 1 ],
+    "experienceGained": "Construction:1"
+  },
+  {
+    "itemName": "Poplar Plank",
+    "itemDescription": "A piece of wood made to conform to society's standard of beauty.",
+    "id": 591,
+    "value": 20,
+    "icon": "Plank",
+    "ingredientIDs": [ 2 ],
+    "experienceGained": "Construction:3"
   }
 ]

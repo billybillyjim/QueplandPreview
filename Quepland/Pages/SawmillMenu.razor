@@ -23,10 +23,40 @@
         return builder =>
         {
             builder.OpenElement(0, "p");
+            builder.AddContent(1, LoadLogDropdown());
+            builder.CloseElement();
+            builder.OpenElement(1, "p");
+            builder.OpenElement(2, "button");
+            builder.AddAttribute(3, "class", "btn btn-primary");
+            builder.AddAttribute(4, "style", "");
+            if (GameState.gatherTimer == null)
+            {
+                if (currentLog == null)
+                {
+                    builder.AddAttribute(6, "title", "You need to pick a log first.");
+                    builder.AddAttribute(7, "disabled", true);
+                }
 
+                builder.AddAttribute(8, "onclick", new Action(() => BeginPlaningLogs()));
+                builder.AddContent(9, "Plane into planks");
+            }
+            else
+            {
+
+                builder.AddAttribute(8, "onclick", new Action(() => GameState.StopActions()));
+                builder.AddContent(9, "Stop Planing");
+            }
+
+
+            builder.CloseElement();
             builder.CloseElement();
 
         };
+    }
+    public void SetLog(GameItem log)
+    {
+        currentLog = log;
+        GameState.UpdateState();
     }
     public void LoadLog(GameItem log)
     {
@@ -36,20 +66,46 @@
             currentLog = log;
             MessageManager.AddMessage("You place some " + log.ItemName + " into the machine.");
         }
+        else
+        {
+            logIsLoaded = false;
+            currentLog = null;
+            GameState.StopActions();
+            MessageManager.AddMessage("You have run out of " + log.ItemName + ".");
+        }
 
+    }
+    public void BeginPlaningLogs()
+    {
+        GameState.gatherTimer = new Timer(new TimerCallback(_ =>
+        {
+            if (logIsLoaded)
+            {
+                WithdrawPlank();
+            }
+            else
+            {
+                LoadLog(currentLog);
+            }
+            GameState.UpdateState();
+        }), null, 2000, 2000);
     }
     public void WithdrawPlank()
     {
         GameItem plank = GetPlankFromLog(currentLog);
-        GameState.GetPlayerInventory().AddItem(plank);
-        MessageManager.AddMessage("You withdraw a " + plank.ItemName + ".");
+        if (GameState.GetPlayerInventory().RemoveOneOfItem(currentLog))
+        {
+            GameState.GetPlayerInventory().AddItem(plank);
+            MessageManager.AddMessage("You withdraw a " + plank.ItemName + ".");
+        }
+
         logIsLoaded = false;
     }
     private RenderFragment LoadLogDropdown()
     {
         return builder =>
         {
-             builder.OpenElement(0, "p");
+            builder.OpenElement(0, "p");
 
             builder.OpenElement(1, "div");
             builder.AddAttribute(2, "class", "dropdown");
@@ -85,12 +141,13 @@
             bool hasLogs = false;
             foreach (GameItem item in GameState.GetPlayerInventory().GetItems().Keys)
             {
-                if (item.ItemName.Contains("Logs") && item.ExperienceGained != null && item.ExperienceGained.Contains("Woodcutting"))
+                //Item id 94 is balsa logs, which can't make planks
+                if (item.ItemName.Contains("Logs") && item.ExperienceGained != null && item.ExperienceGained.Contains("Woodcutting") && item.Id != 94)
                 {
                     hasLogs = true;
                     builder.OpenElement(15, "a");
                     builder.AddAttribute(16, "class", "dropdown-item");
-                    builder.AddAttribute(17, "onclick", new Action(() => LoadLog(item)));
+                    builder.AddAttribute(17, "onclick", new Action(() => SetLog(item)));
                     builder.AddContent(18, item.ItemName);
                     builder.CloseElement();
                 }

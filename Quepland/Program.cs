@@ -12,11 +12,12 @@ namespace Quepland
         public static BuildingManager buildingManager = new BuildingManager();
         public static FollowerManager followerManager = new FollowerManager();
         public static NPCManager npcManager = new NPCManager();
-        public static RoomManager roomManager = new RoomManager();
-        public static FurnitureManager furnitureManager = new FurnitureManager();
         public static PlayfabManager playfabManager = new PlayfabManager();
         public static PetManager petManager = new PetManager();
-        public static SaveManager saveManager = new SaveManager(areaManager, followerManager, npcManager, buildingManager, battleManager, itemDatabase, huntingManager, playfabManager, petManager);
+        public static HouseManager houseManager = new HouseManager();
+
+        public static SaveManager saveManager = new SaveManager(areaManager, followerManager, npcManager, buildingManager, battleManager, itemDatabase, huntingManager, playfabManager, petManager, houseManager);
+        
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();

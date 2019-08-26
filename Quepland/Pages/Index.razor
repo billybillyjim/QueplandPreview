@@ -23,7 +23,6 @@
         <p><button class="btn btn-primary" onclick="@(new Action(() => DebugGainStrengthLevel()))">Gain Strength Level</button></p>
         <p><button class="btn btn-primary" onclick="@(new Action(() => SaveDataEncrypted())))">Save Encrypted</button></p>
         <p><button class="btn btn-primary" onclick="@(new Action(() => LoadDataEncrypted()))">Load Encrypted</button></p>
-        <p><button class="btn btn-primary" onclick="@(new Action(() => AddRoomToHouse()))">Add Test Room To House</button></p>
         <p><button class="btn btn-primary" onclick="@(new Action(() => DebugUnlockAllAreas()))">Unlock All Areas</button></p>
         <p>Item ID:<input type="number" @bind-value="@itemID" @bind-value:event="onchange" /></p>
         <p>Amount:<input type="number" @bind-value="@amount" @bind-value:event="onchange" /></p>
@@ -100,10 +99,6 @@ else
     private ElementReference simpleList;
     private SimpleAES Encryptor = new SimpleAES();
 
-    public void AddRoomToHouse()
-    {
-        GameState.GetPlayer().house.Rooms.Add(Program.roomManager.GetByID(0));
-    }
     public void GetItem()
     {
         GameState.GetPlayerBank().GetInventory().AddMultipleOfItem(Program.itemDatabase.GetItemByID(itemID), amount);
@@ -270,8 +265,7 @@ else
             await Program.followerManager.LoadFollowers(Http);
             await Program.npcManager.LoadNPCs(Http);
             await Program.battleManager.LoadMonsters(Http, GameState, MessageManager, Program.itemDatabase, JSRuntime);
-            await Program.roomManager.LoadRooms(Http);
-            await Program.furnitureManager.LoadFurniture(Http);
+            await Program.houseManager.LoadFurnitureAndSlots(Http);
             await Program.petManager.LoadPets(Http);
             Program.saveManager.JSRuntime = JSRuntime;
             Program.saveManager.localStorage = localStorage;

@@ -75,6 +75,7 @@ public class GameState
     public long totalCoinsEarned;
 
     private Player player = new Player();
+    public House playerHouse = new House();
 
     public Area currentArea;
     public string currentRegion = "Quepland";
@@ -111,7 +112,7 @@ public class GameState
     public List<Pet> buyablePets = new List<Pet>();
     public PetManager petManager;
 
-    public Room currentRoom;
+    
 
     private static SimpleAES Encryptor = new SimpleAES();
 

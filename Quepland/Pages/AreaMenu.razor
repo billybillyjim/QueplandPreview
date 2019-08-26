@@ -226,6 +226,14 @@
                         builder.CloseComponent();
                         
                     }
+                    else if (actionString == "Sawmill")
+                    {
+                        builder.OpenComponent<ActionButton>(2);
+                        builder.AddAttribute(3, "buttonText", "Enter Sawmill");
+                        builder.AddAttribute(4, "submenuURL", "/Sawmill");
+                        builder.CloseComponent();
+                        
+                    }
                     else if (actionString == "Harpoon Fishing")
                     {
                         builder.OpenComponent<HarpoonFishingComponent>(2);

@@ -18,5 +18,6 @@ public class Furniture
     public GameItem WithdrawItem { get; set; }
     public TimeSpan WithdrawEvery { get; set; }
     public int WithdrawAmount { get; set; }
+    public int Size { get; set; }
 
 }

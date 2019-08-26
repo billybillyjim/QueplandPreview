@@ -100,5 +100,11 @@
     "level": 1,
     "startExperience": 0,
     "description": "Leatherworking is working with leather. To acquire leather you need to find a tannery and tan your pelts you acquire from hunting animals. There is a mysterious traveller in the Rising Hills who can guide you closer to what you need."
+  },
+  {
+    "name": "Construction",
+    "level": 1,
+    "startExperience": 0,
+    "description": "Construction is a skill that enables you to build your own house. Buy some land from a real estate company and get building!"
   }
 ]

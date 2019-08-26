@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Chicken Coop",
+    "id": 0,
+    "description": "You can build a chicken coop here.",
+    "availableFurnitureIDs": [0,1,2,3]
+  }
+
+]
