@@ -176,7 +176,7 @@
                             hasBars = true;
                             builder.OpenElement(0, "button");
                             builder.AddAttribute(1, "class", "btn btn-primary");
-                            builder.AddAttribute(2, "style", "margin:10px");
+                            builder.AddAttribute(2, "style", "margin:5px");
                             if (GameState.GetPlayerInventory().HasItem(item) == false || GameState.GetPlayer().GetLevel("Alchemy") < item.RequiredLevel - 5)
                             {
                                 builder.AddAttribute(3, "disabled", true);
@@ -201,19 +201,18 @@
                 }
                 else if (alchemyStage == 1)
                 {
-                    for (int i = 0; i < 4; i++)
+                    foreach(GameItem element in Program.itemDatabase.GetElements())
                     {
-                        int temp = i;
                         builder.OpenElement(0, "button");
                         builder.AddAttribute(1, "class", "btn btn-primary");
-                        builder.AddAttribute(2, "style", "margin:10px");
+                        builder.AddAttribute(2, "style", "margin:5px");
                         //Check for Carquen and next 3 elements.
-                        if (GameState.GetPlayerInventory().HasItem(temp + 62) == false)
+                        if (GameState.GetPlayerInventory().HasItem(element) == false)
                         {
                             builder.AddAttribute(3, "disabled", true);
                         }
-                        builder.AddAttribute(4, "onclick", new Action(() => SetElement(Program.itemDatabase.GetItemByID(temp + 62))));
-                        builder.AddContent(4, Program.itemDatabase.GetItemByID(temp + 62).ItemName);
+                        builder.AddAttribute(4, "onclick", new Action(() => SetElement(element)));
+                        builder.AddContent(4, element.ItemName);
                         builder.CloseElement();
                         builder.OpenElement(5, "br");
                         builder.CloseElement();
@@ -223,7 +222,7 @@
                 {
                     builder.OpenElement(0, "button");
                     builder.AddAttribute(1, "class", "btn btn-primary");
-                    builder.AddAttribute(2, "style", "margin:10px");
+                    builder.AddAttribute(2, "style", "margin:5px");
 
                     if (currentMetalBar == null || currentElement == null)
                     {

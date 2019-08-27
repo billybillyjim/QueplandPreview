@@ -14,6 +14,7 @@ public class ItemDatabase
     private List<GameItem> planks = new List<GameItem>();
     private List<GameItem> nails = new List<GameItem>();
     private List<Reward> rewards = new List<Reward>();
+    private List<GameItem> elements = new List<GameItem>();
     private static Random rand = new Random();
 
     public ItemDatabase()
@@ -51,6 +52,10 @@ public class ItemDatabase
             else if (i.ItemName.Contains("Plank"))
             {
                 planks.Add(i);
+            }
+            else if(i.QueplarValue != 0)
+            {
+                elements.Add(i);
             }
 
         }
@@ -191,5 +196,9 @@ public class ItemDatabase
     public List<GameItem> GetPlanks()
     {
         return planks;
+    }
+    public List<GameItem> GetElements()
+    {
+        return elements;
     }
 }

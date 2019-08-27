@@ -366,7 +366,8 @@
     "gatherSpeed": 7000,
     "ingredientIDs": [ 22 ],
     "queplarValue": 0,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 1
   },
   {
     "itemName": "Tin Bar",
@@ -379,7 +380,8 @@
     "gatherSpeed": 7500,
     "ingredientIDs": [ 23 ],
     "queplarValue": 35,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 2
   },
   {
     "itemName": "Iron Bar",
@@ -392,7 +394,8 @@
     "gatherSpeed": 15000,
     "ingredientIDs": [ 24 ],
     "queplarValue": 80,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 9
   },
   {
     "itemName": "Zinc Bar",
@@ -405,7 +408,8 @@
     "gatherSpeed": 9000,
     "ingredientIDs": [ 25 ],
     "queplarValue": 20,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 3
   },
   {
     "itemName": "Brass Bar",
@@ -418,7 +422,8 @@
     "gatherSpeed": 9500,
     "ingredientIDs": [ 22, 25 ],
     "queplarValue": 10,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 4
   },
   {
     "itemName": "Bronze Bar",
@@ -431,7 +436,8 @@
     "gatherSpeed": 7500,
     "ingredientIDs": [ 22, 23 ],
     "queplarValue": 15,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 5
   },
   {
     "itemName": "Stone Pickaxe",
@@ -759,7 +765,8 @@
     "gatherSpeed": 9000,
     "ingredientIDs": [ 49 ],
     "queplarValue": 45,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 6
   },
   {
     "itemName": "Lead Bar",
@@ -772,7 +779,8 @@
     "gatherSpeed": 6000,
     "ingredientIDs": [ 50 ],
     "queplarValue": 110,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 10
   },
   {
     "itemName": "Bucket of Mercury",
@@ -798,7 +806,8 @@
     "gatherSpeed": 2000,
     "ingredientIDs": [ 52 ],
     "queplarValue": 205,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 12
   },
   {
     "itemName": "Gold Bar",
@@ -811,7 +820,8 @@
     "gatherSpeed": 6000,
     "ingredientIDs": [ 53 ],
     "queplarValue": 290,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 7
   },
   {
     "itemName": "Platinum Bar",
@@ -824,14 +834,14 @@
     "gatherSpeed": 9000,
     "ingredientIDs": [ 54 ],
     "queplarValue": 385,
-    "icon": "Bar"
+    "icon": "Bar",
+    "barLevel": 8
   },
   {
     "itemName": "Alchemic Dust",
     "itemDescription": "A pile of dust from a failed alchemy attempt.",
     "id": 61,
     "value": 0,
-    "queplarValue": -1,
     "icon": "Gold"
   },
   {
@@ -2958,7 +2968,8 @@
     "gatherSpeed": 15000,
     "ingredientIDs": [ 24, 185 ],
     "icon": "Bar",
-    "queplarValue": 200
+    "queplarValue": 200,
+    "barLevel": 11
   },
   {
     "itemName": "Copper Arrowtips",
@@ -8072,7 +8083,8 @@
     "gatherSpeed": 25000,
     "ingredientIDs": [ 550, 185 ],
     "icon": "Bar",
-    "queplarValue": 400
+    "queplarValue": 400,
+    "barLevel": 13
   },
   {
     "itemName": "Sahotite Bar",
@@ -8085,7 +8097,8 @@
     "gatherSpeed": 35000,
     "ingredientIDs": [ 551, 185 ],
     "icon": "Bar",
-    "queplarValue": 550
+    "queplarValue": 550,
+    "barLevel": 14
   },
   {
     "itemName": "Plastinium Bar",
@@ -8098,7 +8111,8 @@
     "gatherSpeed": 45000,
     "ingredientIDs": [ 552, 185 ],
     "icon": "Bar",
-    "queplarValue": 700
+    "queplarValue": 700,
+    "barLevel": 15
   },
   {
     "itemName": "Queplinium Bar",
@@ -8111,7 +8125,8 @@
     "gatherSpeed": 55000,
     "ingredientIDs": [ 553, 185 ],
     "icon": "Bar",
-    "queplarValue": 900
+    "queplarValue": 900,
+    "barLevel": 16
   },
   {
     "itemName": "Strongtium Knife",

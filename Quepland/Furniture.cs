@@ -18,6 +18,8 @@ public class Furniture
     public GameItem WithdrawItem { get; set; }
     public TimeSpan WithdrawEvery { get; set; }
     public int WithdrawAmount { get; set; }
-    public int Size { get; set; }
+    public int CurrentPlanks { get; set; }
+    public int CurrentBars { get; set; }
+    public int[] OtherItemsProgress { get; set; }
 
 }

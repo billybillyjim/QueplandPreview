@@ -16,20 +16,29 @@
 
 <p>Set limit for selling confirmation:<input type="number" @bind-value="@Limit" @bind-value:event="onchange" /> Current:@GameState.expensiveItemThreshold</p>
 
-<p><button class="btn btn-primary" onclick="@(new Action(() => GenerateSaveFile()))">Generate Save File</button></p>
-<textarea>@quickFixString</textarea>
-<p><button class="btn btn-primary" onclick="@(new Action(() => LoadDataFromText()))">Load From Save File</button></p>
-<EditForm Model="@saveModel">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div style="background-color:#dbdbdb;margin-bottom:20px">
+    <p><button class="btn btn-primary" style="margin-left:10px;margin-top:10px" onclick="@(new Action(() => GenerateSaveFile()))">Generate Save File</button></p>
+<textarea style="margin-left:10px;margin-top:10px" >@quickFixString</textarea>
+</div>
 
-    <InputTextArea id="name" @bind-Value="@saveModel.saveFile" />
+<div style="background-color:#dbdbdb">
+    <p><button class="btn btn-primary" style="margin-left:10px;margin-top:10px" onclick="@(new Action(() => LoadDataFromText()))">Load From Save File</button></p>
+    
+    <div style="margin-left:10px;margin-top:10px">
+        <EditForm Model="@saveModel">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-</EditForm>
+            <InputTextArea id="name" @bind-Value="@saveModel.saveFile" />
+
+        </EditForm>
+    </div>
+</div>
+
+
 @if (Program.playfabManager.IsConnected)
 {
     <p>
-        Experimental(Don't rely on this yet!):
         <button class="btn btn-primary" onclick="@(new Action(() => LoadDataFromCloud()))">Load Game From Cloud Save</button>
     </p>
 }

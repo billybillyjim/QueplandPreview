@@ -26,6 +26,8 @@ public class GameItem
     public int HealDuration { get; set; }
     public int MadeOnCreation { get; set; }
     public int AmountOfIngredientsToCreate { get; set; }
+    public int PlankLevel { get; set; }
+    public int BarLevel { get; set; }
 
     public bool IsUsable { get; set; }
     public bool IsEquipable { get; set; }
