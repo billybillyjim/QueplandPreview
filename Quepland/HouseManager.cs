@@ -9,6 +9,7 @@ public class HouseManager
 {
     public List<Furniture> furniture = new List<Furniture>();
     public List<FurnitureSlot> furnitureSlots = new List<FurnitureSlot>();
+    public List<FurnitureSlot> emptySlots = new List<FurnitureSlot>();
     public async Task LoadFurnitureAndSlots(HttpClient Http)
     {
         Furniture[] furnitureArray = await Http.GetJsonAsync<Furniture[]>("data/furniture.json");

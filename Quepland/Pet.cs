@@ -32,10 +32,17 @@ public class Pet
         skillString = skillString.Remove(skillString.Length - 1);
         return data + (char)15 + skillString;
     }
-    public void SetSkills(List<Skill> skillList)
+    public void SetSkills(List<Skill> skillList, List<Skill> playerSkills)
     {
         skills = new List<Skill>();
         skills.AddRange(skillList);
+        foreach(Skill s in playerSkills)
+        {
+            if(skillList.Find(x => x.Name == s.Name) == null)
+            {
+                skills.Add(s);
+            }
+        }
 
     }
     public void SetMessageManager(MessageManager m)
@@ -183,7 +190,8 @@ public class Pet
                skill.Name == "Alchemy" ||
                skill.Name == "Woodworking" ||
                skill.Name == "Culinary Arts" ||
-               skill.Name == "Leatherworking")
+               skill.Name == "Leatherworking" ||
+               skill.Name == "Construction")
             {
                 return true;
             }
@@ -220,6 +228,7 @@ public class Pet
         total += skills.Find(x => x.Name == "Woodworking").GetSkillLevelUnboosted();
         total += skills.Find(x => x.Name == "Culinary Arts").GetSkillLevelUnboosted();
         total += skills.Find(x => x.Name == "Leatherworking").GetSkillLevelUnboosted();
+        total += skills.Find(x => x.Name == "Construction").GetSkillLevelUnboosted();
         return total;
     }
     public int GetTotalLevels()

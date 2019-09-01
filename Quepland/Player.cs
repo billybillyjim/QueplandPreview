@@ -214,7 +214,7 @@ public class Player
                 newPet.Identifier = info[5];
                 string skillString = line.Split((char)15)[1];
                 
-                newPet.SetSkills(Extensions.GetSkillsFromString(skillString));
+                newPet.SetSkills(Extensions.GetSkillsFromString(skillString), skills);
                 if(Pets.Find(x => x.Name == info[0]) == null)
                 {
                     Pets.Add(newPet);
@@ -265,7 +265,7 @@ public class Player
                     newPet.Identifier = info[5];
                     string skillString = line.Split((char)15)[1];
 
-                    newPet.SetSkills(Extensions.GetSkillsFromString(skillString));
+                    newPet.SetSkills(Extensions.GetSkillsFromString(skillString), skills);
                 }
                 catch
                 {

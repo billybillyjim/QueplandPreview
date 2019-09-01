@@ -17,7 +17,7 @@ public class PetManager
         foreach(Pet p in Pets)
         {
             Skill[] skillArray = await Http.GetJsonAsync<Skill[]>("data/skills.json");
-            p.skills = skillArray.ToList();    
+            p.skills = skillArray.ToList();
         }
     }
     public List<Pet> GetPets()

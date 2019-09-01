@@ -620,7 +620,8 @@
       [ 157, 195 ],
       [ 159, 196 ],
       [ 161, 197 ],
-      [ 403, 404 ]
+      [ 403, 404 ],
+      [ 582, 583 ]
 
     ],
     "icon": "Feather",
@@ -5714,7 +5715,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 1
   },
   {
     "itemName": "Tin Nails",
@@ -5728,7 +5730,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 2
   },
   {
     "itemName": "Zinc Nails",
@@ -5742,7 +5745,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 3
   },
   {
     "itemName": "Brass Nails",
@@ -5756,7 +5760,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 4
   },
   {
     "itemName": "Bronze Nails",
@@ -5770,7 +5775,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 5
   },
   {
     "itemName": "Nickel Nails",
@@ -5784,7 +5790,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 6
   },
   {
     "itemName": "Golden Nails",
@@ -5798,7 +5805,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 7
   },
   {
     "itemName": "Iron Nails",
@@ -5812,7 +5820,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 9
   },
   {
     "itemName": "Lead Nails",
@@ -5826,7 +5835,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 10
   },
   {
     "itemName": "Aluminum Nails",
@@ -5840,7 +5850,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 12
   },
   {
     "itemName": "Steel Nails",
@@ -5854,7 +5865,8 @@
     "isStackable": true,
     "isSmithable": true,
     "madeOnCreation": 15,
-    "icon": "Nails"
+    "icon": "Nails",
+    "nailLevel": 11
   },
   {
     "itemName": "Ice Block",
@@ -8619,7 +8631,8 @@
     "value": 10,
     "icon": "Plank",
     "ingredientIDs": [ 1 ],
-    "experienceGained": "Construction:1"
+    "experienceGained": "Construction:1",
+    "plankLevel": 1
   },
   {
     "itemName": "Poplar Plank",
@@ -8628,6 +8641,117 @@
     "value": 20,
     "icon": "Plank",
     "ingredientIDs": [ 2 ],
-    "experienceGained": "Construction:3"
+    "experienceGained": "Construction:3",
+    "plankLevel": 2
+  },
+  {
+    "itemName": "Oak Plank",
+    "itemDescription": "A planed cylinder for creating rectangular prisms.",
+    "id": 592,
+    "value": 45,
+    "icon": "Plank",
+    "ingredientIDs": [ 95 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 3
+  },
+  {
+    "itemName": "Maple Plank",
+    "itemDescription": "A poor alternative to maple syrup.",
+    "id": 593,
+    "value": 70,
+    "icon": "Plank",
+    "ingredientIDs": [ 96 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 4
+  },
+  {
+    "itemName": "Birch Plank",
+    "itemDescription": "A piece of sliced wood.",
+    "id": 594,
+    "value": 100,
+    "icon": "Plank",
+    "ingredientIDs": [ 97 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 5
+  },
+  {
+    "itemName": "Mesquite Plank",
+    "itemDescription": "It's a plank.",
+    "id": 595,
+    "value": 150,
+    "icon": "Plank",
+    "ingredientIDs": [ 98 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 6
+  },
+  {
+    "itemName": "Mahogany Plank",
+    "itemDescription": "Luxurious planks for luxurious furniture. Use with gold nails for extra flex.",
+    "id": 596,
+    "value": 500,
+    "icon": "Plank",
+    "ingredientIDs": [ 99 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 7
+  },
+  {
+    "itemName": "Ironwood Plank",
+    "itemDescription": "Use with iron nails to remind it what iron really is.",
+    "id": 597,
+    "value": 280,
+    "icon": "Plank",
+    "ingredientIDs": [ 100 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 8
+  },
+  {
+    "itemName": "Snakewood Plank",
+    "itemDescription": "This used to be a warped snakewood log.",
+    "id": 598,
+    "value": 550,
+    "icon": "Plank",
+    "ingredientIDs": [ 101 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 9
+  },
+  {
+    "itemName": "Lignum Vitae Plank",
+    "itemDescription": "Not so vitae anymore...",
+    "id": 599,
+    "value": 700,
+    "icon": "Plank",
+    "ingredientIDs": [ 102 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 10
+  },
+  {
+    "itemName": "Buloke Plank",
+    "itemDescription": "A very hard plank for very hard construction tasks.",
+    "id": 600,
+    "value": 900,
+    "icon": "Plank",
+    "ingredientIDs": [ 103 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 11
+  },
+  {
+    "itemName": "Ice Wood Plank",
+    "itemDescription": "A chilly plank that can be used to keep things cool.",
+    "id": 601,
+    "value": 1200,
+    "icon": "Plank",
+    "ingredientIDs": [ 402 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 12
+  },
+  {
+    "itemName": "Great Tree Plank",
+    "itemDescription": "Taken from one of the most ancient and precious trees in the world to make chicken coops and bedframes.",
+    "id": 602,
+    "value": 1700,
+    "icon": "Plank",
+    "ingredientIDs": [ 574 ],
+    "experienceGained": "Construction:3",
+    "plankLevel": 13
   }
 ]

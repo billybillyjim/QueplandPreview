@@ -14,12 +14,14 @@ public class Furniture
     public int[][] OtherItemCosts { get; set; }
     public int ExperienceGained { get; set; }
     public int[] UpgradeIDs { get; set; }
-    public List<GameItem> LoadedItems = new List<GameItem>();
     public GameItem WithdrawItem { get; set; }
     public TimeSpan WithdrawEvery { get; set; }
     public int WithdrawAmount { get; set; }
-    public int CurrentPlanks { get; set; }
-    public int CurrentBars { get; set; }
-    public int[] OtherItemsProgress { get; set; }
+    public int Progress { get; set; }
+    public bool IsFinished { get; set; }
 
+    public int GetWorkRequired()
+    {
+        return 1000 + (PlanksRequired + (BarsRequired * 10) * 7);
+    }
 }

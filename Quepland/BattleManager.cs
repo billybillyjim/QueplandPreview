@@ -111,6 +111,7 @@ public class BattleManager
         opponent.CurrentHP = opponent.HP;
         opponent.ChangingStances = false;
         opponent.CurrentStance = 0;
+        opponent.AttackSpeed = GetAttackSpeed(0);
         battleFound = true;
         currentDojo = dojo;
        StartBattle();

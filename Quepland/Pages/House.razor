@@ -9,7 +9,7 @@
 <h1>Welcome Home</h1>
 
 @LoadBuildDropdown()
-@foreach(FurnitureSlot slot in emptySlots)
+@foreach(FurnitureSlot slot in Program.houseManager.emptySlots)
 {
     @LoadFurnitureSlot(slot)
 }
@@ -18,8 +18,12 @@
 
 @functions{
 
-    private List<FurnitureSlot> emptySlots = new List<FurnitureSlot>();
 
+    private bool useLowestPlank;
+    private bool useLowestBar;
+    private GameItem currentPlank;
+    private GameItem currentBar;
+    private static Random rand = new Random();
 
     private RenderFragment LoadBuildDropdown()
     {
@@ -70,6 +74,152 @@
             builder.CloseElement();
         };
     }
+    private RenderFragment ShowPlankDropdown()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "dropdown");
+            builder.AddAttribute(2, "style", "float:right;");
+            builder.OpenElement(3, "button");
+
+            builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(5, "type", "button");
+            builder.AddAttribute(6, "id", "dropdownMenuButton");
+            builder.AddAttribute(7, "data-toggle", "dropdown");
+            builder.AddAttribute(8, "aria-haspopup", "true");
+            builder.AddAttribute(9, "aria-expanded", "false");
+            builder.AddAttribute(10, "style", "margin-top:-12px;padding:3px");
+            builder.OpenElement(11, "img");
+
+            builder.AddAttribute(12, "style", "height:40px;width:40px");
+            builder.AddAttribute(13, "src", "data/ItemIcons/Plank.png");
+
+            builder.AddContent(14, "Set Plank");
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.OpenElement(15, "div");
+            builder.AddAttribute(16, "class", "dropdown-menu");
+            builder.AddAttribute(17, "aria-labelledby", "dropdownMenuButton");
+            if(currentPlank == null)
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddContent(20, "Select a Plank");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddAttribute(19, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank) + " in your bank.");
+                builder.AddContent(20, currentPlank.ItemName);
+                builder.CloseElement();
+            }
+            builder.OpenElement(21, "div");
+            builder.AddAttribute(22, "class", "dropdown-divider");
+            builder.CloseElement();
+            builder.OpenElement(23, "a");
+            builder.AddAttribute(24, "class", "dropdown-item");
+            builder.AddAttribute(25, "onclick", new Action(() => ToggleUsePlankOption()));
+            builder.AddContent(26, "Use Lowest Level");
+            builder.CloseElement();
+
+            foreach (GameItem plank in Program.itemDatabase.GetPlanks())
+            {
+                if (GameState.GetPlayerBank().GetInventory().HasItem(plank))
+                {
+                    builder.OpenElement(27, "a");
+                    builder.AddAttribute(28, "class", "dropdown-item");
+                    builder.AddAttribute(29, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(plank) + " in your bank.");
+                    builder.AddAttribute(30, "onclick", new Action(() => SetCurrentPlank(plank)));
+                    builder.AddContent(31, plank.ItemName);
+                    builder.CloseElement();
+                }
+
+
+
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+
+    }
+    private RenderFragment ShowBarDropdown()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "dropdown");
+            builder.AddAttribute(2, "style", "float:right;");
+            builder.OpenElement(3, "button");
+
+            builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(5, "type", "button");
+            builder.AddAttribute(6, "id", "dropdownMenuButton");
+            builder.AddAttribute(7, "data-toggle", "dropdown");
+            builder.AddAttribute(8, "aria-haspopup", "true");
+            builder.AddAttribute(9, "aria-expanded", "false");
+            builder.AddAttribute(10, "style", "margin-top:-12px;padding:3px");
+            builder.OpenElement(11, "img");
+
+            builder.AddAttribute(12, "style", "height:40px;width:40px");
+            builder.AddAttribute(13, "src", "data/ItemIcons/Bar.png");
+
+            builder.AddContent(14, "Set Bar");
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.OpenElement(15, "div");
+            builder.AddAttribute(16, "class", "dropdown-menu");
+            builder.AddAttribute(17, "aria-labelledby", "dropdownMenuButton");
+            if(currentBar == null)
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddContent(20, "Select a Bar");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddAttribute(19, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentBar) + " in your bank.");
+                builder.AddContent(20, currentBar.ItemName);
+                builder.CloseElement();
+            }
+            builder.OpenElement(21, "div");
+            builder.AddAttribute(22, "class", "dropdown-divider");
+            builder.CloseElement();
+            builder.OpenElement(23, "a");
+            builder.AddAttribute(24, "class", "dropdown-item");
+            builder.AddAttribute(25, "onclick", new Action(() => ToggleUseBarOption()));
+            builder.AddContent(26, "Use Lowest Level");
+            builder.CloseElement();
+
+            foreach (GameItem bar in Program.itemDatabase.GetSmithingBars())
+            {
+                if (GameState.GetPlayerBank().GetInventory().HasItem(bar))
+                {
+                    builder.OpenElement(27, "a");
+                    builder.AddAttribute(28, "class", "dropdown-item");
+                    builder.AddAttribute(29, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(bar) + " in your bank.");
+                    builder.AddAttribute(30, "onclick", new Action(() => SetCurrentBar(bar)));
+                    builder.AddContent(31, bar.ItemName);
+                    builder.CloseElement();
+                }
+
+
+
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+
+    }
     private RenderFragment LoadFurnitureSlot(FurnitureSlot slot)
     {
         return builder =>
@@ -77,9 +227,17 @@
             builder.OpenElement(0, "div");
             builder.AddAttribute(1, "class", "card");
             builder.OpenElement(2, "div");
+            builder.OpenElement(3, "div");
             builder.AddAttribute(3, "class", "card-header");
             builder.AddAttribute(3, "title", slot.Description);
+            if(slot.hasSelected && slot.FurnitureToBuild.IsFinished == false)
+            {
+
+                builder.AddContent(6, ShowPlankDropdown());
+                builder.AddContent(6, ShowBarDropdown());
+            }
             builder.AddContent(4, slot.Name);
+            builder.CloseElement();
             builder.CloseElement();
             builder.OpenElement(5, "div");
             builder.AddAttribute(6, "class", "card-body");
@@ -96,8 +254,86 @@
                     builder.CloseElement();
                 }
             }
+            else if(slot.Inventory.GetAmountOfBars() < slot.FurnitureToBuild.BarsRequired || slot.Inventory.GetAmountOfPlanks() < slot.FurnitureToBuild.PlanksRequired)
+            {
+                builder.OpenElement(7, "p");
+                builder.OpenElement(8, "p");
+                builder.AddContent(9, "Current Planks:" + slot.Inventory.GetAmountOfPlanks() + "/" + slot.FurnitureToBuild.PlanksRequired);
+                builder.CloseElement();
+                builder.OpenElement(10, "p");
+                builder.AddContent(11, "Current Bars:" + slot.Inventory.GetAmountOfBars() + "/" + slot.FurnitureToBuild.BarsRequired);
+                builder.CloseElement();
+                builder.CloseElement();
+                builder.OpenElement(12, "button");
+                builder.AddAttribute(13, "class", "btn btn-primary");
+                builder.AddAttribute(14, "style", "margin:3px");
+
+                builder.AddAttribute(16, "onclick", new Action(() => LoadPlanks(slot)));
+                if(currentPlank != null && GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank) > 0)
+                {
+                    builder.AddAttribute(17, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank) + " in the bank.");
+                    builder.AddContent(17, "Load with " + currentPlank.ItemName + "s");
+
+                }
+                else if(currentPlank != null && GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank) == 0)
+                {
+                    builder.AddAttribute(17, "disabled", true);
+                    builder.AddAttribute(17, "title", "You don't have any " + currentPlank.ItemName + "s.");
+                    builder.AddContent(17, "Load with Planks");
+                }
+                else
+                {
+                    builder.AddAttribute(17, "disabled", true);
+                    builder.AddAttribute(17, "title", "You need to set a plank before loading any.");
+                    builder.AddContent(17, "Load with Planks");
+                }
+                builder.CloseElement();
+                builder.OpenElement(18, "br");
+                builder.CloseElement();
+                builder.OpenElement(12, "button");
+                builder.AddAttribute(13, "class", "btn btn-primary");
+                builder.AddAttribute(14, "style", "margin:3px");
+                builder.AddAttribute(15, "title", "");
+                builder.AddAttribute(16, "onclick", new Action(() => LoadBars(slot)));
+                if(currentBar != null)
+                {
+                    builder.AddAttribute(17, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentBar) + " in the bank.");
+                    builder.AddContent(17, "Load with " + currentBar.ItemName + "s");
+
+                }
+                else
+                {
+                    builder.AddAttribute(17, "disabled", true);
+                    builder.AddAttribute(17, "title", "You need to set a bar before loading any.");
+                    builder.AddContent(17, "Load with Bars");
+                }
+                builder.CloseElement();
+                builder.OpenElement(18, "br");
+                builder.CloseElement();
+                if(slot.FurnitureToBuild.OtherItemCosts != null)
+                {
+                    builder.OpenElement(18, "button");
+                    builder.AddAttribute(19, "class", "btn btn-primary");
+                    builder.AddAttribute(20, "style", "margin:3px");
+                    builder.AddAttribute(21, "title", "");
+                    builder.AddAttribute(22, "onclick", new Action(() => LoadOther(slot)));
+                    builder.AddContent(23, "Load with Required Items" );
+                    builder.CloseElement();
+                }
+                builder.OpenElement(7, "button");
+                builder.AddAttribute(8, "class", "btn btn-primary");
+                builder.AddAttribute(9, "style", "float:right;margin:10px");
+                builder.AddAttribute(10, "title", "");
+                builder.AddAttribute(11, "onclick", new Action(() => CancelBuild(slot)));
+                builder.AddContent(12, "Cancel" );
+                builder.CloseElement();
+
+            }
             else
             {
+                builder.OpenElement(7, "p");
+                builder.AddContent(7, ((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) + "%");
+                builder.CloseElement();
                 builder.OpenElement(7, "button");
                 builder.AddAttribute(8, "class", "btn btn-primary");
                 builder.AddAttribute(9, "style", "");
@@ -109,7 +345,7 @@
                 builder.AddAttribute(8, "class", "btn btn-primary");
                 builder.AddAttribute(9, "style", "");
                 builder.AddAttribute(10, "title", "");
-                builder.AddAttribute(11, "onclick", new Action(() => CancelBuilding(slot)));
+                builder.AddAttribute(11, "onclick", new Action(() => CancelBuild(slot)));
                 builder.AddContent(12, "Cancel" );
                 builder.CloseElement();
             }
@@ -120,15 +356,79 @@
     }
     public void BeginBuilding(Furniture furniture, FurnitureSlot slot)
     {
-        slot.FurnitureToBuild = furniture;
-        GameState.UpdateState();
-    }
-    public void CancelBuilding(FurnitureSlot slot)
-    {
-        slot.FurnitureToBuild = null;
+        slot.SetFurniture(furniture);
+        slot.hasSelected = true;
         GameState.UpdateState();
     }
     public void AddMaterials(FurnitureSlot slot)
+    {
+        LoadPlanks(slot);
+        LoadBars(slot);
+        LoadOther(slot);
+        GameState.UpdateState();
+    }
+    public void SetCurrentPlank(GameItem item)
+    {
+        currentPlank = item;
+        GameState.UpdateState();
+    }
+    public void SetCurrentBar(GameItem item)
+    {
+        currentBar = item;
+        GameState.UpdateState();
+    }
+    private void LoadPlanks(FurnitureSlot slot)
+    {
+
+        if(currentPlank != null && slot.Inventory.GetAmountOfPlanks() < slot.FurnitureToBuild.PlanksRequired)
+        {
+            int amount = Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank), (slot.FurnitureToBuild.PlanksRequired - slot.Inventory.GetAmountOfPlanks()));
+            GameState.GetPlayerBank().GetInventory().RemoveAsManyItemsAsPossible(currentPlank, amount);
+            slot.Inventory.AddMultipleOfItem(currentPlank, amount);
+            MessageManager.AddMessage("Added " + amount + " " + currentPlank.ItemName + "s to " + slot.Name);
+            if(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentPlank) == 0)
+            {
+                SetCurrentPlank(GameState.GetPlayerBank().GetInventory().GetLowestLevelPlank());
+            }
+        }
+
+        GameState.UpdateState();
+    }
+    private void LoadBars(FurnitureSlot slot)
+    {
+        if(currentBar != null && slot.Inventory.GetAmountOfBars() < slot.FurnitureToBuild.BarsRequired)
+        {
+            int amount = Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentBar), (slot.FurnitureToBuild.BarsRequired - slot.Inventory.GetAmountOfBars()));
+            GameState.GetPlayerBank().GetInventory().RemoveAsManyItemsAsPossible(currentBar, amount);
+            slot.Inventory.AddMultipleOfItem(currentBar, amount);
+            MessageManager.AddMessage("Added " + amount + " " + currentBar.ItemName + "s to " + slot.Name);
+            if (GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentBar) == 0)
+            {
+                SetCurrentBar(GameState.GetPlayerBank().GetInventory().GetLowestLevelBar());
+            }
+
+        }
+        GameState.UpdateState();
+    }
+    private void ToggleUsePlankOption()
+    {
+        useLowestPlank = !useLowestPlank;
+        if (useLowestPlank)
+        {
+            SetCurrentPlank(GameState.GetPlayerBank().GetInventory().GetLowestLevelPlank());
+        }
+        GameState.UpdateState();
+    }
+    private void ToggleUseBarOption()
+    {
+        useLowestBar = !useLowestBar;
+        if (useLowestBar)
+        {
+            SetCurrentBar(GameState.GetPlayerBank().GetInventory().GetLowestLevelBar());
+        }
+        GameState.UpdateState();
+    }
+    private void LoadOther(FurnitureSlot slot)
     {
 
     }
@@ -137,17 +437,60 @@
         GameState.StopActions();
         GameState.gatherTimer = new Timer(new TimerCallback(_ =>
         {
+            if(furniture.Progress < furniture.GetWorkRequired())
+            {
+                GameItem nail = GameState.GetPlayerInventory().GetBestNails();
+                if(nail == null)
+                {
+                    MessageManager.AddMessage("You have run out of nails.");
+                    GameState.StopActions();
+                    return;
+                }
+                int level = GameState.GetPlayer().GetLevel("Construction");
+                int nailsUsed = Math.Min(rand.Next(1, 1 + Math.Max(100 - level, 1)), GameState.GetPlayerInventory().GetAmountOfItem(nail));
+                furniture.Progress += nail.NailLevel;
+                GameState.GetPlayer().GainExperience("Construction", nail.NailLevel);
+                nailsUsed = GameState.GetPlayerInventory().RemoveAsManyItemsAsPossible(nail, nailsUsed);
+                MessageManager.AddMessage("You hammer two planks together with " + nailsUsed + " " + nail.ItemName);
+            }
+            else
+            {
+                furniture.IsFinished = true;
+                GameState.StopActions();
+            }
+            GameState.UpdateState();
 
         }), null, 500, 500);
+        GameState.UpdateState();
+
     }
     private void AddSlot(FurnitureSlot slot)
     {
-        emptySlots.Add(slot);
+        FurnitureSlot newSlot = new FurnitureSlot(slot);
+        Program.houseManager.emptySlots.Add(newSlot);
         GameState.UpdateState();
     }
     private int GetSlotMinimumLevel(FurnitureSlot slot)
     {
         return 0;
+    }
+    private void CancelBuild(FurnitureSlot slot)
+    {
+        foreach(KeyValuePair<GameItem, int> pair in slot.Inventory.GetItems())
+        {
+            GameState.GetPlayerBank().GetInventory().AddMultipleOfItem(pair.Key, pair.Value);
+        }
+        if (Program.houseManager.emptySlots.Remove(slot))
+        {
+            MessageManager.AddMessage("You have cancelled building the " + slot.Name + " and any materials you used have been returned to the bank.");
+        }
+        else
+        {
+            MessageManager.AddMessage("Failed to remove slot because it wasnt event there.");
+        }
+
+        GameState.UpdateState();
+
     }
     protected override void OnInitialized()
     {

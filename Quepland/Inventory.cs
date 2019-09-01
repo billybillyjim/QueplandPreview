@@ -282,6 +282,10 @@ public class Inventory
     }
     public int GetAmountOfItem(GameItem item)
     {
+        if(item == null)
+        {
+            return 0;
+        }
         if (items.TryGetValue(item, out int amount))
         {
             return amount;
@@ -483,6 +487,39 @@ public class Inventory
         return 0;
     }
     /// <summary>
+    /// Returns the number of items actually removed.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="amount"></param>
+    /// <returns></returns>
+    public int RemoveAsManyItemsAsPossible(GameItem item, int amount)
+    {
+        if (items.TryGetValue(item, out int currentAmount))
+        {
+            if (currentAmount >= amount)
+            {
+                items[item] = currentAmount - amount;
+
+                if (items[item] <= 0)
+                {
+                    items.Remove(item);
+                }
+                UpdateItemCount();
+                return amount;
+            }
+            else
+            {
+                items.Remove(item);
+                UpdateItemCount();
+                return currentAmount;
+            }
+
+        }
+        UpdateItemCount();
+        return 0;
+    }
+
+    /// <summary>
     /// Slower than RemoveOneOfItem, iterates through all keyvalue pairs in items.
     /// </summary>
     /// <param name="id"></param>
@@ -540,6 +577,70 @@ public class Inventory
             }
         }
         return bestNails;
+    }
+    public GameItem GetLowestLevelPlank()
+    {
+        GameItem lowestPlank = null;
+        foreach (KeyValuePair<GameItem, int> pair in items)
+        {
+            if (pair.Key.PlankLevel > 0)
+            {
+                if(lowestPlank == null)
+                {
+                    lowestPlank = pair.Key;
+                }
+                else if (pair.Key.PlankLevel < lowestPlank.PlankLevel)
+                {
+                    lowestPlank = pair.Key;
+                }
+            }
+        }
+        return lowestPlank;
+    }
+    public GameItem GetLowestLevelBar()
+    {
+        GameItem lowestBar = null;
+        foreach (KeyValuePair<GameItem, int> pair in items)
+        {
+            if (pair.Key.BarLevel > 0)
+            {
+                if (lowestBar == null)
+                {
+                    lowestBar = pair.Key;
+                }
+                else if (pair.Key.BarLevel < lowestBar.BarLevel)
+                {
+                    lowestBar = pair.Key;
+                }
+            }
+        }
+        return lowestBar;
+    }
+    public int GetAmountOfBars()
+    {
+        int amount = 0;
+        foreach (KeyValuePair<GameItem, int> pair in items)
+        {
+            if(pair.Key.BarLevel > 0)
+            {
+                amount += pair.Value;
+            }
+            
+        }
+        return amount;
+    }
+    public int GetAmountOfPlanks()
+    {
+        int amount = 0;
+        foreach (KeyValuePair<GameItem, int> pair in items)
+        {
+            if(pair.Key.PlankLevel > 0)
+            {
+                amount += pair.Value;
+            }
+            
+        }
+        return amount;
     }
     public void EmptyInventory()
     {

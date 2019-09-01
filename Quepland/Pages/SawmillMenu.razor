@@ -96,6 +96,7 @@
         if (GameState.GetPlayerInventory().RemoveOneOfItem(currentLog))
         {
             GameState.GetPlayerInventory().AddItem(plank);
+            GameState.GetPlayer().GainExperience(plank.ExperienceGained);
             MessageManager.AddMessage("You withdraw a " + plank.ItemName + ".");
         }
 

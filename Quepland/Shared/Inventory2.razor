@@ -1,0 +1,967 @@
+@inject GameState GameState
+@inject MessageManager MessageManager
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+@using System.Threading
+
+@LoadInventoryMenu()
+    <p>
+        <input type="checkbox" @bind-value="@GameState.hideLockedItems" @bind-value:event="onchange" />
+        Hide Locked Items
+    </p>
+@LoadInventory()
+
+@functions{
+
+    [Parameter]
+    private int splitViewPosition { get; set; }
+
+    private GameItem currentUsedItem;
+    private int confirmSellItemID;
+    private bool trySellingExpensiveItem = false;
+    private bool hideLockedItems;
+    private int[,] usableIDs;
+
+    public int sellAmount = 20;
+    private RenderFragment LoadInventoryMenu()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            //builder.AddAttribute(1, "class", "table-hover");
+
+            builder.OpenComponent<MenuButtons>(2);
+            builder.AddAttribute(2, "splitViewPosition", splitViewPosition);
+            builder.CloseComponent();
+
+            builder.OpenElement(3, "h1");
+            builder.AddAttribute(4, "style", "margin-bottom: .2rem;");
+            builder.AddContent(5, "Inventory");
+            builder.CloseElement();
+            builder.OpenElement(6, "p");
+            if (GameState.GetPlayerInventory().GetAvailableSpaces() == 0)
+            {
+                builder.AddAttribute(7, "style", "color:firebrick; margin-bottom: .2rem;");
+            }
+            else
+            {
+                builder.AddAttribute(8, "style", "margin-bottom: .2rem;");
+            }
+
+            builder.AddContent(9, GameState.GetPlayerInventory().GetFreeSpacesString());
+            builder.CloseElement();
+
+            if (GameState.GetPlayer().GetSkill("HP") != null)
+            {
+                builder.OpenElement(10, "p");
+                builder.AddAttribute(10, "style", "margin-bottom: .2rem;");
+                builder.AddContent(11, "HP:" + GameState.GetPlayer().CurrentHP + "/" + GameState.GetPlayer().MaxHP);
+                builder.CloseElement();
+            }
+
+
+            if (GameState.canSell)
+            {
+                builder.OpenElement(12, "p");
+                builder.AddAttribute(12, "style", "margin-bottom: .2rem;");
+                builder.AddContent(13, "Sell X: ");
+                builder.OpenElement(14, "input");
+                //builder.AddAttribute(15, "value", Microsoft.AspNetCore.Components.BindMethods.GetValue(sellAmount));
+                //builder.AddAttribute(16, "onchange", Microsoft.AspNetCore.Components.EventCallback.Factory.CreateBinder(this, __value => sellAmount = __value, sellAmount));
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+
+
+            builder.OpenElement(17, "p");
+            builder.AddAttribute(17, "style", "margin-bottom: .2rem;");
+            if (GameState.GetPlayer().activeFollower == null)
+            {
+                builder.AddContent(18, "No current follower");
+            }
+            else
+            {
+                builder.AddContent(19, GameState.GetPlayer().activeFollower.ToString());
+            }
+
+            builder.CloseElement();
+            builder.OpenElement(20, "p");
+            builder.AddAttribute(20, "style", "margin-bottom: .2rem;");
+            if (GameState.buffSecondsLeft > 0)
+            {
+                builder.AddContent(21, GameState.currentBuffItem.BuffedSkill + " +" + GameState.currentBuffItem.BuffAmount + ", " + GameState.buffSecondsLeft);
+            }
+            else
+            {
+                builder.AddContent(21, "Current Buff:None");
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadInventory()
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "table-hover");
+            builder.OpenElement(22, "table");
+            builder.AddAttribute(23, "style", "width:100%;");
+            builder.OpenElement(24, "thead");
+            builder.OpenElement(25, "tr");
+            builder.OpenElement(26, "th");
+            builder.AddAttribute(27, "align", "left");
+            builder.AddContent(28, "Item");
+            builder.CloseElement();
+            builder.OpenElement(29, "th");
+
+            builder.CloseElement();
+            builder.OpenElement(30, "th");
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.CloseElement();
+
+            builder.OpenElement(34, "tbody");
+            builder.AddAttribute(35, "id", "inventoryRef");
+            builder.AddAttribute(36, "ref", "inventoryRef");
+            if (GameState.GetPlayerInventory() != null)
+            {
+                foreach (KeyValuePair<GameItem, int> item in GameState.GetPlayerInventory().GetItemsSorted(5))
+                {
+                    if(GameState.hideLockedItems == false || item.Key.IsLocked == false)
+                    {
+                        builder.AddContent(37, LoadItem(item));
+                    }
+
+
+                }
+
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadItem(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "tr");
+            builder.AddAttribute(1, "class", "buddy-top");
+            if (item.Key.IsEquipped)
+            {
+                builder.AddAttribute(2, "style", "background-color:aquamarine;width:100%");
+            }
+            else
+            {
+                builder.AddAttribute(2, "style", "width:100%");
+            }
+            builder.OpenElement(3, "td");
+            builder.AddAttribute(4, "title", item.Key.ItemDescription);
+            builder.AddAttribute(5, "style", "text-align:left;font-weight:bold;line-height:20px;display:flex");
+            builder.OpenElement(6, "img");
+            builder.AddAttribute(7, "src", "data/ItemIcons/" + item.Key.Icon + ".png");
+            builder.AddAttribute(8, "style", "width:40px;height:40px;opacity:0.6;color:green;float:left");
+            if (item.Key.ExperienceGained != null)
+            {
+                builder.AddAttribute(9, "title", "+ " + item.Key.ExperienceGained + " exp");
+            }
+            //img 6
+            builder.CloseElement();
+            builder.OpenElement(10, "div");
+            builder.OpenElement(11, "img");
+
+            builder.AddAttribute(12, "src", "data/ItemIcons/Up.png");
+            builder.AddAttribute(13, "style", "width:20px;opacity:0.6;margin:0px;display:table-cell");
+            builder.AddAttribute(14, "onclick", new Action(() => MoveItemUp(item.Key)));
+            //img 11
+            builder.CloseElement();
+            builder.OpenElement(15, "img");
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(16, "src", "data/ItemIcons/Lock.png");
+                builder.AddAttribute(17, "style", "width:20px;opacity:0.6;margin:0px;display:table-cell");
+            }
+            else
+            {
+                builder.AddAttribute(16, "src", "data/ItemIcons/Unlock.png");
+                builder.AddAttribute(17, "style", "width:20px;opacity:0.6;margin:0px;display:table-cell");
+            }
+            builder.AddAttribute(18, "onclick", new Action(() => ToggleLock(item.Key)));
+            //img 15
+            builder.CloseElement();
+            builder.OpenElement(19, "img");
+
+            builder.AddAttribute(20, "src", "data/ItemIcons/Down.png");
+            builder.AddAttribute(21, "style", "width:20px;opacity:0.6;margin:0px;display:table-cell");
+            builder.AddAttribute(22, "onclick", new Action(() => MoveItemDown(item.Key)));
+            //img 19
+            builder.CloseElement();
+            //div 10
+            builder.CloseElement();
+            
+            if(item.Value == 1)
+            {
+                builder.AddContent(23, item.Key.ItemName);
+            }
+            else
+            {
+                builder.AddContent(23, item.Key.ItemName + " x " + item.Value);
+            }
+            //td
+            builder.CloseElement();
+            builder.OpenElement(24, "td");
+            builder.CloseElement();
+            if (item.Key.IsUsable)
+            {
+
+                builder.OpenElement(35, "td");
+                builder.AddAttribute(37, "style", "text-align:right");
+                builder.OpenElement(38, "button");
+                builder.AddAttribute(39, "class", "btn btn-primary");
+                if (GameState.CanLeave() == false)
+                {
+                    builder.AddAttribute(40, "disabled", true);
+                    builder.AddAttribute(41, "title", "You can't do that while you are doing what you're doing.");
+                }
+                if (!GameState.isUsing)
+                {
+                    builder.AddAttribute(42, "onclick", new Action(() => Use(item.Key)));
+                    builder.AddContent(43, "Use " + item.Key.ItemName);
+                }
+                else
+                {
+                    builder.AddAttribute(44, "onclick", new Action(() => CancelUse()));
+                    builder.AddContent(45, "Cancel");
+                }
+                builder.CloseElement();
+                builder.CloseElement();
+
+            }
+
+
+            else if (item.Key.IsUnpackable)
+            {
+                builder.AddContent(47, UnpackButton(item));
+            }
+            else if (item.Key.IsEdible)
+            {
+                builder.AddContent(48, EatButton(item.Key));
+            }
+            else if (item.Key.IsEquipable)
+            {
+                builder.AddContent(49, EquipButtons(item));
+            }
+            else if (item.Key.IsArrow)
+            {
+                builder.AddContent(50, ArrowInfo(item));
+            }
+
+            builder.CloseElement();
+
+            if (usableIDs != null)
+            {
+                for (int i = 0; i < usableIDs.GetLength(0); i++)
+                {
+                    if (usableIDs[i, 0] == item.Key.Id)
+                    {
+                        builder.AddContent(46, UseButton(i, item.Key));
+                    }
+                }
+            }
+
+            if (GameState.canBank)
+            {
+                builder.AddContent(51, BankButtons(item));
+            }
+            if (GameState.canSell && item.Key.Id != 0)
+            {
+                builder.AddContent(52, SellButtons(item));
+            }
+
+        };
+    }
+    private RenderFragment ArrowInfo(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+
+
+            builder.OpenElement(2, "td");
+            string infoString = "";
+            if (item.Key.Damage > 0)
+            {
+                infoString += "Damage: " + item.Key.Damage;
+            }
+
+            builder.AddContent(3, infoString);
+            builder.CloseElement();
+
+
+        };
+    }
+    private RenderFragment UnpackButton(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+
+
+            builder.OpenElement(4, "td");
+            builder.AddAttribute(6, "style", "text-align:right");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "onclick", new Action(() => UnpackItem(item.Key)));
+            if (GameState.GetPlayerInventory().GetAvailableSpaces() < item.Key.UnpackIDs.Length &&
+             !(item.Key.UnpackIDs.Length == 1 && item.Key.IsStackable == false))
+            {
+                builder.AddAttribute(10, "disabled", true);
+                builder.AddAttribute(11, "title", "You don't have enough free inventory space.");
+            }
+            else if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(10, "disabled", true);
+                builder.AddAttribute(11, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(12, item.Key.UnpackString);
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment EquipButtons(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "td");
+            if (item.Key.IsEquipped)
+            {
+                builder.AddAttribute(1, "style", "background-color:aquamarine");
+            }
+            if (item.Key.AttackSpeed != 0)
+            {
+                builder.AddAttribute(2, "title", "DPS: " + (float)item.Key.Damage / (item.Key.AttackSpeed / 1000f));
+            }
+
+            builder.AddAttribute(3, "class", "buddy-mid");
+
+            string infoString = "";
+            if (item.Key.Damage > 0)
+            {
+                infoString += "Damage: " + item.Key.Damage;
+            }
+            if (item.Key.Armor > 0)
+            {
+                if (item.Key.Damage > 0)
+                {
+                    infoString += ", ";
+                }
+                infoString += " Armor: " + item.Key.Armor;
+            }
+            if (item.Key.GatherSpeedBonus > 0)
+            {
+                if (item.Key.Damage > 0 || item.Key.Armor > 0)
+                {
+                    infoString += ", ";
+                }
+                infoString += "Gather Efficiency: " + (item.Key.GatherSpeedBonus * 100) + "%";
+            }
+            builder.AddContent(4, infoString);
+            builder.CloseElement();
+            builder.OpenElement(5, "td");
+            builder.AddAttribute(6, "style", "text-align:right");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            if (item.Key.IsEquipped)
+            {
+                builder.AddAttribute(9, "onclick", new Action(() => Unequip(item.Key)));
+                builder.AddContent(10, "Unequip");
+            }
+            else
+            {
+                builder.AddAttribute(11, "onclick", new Action(() => Equip(item.Key)));
+                if (GameState.GetPlayer().GetLevel(item.Key.ActionRequired) < item.Key.RequiredLevel &&
+                item.Key.ActionRequired.Contains("Leatherworking") == false)
+                {
+                    builder.AddAttribute(12, "disabled", true);
+                    builder.AddAttribute(13, "title", "You don't have the " + item.Key.ActionRequired + " level to equip this item. (" + item.Key.RequiredLevel + ")");
+                }
+                builder.AddContent(14, "Equip");
+            }
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+        };
+    }
+    private RenderFragment BankButtons(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "tr");
+            builder.AddAttribute(1, "class", "buddy-mid");
+            if (item.Key.IsEquipped)
+            {
+                builder.AddAttribute(2, "style", "background-color:aquamarine");
+            }
+            builder.OpenElement(3, "td");
+            builder.AddContent(4, "Deposit");
+            builder.CloseElement();
+            //builder.OpenElement(5, "td");
+            //builder.CloseElement();
+            builder.OpenElement(5, "td");
+            builder.AddAttribute(6, "style", "text-align:right");
+            builder.AddAttribute(6, "colspan", "3");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:2px");
+            builder.AddAttribute(10, "onclick", new Action(() => Deposit(item, 1)));
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(11, "disabled", true);
+                builder.AddAttribute(12, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(13, "1");
+            // builder.CloseElement();
+            builder.CloseElement();
+            //builder.OpenElement(12, "td");
+            //builder.AddAttribute(12, "style", "text-align:right");
+            builder.OpenElement(14, "button");
+            builder.AddAttribute(15, "class", "btn btn-primary");
+            builder.AddAttribute(16, "style", "margin:2px");
+            builder.AddAttribute(17, "onclick", new Action(() => Deposit(item, 5)));
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(18, "disabled", true);
+                builder.AddAttribute(19, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(20, "5");
+            //builder.CloseElement();
+            builder.CloseElement();
+            //builder.OpenElement(18, "td");
+            // builder.AddAttribute(18, "style", "text-align:right");
+            builder.OpenElement(21, "button");
+            builder.AddAttribute(22, "class", "btn btn-primary");
+            builder.AddAttribute(23, "style", "margin:2px");
+            builder.AddAttribute(24, "onclick", new Action(() => Deposit(item, int.MaxValue)));
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(25, "disabled", true);
+                builder.AddAttribute(26, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(27, "All");
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+
+        };
+    }
+    private RenderFragment SellButtons(KeyValuePair<GameItem, int> item)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "tr");
+            builder.AddAttribute(1, "class", "buddy-mid");
+            if (item.Key.IsEquipped)
+            {
+                builder.AddAttribute(2, "style", "background-color:aquamarine");
+            }
+
+            builder.OpenElement(3, "td");
+            builder.AddAttribute(3, "style", "width:50%");
+            if (item.Key.Id == confirmSellItemID && trySellingExpensiveItem)
+            {
+                builder.AddContent(4, "Confirm sale for " + Math.Round(item.Key.Value / 2f, 1) + " each");
+            }
+            else
+            {
+                builder.AddContent(4, "Sell for " + Math.Round(item.Key.Value / 2f, 1) + " each");
+            }
+
+
+            builder.CloseElement();
+            builder.OpenElement(5, "td");
+            builder.AddAttribute(6, "colspan", "4");
+            builder.AddAttribute(8, "style", "text-align:right");
+            builder.OpenElement(9, "button");
+            builder.AddAttribute(10, "class", "btn btn-primary");
+            builder.AddAttribute(11, "style", "margin:3px");
+            if (item.Key.Value < GameState.expensiveItemThreshold || trySellingExpensiveItem == true)
+            {
+                builder.AddAttribute(12, "onclick", new Action(() => Sell(item, 1)));
+            }
+            else
+            {
+                builder.AddAttribute(12, "onclick", new Action(() => TrySell(item, 1)));
+            }
+            //If the player has a full inventory and no place for coins, they can't sell part of a stack.
+            if (item.Key.IsStackable && item.Value > 1 && GameState.GetPlayerInventory().GetAvailableSpaces() == 0 && GameState.GetPlayerInventory().GetCoins() == 0)
+            {
+                builder.AddAttribute(13, "disabled", true);
+                builder.AddAttribute(14, "title", "You don't have inventory space for the coins you would receive.");
+            }
+            else if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(13, "disabled", true);
+                builder.AddAttribute(14, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(15, "1");
+            builder.CloseElement();
+            builder.OpenElement(16, "button");
+            builder.AddAttribute(17, "class", "btn btn-primary");
+            builder.AddAttribute(18, "style", "margin:3px");
+            if (item.Key.Value < GameState.expensiveItemThreshold || trySellingExpensiveItem == true)
+            {
+                builder.AddAttribute(19, "onclick", new Action(() => Sell(item, 5)));
+            }
+            else
+            {
+                builder.AddAttribute(19, "onclick", new Action(() => TrySell(item, 5)));
+            }
+            //If the player has a full inventory and no place for coins, they can't sell part of a stack.
+            if (item.Key.IsStackable && item.Value > 5 && GameState.GetPlayerInventory().GetAvailableSpaces() == 0 && GameState.GetPlayerInventory().GetCoins() == 0)
+            {
+                builder.AddAttribute(20, "disabled", true);
+                builder.AddAttribute(21, "title", "You don't have inventory space for the coins you would receive.");
+            }
+            else if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(20, "disabled", true);
+                builder.AddAttribute(21, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(22, "5");
+            builder.CloseElement();
+            builder.OpenElement(23, "button");
+            builder.AddAttribute(24, "class", "btn btn-primary");
+            builder.AddAttribute(25, "style", "margin:3px");
+            if (item.Key.Value < GameState.expensiveItemThreshold || trySellingExpensiveItem == true)
+            {
+                builder.AddAttribute(26, "onclick", new Action(() => Sell(item, sellAmount)));
+            }
+            else
+            {
+                builder.AddAttribute(26, "onclick", new Action(() => TrySell(item, sellAmount)));
+            }
+            //If the player has a full inventory and no place for coins, they can't sell part of a stack.
+            if ((item.Key.IsStackable && item.Value > sellAmount && GameState.GetPlayerInventory().GetAvailableSpaces() == 0 && GameState.GetPlayerInventory().GetCoins() == 0) ||
+                        sellAmount < 0)
+            {
+                builder.AddAttribute(27, "disabled", true);
+                if (sellAmount < 0)
+                {
+                    builder.AddAttribute(28, "title", "You can't sell a negative amount of something.");
+                }
+                else
+                {
+                    builder.AddAttribute(29, "title", "You don't have inventory space for the coins you would receive.");
+                }
+
+            }
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(27, "disabled", true);
+                builder.AddAttribute(28, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(30, sellAmount);
+            builder.CloseElement();
+            builder.OpenElement(31, "button");
+            builder.AddAttribute(32, "class", "btn btn-primary");
+            builder.AddAttribute(33, "style", "margin:3px");
+            if (item.Key.Value < GameState.expensiveItemThreshold || trySellingExpensiveItem == true)
+            {
+                builder.AddAttribute(34, "onclick", new Action(() => Sell(item, int.MaxValue)));
+            }
+            else
+            {
+                builder.AddAttribute(34, "onclick", new Action(() => TrySell(item, int.MaxValue)));
+            }
+            if (item.Key.IsLocked)
+            {
+                builder.AddAttribute(35, "disabled", true);
+                builder.AddAttribute(36, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(37, "All");
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+
+        };
+    }
+    private RenderFragment UseButton(int i, GameItem item)
+    {
+        return builder =>
+        {
+            GameItem itemToMake = Program.itemDatabase.GetItemByID(usableIDs[i, 1]);
+            int spacesRequired = itemToMake.MadeOnCreation;
+            if (itemToMake.IsStackable)
+            {
+                spacesRequired = 1;
+                if (GameState.GetPlayerInventory().HasItem(itemToMake))
+                {
+                    spacesRequired = 0;
+                }
+            }
+            builder.OpenElement(1, "td");
+            builder.AddAttribute(3, "align", "right");
+            builder.OpenElement(4, "button");
+            builder.AddAttribute(5, "class", "btn btn-primary");
+            builder.AddAttribute(6, "onclick", new Action(() => Create(item, i)));
+            if (GameState.GetPlayer().HasRequiredLevel(itemToMake) == false)
+            {
+                builder.AddAttribute(7, "disabled", true);
+                builder.AddAttribute(8, "title", "You lack the " + itemToMake.ActionRequired + " level to do this. (" + itemToMake.RequiredLevel + ")");
+            }
+            else if (GameState.isGathering || GameState.isHunting || GameState.isSmithing)
+            {
+                builder.AddAttribute(9, "disabled", true);
+                builder.AddAttribute(10, "title", "You can't make things while doing what you're doing.");
+            }
+            else if (item.IsLocked)
+            {
+                builder.AddAttribute(9, "disabled", true);
+                builder.AddAttribute(10, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            else if (itemToMake.IngredientIDs != null && itemToMake.AmountOfIngredientsToCreate > GameState.GetPlayerInventory().GetAmountOfItem(Program.itemDatabase.GetItemByID(itemToMake.IngredientIDs[0])))
+            {
+                builder.AddAttribute(9, "disabled", true);
+                builder.AddAttribute(10, "title", "You don't have enough " + Program.itemDatabase.GetItemByID(itemToMake.IngredientIDs[0]).ItemName + ".(" + itemToMake.AmountOfIngredientsToCreate + ")");
+            }
+            else if (GameState.GetPlayerInventory().GetAvailableSpaces() < spacesRequired)
+            {
+
+                builder.AddAttribute(9, "disabled", true);
+                builder.AddAttribute(10, "title", "You don't have enough inventory space to make " + itemToMake.ItemName + "(" + spacesRequired + ")");
+
+            }
+            builder.AddContent(11, itemToMake.ItemName);
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment EatButton(GameItem item)
+    {
+        return builder =>
+        {
+
+            builder.OpenElement(2, "td");
+            builder.AddAttribute(3, "title", "Boosts " + item.BuffedSkill + " by " + item.BuffAmount);
+            builder.AddContent(4, "Heals " + item.HealAmount + " for " + item.HealDuration + " seconds");
+            builder.CloseElement();
+            builder.OpenElement(5, "td");
+            builder.AddAttribute(7, "align", "right");
+            builder.OpenElement(8, "button");
+            builder.AddAttribute(9, "class", "btn btn-primary");
+            builder.AddAttribute(10, "onclick", new Action(() => Eat(item)));
+            if (item.IsLocked)
+            {
+                builder.AddAttribute(11, "disabled", true);
+                builder.AddAttribute(12, "title", "This item is locked. Click the lock by the name to unlock it.");
+            }
+            builder.AddContent(13, "Eat");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    public string SetSellAmount(int value)
+    {
+        sellAmount = value;
+        return "";
+    }
+
+    private string Deposit(KeyValuePair<GameItem, int> item, int amount)
+    {
+        CancelUse();
+        GameState.safeToSave = false;
+        if (amount > item.Value)
+        {
+            amount = item.Value;
+        }
+        if (item.Key.IsEquipable && item.Key.IsEquipped)
+        {
+            Unequip(item.Key);
+        }
+        GameState.GetPlayerBank().GetInventory().AddMultipleOfItem(item.Key, amount);
+        GameState.GetPlayerInventory().RemoveItems(item.Key, amount);
+        GameState.safeToSave = true;
+        GameState.UpdateState();
+        return "";
+    }
+    private string Sell(KeyValuePair<GameItem, int> item, int amount)
+    {
+        CancelUse();
+        GameState.safeToSave = false;
+        trySellingExpensiveItem = false;
+        confirmSellItemID = -1;
+        if (amount > item.Value)
+        {
+            amount = item.Value;
+        }
+        if (amount < 0)
+        {
+            return "";
+        }
+        if (item.Key.IsEquipable && item.Key.IsEquipped)
+        {
+            Unequip(item.Key);
+        }
+        GameState.GetPlayerInventory().RemoveItems(item.Key, amount);
+        GameState.GetPlayerInventory().AddMultipleOfItem(Program.itemDatabase.GetGold(), (int)((item.Key.Value * amount) / 2d));
+        GameState.totalCoinsEarned += (int)((item.Key.Value * amount) / 2d);
+        GameState.safeToSave = true;
+        GameState.UpdateState();
+        return "";
+    }
+    private string TrySell(KeyValuePair<GameItem, int> item, int amount)
+    {
+        trySellingExpensiveItem = true;
+        confirmSellItemID = item.Key.Id;
+        StateHasChanged();
+        return "";
+    }
+    public void ToggleLock(GameItem item)
+    {
+        item.IsLocked = !item.IsLocked;
+        GameState.UpdateState();
+        this.StateHasChanged();
+    }
+    private string Use(GameItem item)
+    {
+        if (currentUsedItem != item && item.IsUsable)
+        {
+            usableIDs = Extensions.To2DArray<int>(item.UsableIDs);
+            currentUsedItem = item;
+        }
+        GameState.isUsing = true;
+        GameState.UpdateState();
+        StateHasChanged();
+        return "";
+    }
+    private string CancelUse()
+    {
+        if (GameState.createRepeatTimer != null)
+        {
+            GameState.createRepeatTimer.Dispose();
+        }
+        currentUsedItem = null;
+        GameState.isUsing = false;
+        usableIDs = null;
+        GameState.safeToSave = true;
+        GameState.UpdateState();
+        StateHasChanged();
+        return "";
+    }
+    public void Eat(GameItem item)
+    {
+        CancelUse();
+        EndBoostTimer();
+
+        GameState.SetBuffItem(item);
+        GameState.GetPlayer().GetSkill(GameState.currentBuffItem.BuffedSkill).Boost = GameState.currentBuffItem.BuffAmount;
+
+        GameState.foodTimer = new Timer(new TimerCallback(_ =>
+        {
+            GameState.buffSecondsLeft--;
+            GameState.GetPlayer().CurrentHP = Math.Min(GameState.GetPlayer().CurrentHP + GameState.currentBuffItem.HealAmount, GameState.GetPlayer().MaxHP);
+            GameState.GetPlayer().GainExperience("HP", GameState.currentBuffItem.HealAmount);
+            if (GameState.buffSecondsLeft <= 0)
+            {
+                GameState.GetPlayer().GetSkill(GameState.currentBuffItem.BuffedSkill).Boost = 0;
+                MessageManager.AddMessage("Your buff has expired.");
+                EndBoostTimer();
+            }
+            else if(GameState.GetPlayer().CurrentHP <= 0)
+            {
+                GameState.buffSecondsLeft = 0;
+                GameState.GetPlayer().GetSkill(GameState.currentBuffItem.BuffedSkill).Boost = 0;
+                MessageManager.AddMessage("You died from food poisoning.");
+                GameState.GetPlayer().CurrentHP = GameState.GetPlayer().MaxHP;
+                EndBoostTimer();
+            }
+            GameState.UpdateState();
+            StateHasChanged();
+        }), null, 1000, 1000);
+        GameState.safeToSave = false;
+        MessageManager.AddMessage("You eat a " + item.ItemName + " healing " + item.HealAmount + " and  boosting your " + item.BuffedSkill + " by " + item.BuffAmount + ".");
+        GameState.GetPlayerInventory().RemoveOneOfItem(item);
+        GameState.safeToSave = true;
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private string UnpackItem(GameItem item)
+    {
+        CancelUse();
+        int itemsCreated = item.UnpackIDs.Length;
+        GameState.safeToSave = false;
+        if (GameState.GetPlayerInventory().GetAvailableSpaces() < itemsCreated &&
+            !(itemsCreated == 1 && Program.itemDatabase.GetItemByID(item.UnpackIDs[0]).IsStackable == true))
+        {
+            return "";
+        }
+        GameState.GetPlayerInventory().RemoveOneOfItem(item);
+        foreach (int id in item.UnpackIDs)
+        {
+            GameState.GetPlayerInventory().AddMultipleOfItem(Program.itemDatabase.GetItemByID(id), Math.Max(1, item.MadeOnCreation));
+
+        }
+        GameState.safeToSave = true;
+        GameState.UpdateState();
+        this.StateHasChanged();
+        return "";
+    }
+    private string Create(GameItem itemUsed, int itemCreatedID)
+    {
+        if (GameState.createRepeatTimer != null)
+        {
+            GameState.createRepeatTimer.Dispose();
+            GameState.createRepeatTimer = null;
+        }
+
+
+        int creationTime = Program.itemDatabase.GetItemByID(usableIDs[itemCreatedID, 1]).GatherSpeed;
+        GameState.createRepeatTimer = new Timer(new TimerCallback(_ =>
+        {
+
+            GameItem itemCreated = Program.itemDatabase.GetItemByID(usableIDs[itemCreatedID, 1]);
+            GameState.safeToSave = false;
+            if (itemCreated.AmountOfIngredientsToCreate == 0)
+            {
+
+                if (GameState.GetPlayerInventory().RemoveOneOfItem(itemUsed))
+                {
+                    int numToMake = Math.Max(itemCreated.MadeOnCreation, 1);
+                    if (GameState.GetPlayerInventory().AddMultipleOfItem(itemCreated, numToMake) == false)
+                    {
+                        CancelUse();
+                    }
+
+                    MessageManager.AddMessage(itemCreated.GatherString);
+                    GameState.GetPlayer().GainExperience(itemCreated.ExperienceGained);
+                    if (currentUsedItem.DestroyOnUse)
+                    {
+                        GameState.GetPlayerInventory().RemoveOneOfItem(currentUsedItem);
+                        if (GameState.GetPlayerInventory().HasItem(currentUsedItem) == false)
+                        {
+                            MessageManager.AddMessage("You have run out of " + currentUsedItem.ItemName + ".");
+                            CancelUse();
+                        }
+                    }
+                    if (GameState.GetPlayerInventory().HasItem(itemUsed) == false)
+                    {
+                        MessageManager.AddMessage("You have run out of " + itemUsed.ItemName + ".");
+                        CancelUse();
+                    }
+                }
+            }
+            else
+            {
+                GameState.GetPlayerInventory().RemoveItems(itemUsed, itemCreated.AmountOfIngredientsToCreate);
+                GameState.GetPlayerInventory().AddItem(itemCreated);
+                MessageManager.AddMessage(itemCreated.GatherString);
+                GameState.GetPlayer().GainExperience(itemCreated.ExperienceGained);
+                if (currentUsedItem.DestroyOnUse)
+                {
+                    GameState.GetPlayerInventory().RemoveOneOfItem(currentUsedItem);
+                    if (GameState.GetPlayerInventory().HasItem(currentUsedItem) == false)
+                    {
+                        MessageManager.AddMessage("You have run out of " + currentUsedItem.ItemName + ".");
+                        CancelUse();
+                    }
+                }
+                if (GameState.GetPlayerInventory().HasItem(itemUsed) == false || GameState.GetPlayerInventory().GetAmountOfItem(itemUsed) < itemCreated.AmountOfIngredientsToCreate)
+                {
+                    MessageManager.AddMessage("You have run out of " + itemUsed.ItemName + ".");
+                    CancelUse();
+                }
+
+            }
+            //CancelUse();
+            GameState.safeToSave = true;
+            GameState.UpdateState();
+            StateHasChanged();
+        }), null, (int)((500 + (creationTime / 2)) * GameState.GetPlayer().GetGatherSpeed(currentUsedItem.ActionRequired)), (int)((1000 + creationTime) * GameState.GetPlayer().GetGatherSpeed(currentUsedItem.ActionRequired)));
+
+
+        return "";
+    }
+    public void Equip(GameItem item)
+    {
+        CancelUse();
+        GameState.GetPlayer().EquipItem(item);
+        if (GameState.attackTimer != null)
+        {
+            GameState.attackTimer.Change(GameState.GetPlayer().GetWeaponAttackSpeed(), GameState.GetPlayer().GetWeaponAttackSpeed());
+        }
+        else
+        {
+            GameState.StopActions();
+        }
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    public void Unequip(GameItem item)
+    {
+        CancelUse();
+        GameState.GetPlayer().UnequipItem(item);
+        if (GameState.attackTimer != null)
+        {
+            GameState.attackTimer.Change(GameState.GetPlayer().GetWeaponAttackSpeed(), GameState.GetPlayer().GetWeaponAttackSpeed());
+        }
+        else
+        {
+            GameState.StopActions();
+        }
+        GameState.UpdateState();
+        StateHasChanged();
+    }
+    private void EndBoostTimer()
+    {
+        if (GameState.foodTimer != null)
+        {
+            GameState.GetPlayer().GetSkill(GameState.currentBuffItem.BuffedSkill).Boost = 0;
+            GameState.foodTimer.Dispose();
+            GameState.foodTimer = null;
+            GameState.UpdateState();
+            StateHasChanged();
+        }
+    }
+    private void MoveItemUp(GameItem item)
+    {
+        foreach (KeyValuePair<GameItem, int> pair in GameState.GetPlayerInventory().GetItems())
+        {
+            if (pair.Key.itemPos == item.itemPos - 1)
+            {
+                pair.Key.itemPos++;
+                item.itemPos--;
+                GameState.UpdateState();
+                StateHasChanged();
+                return;
+            }
+        }
+    }
+    private void MoveItemDown(GameItem item)
+    {
+        foreach (KeyValuePair<GameItem, int> pair in GameState.GetPlayerInventory().GetItems())
+        {
+            if (pair.Key.itemPos == item.itemPos + 1)
+            {
+                pair.Key.itemPos--;
+                item.itemPos++;
+                GameState.UpdateState();
+                StateHasChanged();
+                return;
+            }
+        }
+
+    }
+    protected override void OnInitialized()
+    {
+        GameState.StateChanged += OnInventoryStateChanged;
+    }
+
+    public void Dispose()
+    {
+        GameState.StateChanged -= OnInventoryStateChanged;
+    }
+    void OnInventoryStateChanged(object sender, EventArgs e) => StateHasChanged();
+}
+

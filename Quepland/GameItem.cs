@@ -28,6 +28,7 @@ public class GameItem
     public int AmountOfIngredientsToCreate { get; set; }
     public int PlankLevel { get; set; }
     public int BarLevel { get; set; }
+    public int NailLevel { get; set; }
 
     public bool IsUsable { get; set; }
     public bool IsEquipable { get; set; }
