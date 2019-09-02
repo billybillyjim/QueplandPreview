@@ -172,6 +172,17 @@ public static class Extensions
 
         return result;
     }
+    public static List<KeyValuePair<GameItem, int>> Convert2DArrayToItems(int[,] itemArray, ItemDatabase itemDatabase)
+    {
+        List<KeyValuePair<GameItem, int>> items = new List<KeyValuePair<GameItem, int>>();
+
+        for(int i = 0; i < itemArray.GetLength(0); i++)
+        {
+            items.Add(new KeyValuePair<GameItem, int>(itemDatabase.GetItemByID(itemArray[i, 0]), itemArray[i, 1]));
+        }
+
+        return items;
+    }
     public static string GetIngredientsAsString(GameItem item, ItemDatabase itemDatabase)
     {
         string returnString = "";

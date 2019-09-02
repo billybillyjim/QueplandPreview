@@ -37,11 +37,20 @@ public class FurnitureSlot
         FurnitureToBuild.MinimumPlankLevel = furniture.MinimumPlankLevel;
         FurnitureToBuild.Name = furniture.Name;
         FurnitureToBuild.OtherItemCosts = furniture.OtherItemCosts;
+        FurnitureToBuild.OtherItemCurrentAmounts = Extensions.To2DArray(furniture.OtherItemCosts);
         FurnitureToBuild.PlanksRequired = furniture.PlanksRequired;
         FurnitureToBuild.UpgradeIDs = furniture.UpgradeIDs;
         FurnitureToBuild.WithdrawAmount = furniture.WithdrawAmount;
         FurnitureToBuild.WithdrawEvery = furniture.WithdrawEvery;
         FurnitureToBuild.WithdrawItem = furniture.WithdrawItem;
+        if(furniture.OtherItemCosts != null)
+        {
+            for(int i = 0; i < furniture.OtherItemCosts.GetLength(0); i++)
+            {
+                FurnitureToBuild.OtherItemCurrentAmounts[i, 0] = furniture.OtherItemCosts[i][0];
+                FurnitureToBuild.OtherItemCurrentAmounts[i, 1] = 0;
+            }
+        }
     }
 }
 
