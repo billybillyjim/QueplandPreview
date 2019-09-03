@@ -308,7 +308,7 @@
             builder.CloseElement();
             builder.OpenElement(5, "div");
             builder.AddAttribute(6, "class", "card-body");
-            if(slot.FurnitureToBuild == null)
+            if(slot.FurnitureToBuild == null && slot.isFinished == false)
             {
                 foreach (Furniture furniture in Program.houseManager.GetAvailableFurnitureForSlot(slot))
                 {
@@ -323,25 +323,38 @@
                     builder.CloseElement();
                 }
             }
-            else if(slot.Inventory.GetAmountOfBars() < slot.FurnitureToBuild.BarsRequired ||
-            slot.Inventory.GetAmountOfPlanks() < slot.FurnitureToBuild.PlanksRequired)
+            else if((slot.Inventory.GetAmountOfBars() < slot.FurnitureToBuild.BarsRequired ||
+                    slot.Inventory.GetAmountOfPlanks() < slot.FurnitureToBuild.PlanksRequired) && slot.isFinished == false)
             {
 
                 builder.AddContent(13, LoadItemButtons(slot));
             }
-            else
+            else if(slot.isFinished == false)
             {
                 builder.OpenElement(7, "p");
-                builder.AddContent(7, ((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) + "%");
+                if(((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) < 100)
+                {
+                    builder.AddContent(7, ((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) + "%");
+                }
+                else
+                {
+                    builder.AddContent(7, "Complete!");
+                }
+
                 builder.CloseElement();
                 builder.OpenElement(7, "button");
                 builder.AddAttribute(8, "class", "btn btn-primary");
                 builder.AddAttribute(9, "style", "");
                 builder.AddAttribute(10, "title", "");
-                if(GameState.gatherTimer == null)
+                if(GameState.gatherTimer == null && ((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) < 100)
                 {
                     builder.AddAttribute(11, "onclick", new Action(() => Construct(slot.FurnitureToBuild)));
                     builder.AddContent(12, "Begin Constructing " + slot.FurnitureToBuild.Name);
+                }
+                else if(((slot.FurnitureToBuild.Progress / (float)slot.FurnitureToBuild.GetWorkRequired()) * 100) >= 100)
+                {
+                    builder.AddAttribute(11, "onclick", new Action(() => CompleteFurniture(slot)));
+                    builder.AddContent(12, "Complete " + slot.FurnitureToBuild.Name);
                 }
                 else
                 {
@@ -358,7 +371,23 @@
                 builder.AddContent(12, "Cancel" );
                 builder.CloseElement();
             }
-
+            else
+            {
+                builder.OpenElement(7, "p");
+                if(slot.FurnitureToBuild.LastWithdrawn == null || DateTime.UtcNow.Subtract(slot.FurnitureToBuild.LastWithdrawn).Ticks < slot.FurnitureToBuild.WithdrawEvery.Ticks)
+                {
+                    builder.OpenElement(7, "button");
+                    builder.AddAttribute(8, "class", "btn btn-primary");
+                    builder.AddAttribute(9, "style", "margin:3px");
+                    builder.AddAttribute(10, "title", "");
+                    builder.AddAttribute(11, "onclick", new Action(() => Withdraw(slot)));
+                    builder.AddContent(12, "Take " + slot.FurnitureToBuild.WithdrawItem);
+                    builder.CloseElement();
+                    builder.OpenElement(13, "br");
+                    builder.CloseElement();
+                }
+                builder.CloseElement();
+            }
             builder.CloseElement();
             builder.CloseElement();
         };
@@ -380,7 +409,7 @@
                 {
                     builder.OpenElement(27, "p");
                     builder.AddAttribute(29, "title", "You have " + GameState.GetPlayerBank().GetInventory().GetAmountOfItem(item.Key) + " in your bank.");
-                    builder.AddContent(31, item.Key.ItemName + ":" + slot.Inventory.GetAmountOfItem(item.Key) + "/" + slot.FurnitureToBuild.GetAmountOfItem(item.Key.Id));
+                    builder.AddContent(31, item.Key.ItemName + ":" + slot.Inventory.GetAmountOfItem(item.Key) + "/" + slot.FurnitureToBuild.GetCostOfItem(item.Key.Id));
                     builder.CloseElement();
                 }
             }
@@ -444,7 +473,7 @@
                 builder.AddAttribute(19, "class", "btn btn-primary");
                 builder.AddAttribute(20, "style", "margin:3px");
 
-                if(currentOtherItem != null && slot.Inventory.GetAmountOfItem(currentOtherItem) < slot.FurnitureToBuild.GetAmountOfItem(currentOtherItem.Id) && GameState.GetPlayerBank().GetInventory().HasItem(currentOtherItem))
+                if(currentOtherItem != null && slot.Inventory.GetAmountOfItem(currentOtherItem) < slot.FurnitureToBuild.GetCostOfItem(currentOtherItem.Id) && GameState.GetPlayerBank().GetInventory().HasItem(currentOtherItem))
                 {
                     builder.AddAttribute(22, "onclick", new Action(() => LoadOther(slot)));
                 }
@@ -476,11 +505,25 @@
         slot.hasSelected = true;
         GameState.UpdateState();
     }
+    public void CompleteFurniture(FurnitureSlot slot)
+    {
+        slot.isFinished = true;
+        slot.FurnitureToBuild.IsFinished = true;
+        GameState.UpdateState();
+    }
     public void AddMaterials(FurnitureSlot slot)
     {
         LoadPlanks(slot);
         LoadBars(slot);
         LoadOther(slot);
+        GameState.UpdateState();
+    }
+    public void Withdraw(FurnitureSlot slot)
+    {
+        if (GameState.GetPlayerInventory().AddItem(slot.FurnitureToBuild.WithdrawItem))
+        {
+            slot.FurnitureToBuild.LastWithdrawn = DateTime.UtcNow;
+        }
         GameState.UpdateState();
     }
     public void SetCurrentPlank(GameItem item)
@@ -551,9 +594,9 @@
     }
     private void LoadOther(FurnitureSlot slot)
     {
-        if(currentOtherItem != null && slot.Inventory.GetAmountOfItem(currentOtherItem) < slot.FurnitureToBuild.GetAmountOfItem(currentOtherItem.Id))
+        if(currentOtherItem != null && slot.Inventory.GetAmountOfItem(currentOtherItem) < slot.FurnitureToBuild.GetCostOfItem(currentOtherItem.Id))
         {
-            int amount = Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentOtherItem), (slot.FurnitureToBuild.GetAmountOfItem(currentOtherItem.Id) - slot.Inventory.GetAmountOfItem(currentOtherItem)));
+            int amount = Math.Min(GameState.GetPlayerBank().GetInventory().GetAmountOfItem(currentOtherItem), (slot.FurnitureToBuild.GetCostOfItem(currentOtherItem.Id) - slot.Inventory.GetAmountOfItem(currentOtherItem)));
             GameState.GetPlayerBank().GetInventory().RemoveAsManyItemsAsPossible(currentOtherItem, amount);
             slot.Inventory.AddMultipleOfItem(currentOtherItem, amount);
             MessageManager.AddMessage("Added " + amount + " " + currentOtherItem.ItemName + " to " + slot.Name);

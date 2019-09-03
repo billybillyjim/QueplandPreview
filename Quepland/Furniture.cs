@@ -17,13 +17,14 @@ public class Furniture
     public int[] UpgradeIDs { get; set; }
     public GameItem WithdrawItem { get; set; }
     public TimeSpan WithdrawEvery { get; set; }
+    public DateTime LastWithdrawn { get; set; }
     public int WithdrawAmount { get; set; }
     public int Progress { get; set; }
     public bool IsFinished { get; set; }
 
     public int GetWorkRequired()
     {
-        return 1000 + (PlanksRequired + (BarsRequired * 10) * 7);
+        return 1000 + (PlanksRequired + (BarsRequired * 7) * 4);
     }
     public int GetCurrentAmountOfItem(int itemID)
     {
@@ -36,7 +37,7 @@ public class Furniture
         }
         return 0;
     }
-    public int GetAmountOfItem(int itemID)
+    public int GetCostOfItem(int itemID)
     {
         for (int i = 0; i < OtherItemCosts.GetLength(0); i++)
         {
