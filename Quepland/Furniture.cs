@@ -6,6 +6,7 @@ public class Furniture
 	public string Name { get; set; }
     public int ID { get; set; }
     public string Description { get; set; }
+    public string Type { get; set; }
     public int ConstructionLevelRequired { get; set; }
     public int MinimumPlankLevel { get; set; }
     public int PlanksRequired { get; set; }
@@ -22,6 +23,8 @@ public class Furniture
     public int WithdrawItemAmount { get; set; }
     public int Progress { get; set; }
     public bool IsFinished { get; set; }
+    public int BoostDuration { get; set; }
+    public int BoostAmount { get; set; }
 
     public int GetWorkRequired()
     {

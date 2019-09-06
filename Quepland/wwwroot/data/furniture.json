@@ -3,6 +3,7 @@
     "name": "Cheap Chicken Coop",
     "id": 0,
     "description": "A cheaply made chicken coop that can house 10 chickens.",
+    "type": "Coop",
     "planksRequired": 1000,
     "barsRequired": 100,
     "minimumPlankLevel": 0,
@@ -31,7 +32,8 @@
     "upgradeIDs": [ 2, 3 ],
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
-    "withdrawItemAmount": 5
+    "withdrawItemAmount": 5,
+    "type": "Coop"
   },
   {
     "name": "Fancy Chicken Coop",
@@ -48,7 +50,8 @@
     "upgradeIDs": [ 3 ],
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
-    "withdrawItemAmount": 5
+    "withdrawItemAmount": 5,
+    "type": "Coop"
   },
   {
     "name": "Wonderful Chicken Coop",
@@ -64,7 +67,20 @@
     ],
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
-    "withdrawItemAmount": 5
-
+    "withdrawItemAmount": 5,
+    "type": "Coop"
+  },
+  {
+    "name": "Cheap Bed",
+    "id": 4,
+    "description": "A cheaply made bed for you to rest on.",
+    "planksRequired": 1000,
+    "barsRequired": 0,
+    "minimumPlankLevel": 0,
+    "minimumBarLevel": 0,
+    "experienceGained": 25000,
+    "boostDuration": 1,
+    "boostAmount": 3,
+    "type": "Bed"
   }
 ]

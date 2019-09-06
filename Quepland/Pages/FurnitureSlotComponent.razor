@@ -304,9 +304,49 @@
             //Show finished furniture
             else
             {
-                if (slot.FurnitureToBuild.WithdrawItemAmount > 0)
+                if (slot.FurnitureToBuild.Type == "Coop")
                 {
                     builder.AddContent(15, LoadWithdrawItemButton(slot));
+                }
+                if(slot.FurnitureToBuild.Type == "Forge")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Bed")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Guest Bed")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Fighting Ring")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Sushi Bench")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Tanning Bench")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Totem")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Assembly Bench")
+                {
+
+                }
+                if(slot.FurnitureToBuild.Type == "Woodworking Bench")
+                {
+
+                }
+                if (slot.FurnitureToBuild.Type == "Training Dummy")
+                {
+
                 }
 
             }
@@ -447,6 +487,26 @@
                 builder.CloseElement();
             }
             builder.AddContent(7, Button("Cancel", new Action<FurnitureSlot>(HM.CancelBuild), slot, "float:right;margin:5px;"));
+        };
+    }
+    private RenderFragment LoadBedButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "p");
+            builder.AddContent(7, slot.FurnitureToBuild.GetWithdrawTime().ToString());
+            builder.CloseElement();
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+            builder.AddAttribute(10, "title", "");
+            builder.AddAttribute(11, "onclick", new Action(() => HM.Withdraw(slot)));
+            builder.AddContent(12, "Take " + Program.itemDatabase.GetItemByID(slot.FurnitureToBuild.WithdrawItemID));
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
         };
     }
 
