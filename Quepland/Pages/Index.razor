@@ -271,6 +271,9 @@ else
             Program.saveManager.localStorage = localStorage;
             Program.saveManager.gameState = GameState;
             Program.saveManager.messageManager = MessageManager;
+            Program.houseManager.gameState = GameState;
+            Program.houseManager.messageManager = MessageManager;
+            Program.houseManager.itemDatabase = Program.itemDatabase;
             GameState.GetPlayer().SetMessageManager(MessageManager);
             GameState.GetPlayer().CurrentHP = 50;
             GameState.GetPlayerBank().AddItemsToCurrentTab(Program.itemDatabase.GetAllItemIDs());

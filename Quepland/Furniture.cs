@@ -15,10 +15,11 @@ public class Furniture
     public int[,] OtherItemCurrentAmounts = new int[10,2];
     public int ExperienceGained { get; set; }
     public int[] UpgradeIDs { get; set; }
-    public GameItem WithdrawItem { get; set; }
+    public int WithdrawItemID { get; set; }
     public TimeSpan WithdrawEvery { get; set; }
+    public string WithdrawEveryString { get; set; }
     public DateTime LastWithdrawn { get; set; }
-    public int WithdrawAmount { get; set; }
+    public int WithdrawItemAmount { get; set; }
     public int Progress { get; set; }
     public bool IsFinished { get; set; }
 
@@ -47,5 +48,9 @@ public class Furniture
             }
         }
         return 0;
+    }
+    public TimeSpan GetWithdrawTime()
+    {
+        return TimeSpan.Parse(WithdrawEveryString);
     }
 }

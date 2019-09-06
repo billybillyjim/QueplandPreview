@@ -13,6 +13,7 @@ public class FurnitureSlot
     public Inventory Inventory = new Inventory(int.MaxValue);
     public bool isFinished { get; set; }
     public bool hasSelected { get; set; }
+    public int SpaceRequired { get; set; }
 
     public FurnitureSlot()
     {
@@ -24,6 +25,7 @@ public class FurnitureSlot
         ID = slot.ID;
         Description = slot.Description;
         AvailableFurnitureIDs = slot.AvailableFurnitureIDs;
+        SpaceRequired = slot.SpaceRequired;
     }
     public void SetFurniture(Furniture furniture)
     {
@@ -40,9 +42,10 @@ public class FurnitureSlot
         FurnitureToBuild.OtherItemCurrentAmounts = Extensions.To2DArray(furniture.OtherItemCosts);
         FurnitureToBuild.PlanksRequired = furniture.PlanksRequired;
         FurnitureToBuild.UpgradeIDs = furniture.UpgradeIDs;
-        FurnitureToBuild.WithdrawAmount = furniture.WithdrawAmount;
-        FurnitureToBuild.WithdrawEvery = furniture.WithdrawEvery;
-        FurnitureToBuild.WithdrawItem = furniture.WithdrawItem;
+        FurnitureToBuild.WithdrawItemAmount = furniture.WithdrawItemAmount;
+        FurnitureToBuild.WithdrawEveryString = furniture.WithdrawEveryString;
+        FurnitureToBuild.WithdrawItemID = furniture.WithdrawItemID;
+
         if(furniture.OtherItemCosts != null)
         {
             for(int i = 0; i < furniture.OtherItemCosts.GetLength(0); i++)
