@@ -11,6 +11,7 @@ public class Furniture
     public int MinimumPlankLevel { get; set; }
     public int PlanksRequired { get; set; }
     public int BarsRequired { get; set; }
+    public int LevelRequired { get; set; }
     public int MinimumBarLevel { get; set; }
     public int[][] OtherItemCosts { get; set; }
     public int[,] OtherItemCurrentAmounts = new int[10,2];

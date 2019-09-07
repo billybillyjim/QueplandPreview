@@ -8753,5 +8753,34 @@
     "ingredientIDs": [ 574 ],
     "experienceGained": "Construction:3",
     "plankLevel": 13
+  },
+  {
+    "itemName": "Empty Pillow",
+    "id": 603,
+    "value": 5000,
+    "icon": "Pillow",
+    "itemDescription": "An empty shell longing for feather friends.",
+    "actionsEnabled": "Pillow",
+    "usableIDs": [ [ 43, 604 ] ],
+    "isUsable": true,
+    "destroyOnUse": true
+  },
+  {
+    "itemName": "Full Pillow",
+    "id": 604,
+    "value": 12000,
+    "icon": "Pillow",
+    "ingredientIDs": [43],
+    "itemDescription": "A pillow full of feathers. It needs to be enchanted to be of any use to an adventurer like yourself.",
+    "amountOfIngredientsToCreate": 5000,
+    "actionRequired": "Pillow",
+    "gatherSpeed": 1300
+  },
+  {
+    "itemName": "Enchanted Pillow",
+    "id": 605,
+    "value": 25000,
+    "icon": "Pillow",
+    "itemDescription": "An enchanted pillow. Touching your ear to it puts you instantly asleep."
   }
 ]

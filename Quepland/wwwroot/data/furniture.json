@@ -13,7 +13,7 @@
       [ 44, 5 ]
     ],
     "upgradeIDs": [ 1, 2, 3 ],
-    "withdrawEveryString": "00:01:00",
+    "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
     "withdrawItemAmount": 5
   },
@@ -33,7 +33,8 @@
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
     "withdrawItemAmount": 5,
-    "type": "Coop"
+    "type": "Coop",
+    "levelRequired": 10
   },
   {
     "name": "Fancy Chicken Coop",
@@ -51,7 +52,8 @@
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
     "withdrawItemAmount": 5,
-    "type": "Coop"
+    "type": "Coop",
+    "levelRequired": 30
   },
   {
     "name": "Wonderful Chicken Coop",
@@ -68,7 +70,8 @@
     "withdrawEveryString": "23:00:00",
     "withdrawItemID": 43,
     "withdrawItemAmount": 5,
-    "type": "Coop"
+    "type": "Coop",
+    "levelRequired": 70
   },
   {
     "name": "Cheap Bed",
@@ -79,8 +82,79 @@
     "minimumPlankLevel": 0,
     "minimumBarLevel": 0,
     "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 1 ]
+    ],
     "boostDuration": 1,
     "boostAmount": 3,
     "type": "Bed"
-  }
+  },
+  {
+    "name": "Regular Bed",
+    "id": 5,
+    "description": "An average bed for an average rest.",
+    "planksRequired": 3000,
+    "barsRequired": 300,
+    "minimumPlankLevel": 2,
+    "minimumBarLevel": 2,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 1 ]
+    ],
+    "boostDuration": 3,
+    "boostAmount": 4,
+    "type": "Bed",
+    "levelRequired": 15
+  },
+  {
+    "name": "Fancy Bed",
+    "id": 6,
+    "description": "A fancy bed. Something to separate you from the riffraff.",
+    "planksRequired": 7000,
+    "barsRequired": 500,
+    "minimumPlankLevel": 4,
+    "minimumBarLevel": 4,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 3 ]
+    ],
+    "boostDuration": 6,
+    "boostAmount": 5,
+    "type": "Bed",
+    "levelRequired": 50
+  },
+  {
+    "name": "Exquisite Bed",
+    "id": 7,
+    "description": "A bed for champions. Sleep like royalty, endulge yourself.",
+    "planksRequired": 15000,
+    "barsRequired": 2500,
+    "minimumPlankLevel": 6,
+    "minimumBarLevel": 6,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 5 ]
+    ],
+    "boostDuration": 12,
+    "boostAmount": 5,
+    "type": "Bed",
+    "levelRequired": 80
+  },
+  {
+    "name": "Magnificent Bed",
+    "id": 8,
+    "description": "A bed that would bring tears of awe to onlookers, if they could see inside your bedroom.",
+    "planksRequired": 30000,
+    "barsRequired": 3000,
+    "minimumPlankLevel": 9,
+    "minimumBarLevel": 9,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 10 ]
+    ],
+    "boostDuration": 18,
+    "boostAmount": 8,
+    "type": "Bed",
+    "levelRequired": 115
+  },
 ]

@@ -94,7 +94,7 @@
     }
     private int GetSlotMinimumLevel(FurnitureSlot slot)
     {
-        return 0;
+        return Program.houseManager.GetAvailableFurnitureForSlot(slot)[0].LevelRequired;
     }
 
     protected override void OnInitialized()

@@ -585,5 +585,18 @@
     "buttonText": "Buy Operator for 100000000 gold coins",
     "spokenText": "What are you talking about? You can't just buy people like cattle. I'll help you out, but you gotta pay me an hourly wage. Who would purposefully sell themselves into slavery like that?",
     "isInteractable": true
+  },
+  {
+    "name": "Pillow Pete",
+    "id": 84,
+    "isInteractable": true,
+    "purchaseItemIDs": [ 605 ],
+    "itemPaymentIDs": [
+      [ 604, 0 ]
+    ],
+    "specialCosts": [ 1, 50000 ],
+    "hasSpecialCosts": true,
+    "spokenText": "Would you like me to enchant a pillow for you? It's my specialty. No refunds!"
+
   }
 ]
