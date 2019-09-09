@@ -1,4 +1,5 @@
 ﻿@page "/SmithingMenu/"
+@page "/SmithingMenu/{isFrostForgeString}/{isMagmaForgeString}/"
 @inject GameState  GameState
 @inject MessageManager  MessageManager
 @using System.Threading;
@@ -6,7 +7,8 @@
 
 <h1>Inside the Smithy</h1>
 <p>An entire working forge lays before you. Pick any metal to begin.</p>
-
+@isFrostForge
+@isMagmaForge
 
 <div class="progress">
     <div class="progress-bar bg-success" style="@(new Action(() => GetWidthString()));transition:none;" role="progressbar" aria-valuenow=@GetValueString() aria-valuemin="0" aria-valuemax="100"></div>
@@ -43,6 +45,12 @@
 
 @functions{
 
+    [Parameter]
+    public string isFrostForgeString { get; set; }
+    [Parameter]
+    public string isMagmaForgeString { get; set; }
+    private bool isFrostForge;
+    private bool isMagmaForge;
     private bool waitingForAutoCollectMessage = true;
     private GameItem currentSmithingBar;
     private GameItem currentSmithingItem;
@@ -92,20 +100,20 @@
                     else if (GameState.GetPlayer().HasIngredients(i.IngredientIDs) == false && GameState.GetPlayerInventory().HasItem(i) == false)
                     {
                         string ingredientString = "(";
-                        foreach(int j in i.IngredientIDs)		
-                        {		
-                            ingredientString += Program.itemDatabase.GetItemByID(j).ItemName + ", ";		
-                        }		
-                        if(i.IngredientIDs.Length == 1)		
-                        {		
-                            ingredientString = ingredientString.Remove(ingredientString.Length - 2);		
-                        }		
-                        else		
-                        {		
-                            ingredientString = ingredientString.Remove(ingredientString.Length - 2);		
-                            ingredientString = Extensions.ReplaceLastOccurrence(ingredientString, ",", " and");		
-                        }		
-                        ingredientString += ")";		
+                        foreach (int j in i.IngredientIDs)
+                        {
+                            ingredientString += Program.itemDatabase.GetItemByID(j).ItemName + ", ";
+                        }
+                        if (i.IngredientIDs.Length == 1)
+                        {
+                            ingredientString = ingredientString.Remove(ingredientString.Length - 2);
+                        }
+                        else
+                        {
+                            ingredientString = ingredientString.Remove(ingredientString.Length - 2);
+                            ingredientString = Extensions.ReplaceLastOccurrence(ingredientString, ",", " and");
+                        }
+                        ingredientString += ")";
                         builder.AddAttribute(0, "title", "You lack the ingredients to smelt this bar." + ingredientString);
                         builder.AddAttribute(0, "disabled", true);
                     }
@@ -133,7 +141,7 @@
                 {
                     builder.AddAttribute(0, "disabled", true);
                 }
-                if(GameState.GetPlayer().HasIngredients(currentSmithingBar.IngredientIDs) == false)
+                if (GameState.GetPlayer().HasIngredients(currentSmithingBar.IngredientIDs) == false)
                 {
                     builder.AddAttribute(0, "disabled", true);
                     builder.AddAttribute(0, "title", "You don't have the materials to do this.");
@@ -303,7 +311,7 @@
             {
                 builder.AddAttribute(9, "disabled", true);
             }
-            if(currentSmithingBar == null)
+            if (currentSmithingBar == null)
             {
                 builder.AddContent(10, "Choose a material");
             }
@@ -319,14 +327,14 @@
             builder.AddAttribute(13, "aria-labelledby", "dropdownMenuButton");
 
 
-            foreach(GameItem bar in Program.itemDatabase.GetSmithingBars())
+            foreach (GameItem bar in Program.itemDatabase.GetSmithingBars())
             {
-                if((GameState.GetPlayerInventory().HasItem(bar) || GameState.GetPlayerInventory().HasBarIngredients(bar)) && GameState.GetPlayer().HasRequiredLevel(bar) )
+                if ((GameState.GetPlayerInventory().HasItem(bar) || GameState.GetPlayerInventory().HasBarIngredients(bar)) && GameState.GetPlayer().HasRequiredLevel(bar))
                 {
                     builder.OpenElement(14, "a");
                     builder.AddAttribute(15, "class", "dropdown-item");
-                    // builder.AddAttribute(16, "href", "#");
-                    builder.AddAttribute(17, "onclick", new Action(() => SetCurrentSmithingBarAuto(bar)));
+                // builder.AddAttribute(16, "href", "#");
+                builder.AddAttribute(17, "onclick", new Action(() => SetCurrentSmithingBarAuto(bar)));
                     builder.AddContent(18, bar.ItemName);
                     builder.CloseElement();
                 }
@@ -346,7 +354,7 @@
             builder.AddAttribute(25, "data-toggle", "dropdown");
             builder.AddAttribute(26, "aria-haspopup", "true");
             builder.AddAttribute(27, "aria-expanded", "false");
-            if(currentSmithingBar == null)
+            if (currentSmithingBar == null)
             {
                 builder.AddAttribute(28, "disabled", true);
                 builder.AddAttribute(29, "title", "You must set a bar first");
@@ -360,7 +368,7 @@
             {
                 builder.AddContent(30, currentSmithingBar);
             }
-            else if(currentSmithingItem == null)
+            else if (currentSmithingItem == null)
             {
                 builder.AddContent(30, "Choose an item");
             }
@@ -375,26 +383,26 @@
             builder.AddAttribute(33, "aria-labelledby", "itemMenuButton");
             builder.AddAttribute(33, "style", "margin-bottom:10px");
 
-            foreach(GameItem item in Program.itemDatabase.GetSmithingItems())
+            foreach (GameItem item in Program.itemDatabase.GetSmithingItems())
             {
-                if((currentSmithingBar != null && item.IngredientIDs[0] == currentSmithingBar.Id)  && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
+                if ((currentSmithingBar != null && item.IngredientIDs[0] == currentSmithingBar.Id) && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
                 {
                     builder.OpenElement(34, "a");
                     builder.AddAttribute(35, "class", "dropdown-item");
-                    // builder.AddAttribute(36, "href", "#");
-                    builder.AddAttribute(37, "onclick", new Action(() => SetCurrentSmithingItemAuto(item)));
+                // builder.AddAttribute(36, "href", "#");
+                builder.AddAttribute(37, "onclick", new Action(() => SetCurrentSmithingItemAuto(item)));
                     builder.AddContent(38, item.ItemName);
                     builder.CloseElement();
                 }
 
             }
-            if(currentSmithingBar != null && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
+            if (currentSmithingBar != null && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
             {
-                //Just smith bars option
-                builder.OpenElement(39, "a");
+            //Just smith bars option
+            builder.OpenElement(39, "a");
                 builder.AddAttribute(40, "class", "dropdown-item");
-                // builder.AddAttribute(36, "href", "#");
-                builder.AddAttribute(41, "onclick", new Action(() => JustSmithBars()));
+            // builder.AddAttribute(36, "href", "#");
+            builder.AddAttribute(41, "onclick", new Action(() => JustSmithBars()));
                 builder.AddContent(42, currentSmithingBar.ItemName);
                 builder.CloseElement();
             }
@@ -407,7 +415,7 @@
             builder.AddAttribute(44, "class", "btn btn-primary");
             builder.AddAttribute(45, "style", "margin-bottom:10px");
             builder.AddAttribute(46, "onclick", new Action(() => BeginAutoSmithing()));
-            if(currentSmithingBar == null || (currentSmithingItem == null && !justSmithBars))
+            if (currentSmithingBar == null || (currentSmithingItem == null && !justSmithBars))
             {
                 builder.AddAttribute(47, "disabled", true);
                 builder.AddAttribute(48, "title", "Please select a bar and material.");
@@ -550,7 +558,7 @@
                 }
                 else if (autoSmithProgress == 0)
                 {
-                    if(justSmithBars && GameState.GetPlayerInventory().HasBarIngredients(currentSmithingBar) == false)
+                    if (justSmithBars && GameState.GetPlayerInventory().HasBarIngredients(currentSmithingBar) == false)
                     {
                         MessageManager.AddMessage("You don't have any ores to just make bars.");
                         StopAutoSmithing();
@@ -777,7 +785,7 @@
         if (currentSmithingBar != null && GameState.GetPlayerBank().GetInventory().HasBarIngredients(currentSmithingBar) && GameState.GetPlayer().HasRequiredLevel(currentSmithingBar))
         {
             int maxIngredients = Math.Min(GameState.GetPlayerBank().GetInventory().GetMaxBarIngredients(currentSmithingBar), GameState.GetPlayerInventory().GetAvailableSpaces()) / currentSmithingBar.IngredientIDs.Length;
-            if(maxIngredients == 0 || (maxIngredients == 1 && currentSmithingBar.IngredientIDs.Length > 1))
+            if (maxIngredients == 0 || (maxIngredients == 1 && currentSmithingBar.IngredientIDs.Length > 1))
             {
                 return false;
             }

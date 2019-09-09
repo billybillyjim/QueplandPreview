@@ -10,8 +10,15 @@
     "name": "Master Bed",
     "id": 1,
     "description": "You can build a bed to sleep on here.",
-    "availableFurnitureIDs": [ 4,5,6,7,8 ],
+    "availableFurnitureIDs": [ 4, 5, 6, 7, 8 ],
     "spaceRequired": 4
+  },
+  {
+    "name": "Forge",
+    "id": 2,
+    "description": "You can build a forge to work metals here.",
+    "availableFurnitureIDs": [ 9, 10, 11 ],
+    "spaceRequired": 6
   }
 
 ]

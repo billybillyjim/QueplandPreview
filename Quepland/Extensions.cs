@@ -155,7 +155,7 @@ public static class Extensions
     {
         if (source == null)
         {
-            throw new ArgumentNullException("source");
+            return null;
         }
 
         int max = source.Select(l => l).Max(l => l.Count());

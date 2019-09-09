@@ -156,5 +156,41 @@
     "boostAmount": 8,
     "type": "Bed",
     "levelRequired": 115
+  },
+  {
+    "name": "Forge",
+    "id": 9,
+    "description": "A place to forge metals into tools, right in the comfort of your own home.",
+    "planksRequired": 3000,
+    "barsRequired": 10000,
+    "minimumPlankLevel": 2,
+    "minimumBarLevel": 2,
+    "experienceGained": 25000,
+    "type": "Forge",
+    "levelRequired": 30
+  },
+  {
+    "name": "Frost Forge",
+    "id": 10,
+    "description": "A magical forge that allows you to smith frozen weapons.",
+    "planksRequired": 5000,
+    "barsRequired": 15000,
+    "minimumPlankLevel": 4,
+    "minimumBarLevel": 4,
+    "experienceGained": 25000,
+    "type": "Forge",
+    "levelRequired": 60
+  },
+  {
+    "name": "Magma Forge",
+    "id": 11,
+    "description": "A magical forge of such great temperature you can smith without adding coal for heat.",
+    "planksRequired": 9000,
+    "barsRequired": 25000,
+    "minimumPlankLevel": 6,
+    "minimumBarLevel": 6,
+    "experienceGained": 25000,
+    "type": "Forge",
+    "levelRequired": 90
   }
 ]

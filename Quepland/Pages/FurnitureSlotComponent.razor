@@ -259,7 +259,7 @@
             {
                 builder.AddContent(4, slot.FurnitureToBuild.Name);
             }
-            
+
             builder.CloseElement();
             builder.CloseElement();
             builder.OpenElement(5, "div");
@@ -334,7 +334,7 @@
                 }
                 if(slot.FurnitureToBuild.Type == "Forge")
                 {
-
+                    builder.AddContent(15, LoadForgeButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Bed")
                 {
@@ -555,7 +555,35 @@
             builder.CloseElement();
         };
     }
+    private RenderFragment LoadForgeButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
 
+            if (slot.FurnitureToBuild.Name == "Frost Forge")
+            {
+                builder.AddAttribute(11, "onclick", new Action(() => GoToForge(true, false)));
+
+            }
+            else if (slot.FurnitureToBuild.Name == "Magma Forge")
+            {
+                builder.AddAttribute(11, "onclick", new Action(() => GoToForge(false, true)));
+            }
+            else
+            {
+                builder.AddAttribute(11, "onclick", new Action(() => GoToForge(false, false)));
+            }
+            builder.AddContent(12, "Use Forge");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
     private RenderFragment Button(string text, Action<FurnitureSlot> function, FurnitureSlot slot)
     {
         return builder =>
@@ -595,6 +623,22 @@
             builder.AddContent(12, text);
             builder.CloseElement();
         };
+    }
+
+    private void GoToForge(bool frost, bool magma)
+    {
+        if (frost)
+        {
+            UriHelper.NavigateTo("/SmithingMenu/true/false");
+        }
+        else if (magma)
+        {
+            UriHelper.NavigateTo("/SmithingMenu/false/true");
+        }
+        else
+        {
+            UriHelper.NavigateTo("/SmithingMenu/");
+        }
     }
 
     protected override void OnInitialized()

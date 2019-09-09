@@ -29,7 +29,7 @@ public class Furniture
 
     public int GetWorkRequired()
     {
-        return 1000 + (PlanksRequired + (BarsRequired * 7) * 4);
+        return 1000 + ((PlanksRequired + (BarsRequired * 3)) * 4);
     }
     public int GetCurrentAmountOfItem(int itemID)
     {
