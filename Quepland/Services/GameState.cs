@@ -31,6 +31,9 @@ public class GameState
     public DateTime huntingEndTime;
     public DateTime huntingStartTime;
 
+    public DateTime bedBoostEndTime;
+    public int bedBoostAmount;
+
     public bool isAutoCollecting;
 
     public bool isSplitView;
@@ -83,6 +86,7 @@ public class GameState
 
     public Timer attackTimer;
     public Timer foodTimer;
+    public Timer bedBoostTimer;
     public Timer UIRefreshTimer;
 
     //Area Menu Timers
@@ -174,6 +178,19 @@ public class GameState
             return true;
         }
         return false;
+    }
+    public void Sleep(Furniture furniture)
+    {
+        bedBoostEndTime = DateTime.UtcNow.AddHours(furniture.BoostDuration);
+        player.Sleep(furniture.BoostAmount);
+        bedBoostTimer = new Timer(new TimerCallback(_ =>
+        {
+            if(DateTime.UtcNow.CompareTo(bedBoostEndTime) > 0)
+            {
+                player.EndBedBoost();
+            }
+        }), null, 60000, 60000);
+        UpdateState();
     }
     public void StopActions()
     {

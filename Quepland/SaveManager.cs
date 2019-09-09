@@ -39,6 +39,8 @@ public class SaveManager
         this.playfabManager = playfabManager;
         this.petManager = petManager;
         this.houseManager = houseManager;
+        playfabManager.gameState = gameState;
+        playfabManager.messageManager = messageManager;
     }
 
     public string GetSaveStringEncrypted(bool encrypt)

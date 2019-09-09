@@ -561,6 +561,7 @@ public class Inventory
         }
         return false;
     }
+    //Returns null if not found
     public GameItem GetBestNails()
     {
         int reqLevel = 0;

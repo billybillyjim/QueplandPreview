@@ -26,14 +26,15 @@ public class Skill
     }
     public string Description { get; set; }
     public int Boost { get; set; }
+    public int BedBoost { get; set; }
 
     /// <summary>
-    /// Returns a skill's level including boost. Use GetSkillLevelUnboosted() for the real level.
+    /// Returns a skill's level including boost and bed boost. Use GetSkillLevelUnboosted() for the real level.
     /// </summary>
     /// <returns></returns>
     public int GetSkillLevel()
     {
-        return Level + Boost;
+        return Level + Boost + BedBoost;
     }
     public int GetSkillLevelUnboosted()
     {

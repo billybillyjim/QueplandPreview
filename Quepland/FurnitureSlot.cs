@@ -41,6 +41,7 @@ public class FurnitureSlot
         FurnitureToBuild.OtherItemCosts = furniture.OtherItemCosts;
         FurnitureToBuild.OtherItemCurrentAmounts = Extensions.To2DArray(furniture.OtherItemCosts);
         FurnitureToBuild.PlanksRequired = furniture.PlanksRequired;
+        FurnitureToBuild.Type = furniture.Type;
         FurnitureToBuild.UpgradeIDs = furniture.UpgradeIDs;
         FurnitureToBuild.WithdrawItemAmount = furniture.WithdrawItemAmount;
         FurnitureToBuild.WithdrawEveryString = furniture.WithdrawEveryString;

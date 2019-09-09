@@ -11,6 +11,8 @@ public class PlayfabManager
     private string loadString = "";
     public bool IsConnected = false;
     public GameState gameState;
+    public MessageManager messageManager;
+
     public async Task TryLogin(string userID, string token)
     {
         PlayFabSettings.staticSettings.TitleId = "E9B77"; 
@@ -42,6 +44,7 @@ public class PlayfabManager
     {
         if (IsConnected == false || data == null)
         {
+
             return;
         }
         string dataPart2 = "";
@@ -61,13 +64,18 @@ public class PlayfabManager
         if(result.Error != null)
         {
             Console.WriteLine(result.Error.GenerateErrorReport());
+            if (result.Error.HttpCode == 401)
+            {
+                IsConnected = false;
+                Console.WriteLine("Player has been logged out. Attempting to log in...");
+                await TryLogin(gameState.userID, gameState.token);
+            }
         }
-        if(result.Error.HttpCode == 401)
+        else
         {
-            IsConnected = false;
-            Console.WriteLine("Player has been logged out. Attempting to log in...");
-            await TryLogin(gameState.userID, gameState.token);
+            messageManager.AddMessage("Cloud save was successful.");
         }
+
         
 
     }

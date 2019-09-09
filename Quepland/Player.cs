@@ -705,6 +705,20 @@ public class Player
         }
         return false;
     }
+    public void Sleep(int boost)
+    {
+        foreach(Skill s in skills)
+        {
+            s.BedBoost = boost;
+        }
+    }
+    public void EndBedBoost()
+    {
+        foreach(Skill s in skills)
+        {
+            s.BedBoost = 0;
+        }
+    }
     public int GetTotalLevel()
     {
         int total = 0;
