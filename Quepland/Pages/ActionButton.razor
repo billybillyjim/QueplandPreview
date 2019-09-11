@@ -1,5 +1,5 @@
 ﻿@inject GameState GameState
-@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@inject NavigationManager NavigationManager
 
 @LoadButton()
 
@@ -11,7 +11,7 @@
     public string levelRequirement { get; set; }
     [Parameter]
     public string submenuURL { get; set; }
-    
+
 
 
     private RenderFragment LoadButton()
@@ -39,9 +39,9 @@
     }
     private void EnterSubmenu()
     {
-    
+
         GameState.previousURL = "/" + GameState.currentArea.AreaURL;
-        UriHelper.NavigateTo("/" + GameState.currentArea.AreaURL + submenuURL);
-    
+        NavigationManager.NavigateTo("/" + GameState.currentArea.AreaURL + submenuURL);
+
     }
 }

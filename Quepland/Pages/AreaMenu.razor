@@ -2,7 +2,7 @@
 @inject GameState  GameState
 @inject MessageManager  MessageManager
 @using System.Threading;
-@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@inject NavigationManager UriHelper
 @inject Blazored.LocalStorage.ISyncLocalStorageService localStorage
 
 @if (area != null)

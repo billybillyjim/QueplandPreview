@@ -1,7 +1,7 @@
 ﻿@page "/Followers"
 @inject HttpClient Http
 @inject GameState GameState
-@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@inject NavigationManager UriHelper
 @implements IDisposable
 
 <button class="btn btn-primary" onclick="@(new Action(()=>Return()))">Return</button>

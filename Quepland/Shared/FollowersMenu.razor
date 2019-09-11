@@ -1,6 +1,6 @@
 ﻿@inject HttpClient Http
 @inject GameState GameState
-@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@inject NavigationManager UriHelper
 @implements IDisposable
 
 <p><MenuButtons splitViewPosition="@splitViewPosition"></MenuButtons></p>
@@ -53,7 +53,7 @@
 </div>
 @functions{
         [Parameter]
-    private int splitViewPosition { get; set; }
+    public int splitViewPosition { get; set; }
 
     private void Assign(Follower follower)
     {

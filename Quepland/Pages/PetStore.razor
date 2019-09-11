@@ -3,7 +3,7 @@
 @inject HttpClient Http
 @inject GameState GameState
 @inject MessageManager  MessageManager
-@inject Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper UriHelper
+@inject NavigationManager UriHelper
 @inject IJSRuntime JSRuntime
 @implements IDisposable
 
@@ -39,6 +39,7 @@ else
     private Pet currentPetToBuy;
     private string restoringPurchasesString = "";
     private bool isRestoringPurchases;
+    
 
     private RenderFragment LoadPetStore()
     {
@@ -192,7 +193,7 @@ else
         isRestoringPurchases = true;
         GameState.UpdateState();
         restoringPurchasesString = "Restoring purchases... This may take a while.";
-        await JSRuntime.InvokeAsync<object>("kongregateFunctions.restorePurchases", DotNetObjectRef.Create(new PetPurchase(GameState)));
+        await JSRuntime.InvokeAsync<object>("kongregateFunctions.restorePurchases", DotNetObjectReference.Create(new PetPurchase(GameState)));
 
         isRestoringPurchases = false;
         GameState.UpdateState();
@@ -202,7 +203,7 @@ else
 
         if (GameState.userID == null || GameState.userID == "")
         {
-            await JSRuntime.InvokeAsync<object>("kongregateFunctions.showRegistration", DotNetObjectRef.Create(new PetPurchase(GameState)));
+            await JSRuntime.InvokeAsync<object>("kongregateFunctions.showRegistration", DotNetObjectReference.Create(new PetPurchase(GameState)));
             GameState.UpdateState();
             return;
         }
@@ -212,7 +213,7 @@ else
         }
         currentPetToBuy = pet;
         GameState.petToBuy = pet;
-        await JSRuntime.InvokeAsync<object>("kongregateFunctions.purchasePet", pet.Identifier, DotNetObjectRef.Create(new PetPurchase(GameState)));
+        await JSRuntime.InvokeAsync<object>("kongregateFunctions.purchasePet", pet.Identifier, DotNetObjectReference.Create(new PetPurchase(GameState)));
         GameState.UpdateState();
     }
 

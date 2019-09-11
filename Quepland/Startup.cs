@@ -10,7 +10,7 @@ namespace Quepland
         {
             services.AddScoped<GameState>();
             services.AddScoped<MessageManager>();
-            services.AddScoped<Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper>();
+            //services.AddScoped<Microsoft.AspNetCore.Blazor.Services.WebAssemblyUriHelper>();
             services.AddBlazoredLocalStorage();
         }
 
