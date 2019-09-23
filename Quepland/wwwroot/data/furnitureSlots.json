@@ -19,6 +19,13 @@
     "description": "You can build a forge to work metals here.",
     "availableFurnitureIDs": [ 9, 10, 11 ],
     "spaceRequired": 6
+  },
+    {
+    "name": "Guest Bed",
+    "id": 3,
+    "description": "You can build a bed for others to sleep on here.",
+    "availableFurnitureIDs": [ 12,13,14,15,16 ],
+    "spaceRequired": 4
   }
 
 ]

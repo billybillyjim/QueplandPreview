@@ -342,35 +342,35 @@
                 }
                 if(slot.FurnitureToBuild.Type == "Guest Bed")
                 {
-
+                    builder.AddContent(15, LoadGuestBedButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Fighting Ring")
                 {
-
+                    builder.AddContent(15, LoadFightingRingButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Sushi Bench")
                 {
-
+                    builder.AddContent(15, LoadSushiButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Tanning Bench")
                 {
-
+                    builder.AddContent(15, LoadTanningButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Totem")
                 {
-
+                    builder.AddContent(15, LoadTotem(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Assembly Bench")
                 {
-
+                    builder.AddContent(15, LoadAssemblyButton(slot));
                 }
                 if(slot.FurnitureToBuild.Type == "Woodworking Bench")
                 {
-
+                    builder.AddContent(15, LoadWoodworkingButton(slot));
                 }
                 if (slot.FurnitureToBuild.Type == "Training Dummy")
                 {
-
+                    builder.AddContent(15, LoadTrainingDummy(slot));
                 }
 
             }
@@ -584,6 +584,188 @@
             builder.CloseElement();
         };
     }
+    private RenderFragment LoadFightingRingButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Enter Ring");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadSushiButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Enter Ring");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadTanningButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Enter Ring");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadTotem(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenComponent<TotemCarvingComponent>(2);
+            builder.AddAttribute(3, "actionString", "Carve Totem");
+            builder.CloseComponent();        
+        };
+    }
+    private RenderFragment LoadAssemblyButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Select Item To Craft");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadWoodworkingButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Select Item");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadTrainingDummy(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(7, "p");
+            builder.OpenElement(7, "button");
+            builder.AddAttribute(8, "class", "btn btn-primary");
+            builder.AddAttribute(9, "style", "margin:3px");
+
+            builder.AddAttribute(11, "onclick", new Action(() => EnterFightingRing()));
+
+            builder.AddContent(12, "Fight Dummy");
+            builder.CloseElement();
+            builder.OpenElement(13, "br");
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
+    private RenderFragment LoadGuestBedButton(FurnitureSlot slot)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "dropdown");
+            builder.AddAttribute(2, "style", "float:right;margin-right:3px");
+            builder.OpenElement(3, "button");
+
+            builder.AddAttribute(4, "class", "btn btn-primary dropdown-toggle");
+            builder.AddAttribute(5, "type", "button");
+            builder.AddAttribute(6, "id", "dropdownMenuButton");
+            builder.AddAttribute(7, "data-toggle", "dropdown");
+            builder.AddAttribute(8, "aria-haspopup", "true");
+            builder.AddAttribute(9, "aria-expanded", "false");
+            builder.AddAttribute(10, "style", "margin-top:-12px;padding:3px");
+            builder.OpenElement(11, "img");
+
+            builder.AddAttribute(12, "style", "height:40px;width:40px");
+            builder.AddAttribute(13, "src", "data/ItemIcons/Plank.png");
+
+            builder.AddContent(14, "Set Plank");
+
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.OpenElement(15, "div");
+            builder.AddAttribute(16, "class", "dropdown-menu");
+            builder.AddAttribute(17, "aria-labelledby", "dropdownMenuButton");
+            if (slot.FurnitureToBuild.Follower == null)
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddContent(20, "Assign to Follower");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(18, "a");
+                builder.AddAttribute(19, "class", "dropdown-item");
+                builder.AddAttribute(19, "title", "");
+                builder.AddContent(20, slot.FurnitureToBuild.Follower.Name);
+                builder.CloseElement();
+            }
+            builder.OpenElement(21, "div");
+            builder.AddAttribute(22, "class", "dropdown-divider");
+            builder.CloseElement();
+
+
+            foreach (Follower follower in Program.followerManager.GetFollowers())
+            {
+                if (follower.IsUnlocked == false && GameState.GetPlayer().activeFollower != follower)
+                {
+                    builder.OpenElement(27, "a");
+                    builder.AddAttribute(28, "class", "dropdown-item");
+                    builder.AddAttribute(29, "title", "");
+                    builder.AddAttribute(30, "onclick", new Action(() => slot.FurnitureToBuild.SetFollower(follower)));
+                    builder.AddContent(31, follower.Name);
+                    builder.CloseElement();
+                }
+            }
+            builder.CloseElement();
+            builder.CloseElement();
+        };
+    }
     private RenderFragment Button(string text, Action<FurnitureSlot> function, FurnitureSlot slot)
     {
         return builder =>
@@ -639,6 +821,10 @@
         {
             UriHelper.NavigateTo("/SmithingMenu/");
         }
+    }
+    private void EnterFightingRing()
+    {
+        UriHelper.NavigateTo("/FightingRing/");
     }
 
     protected override void OnInitialized()

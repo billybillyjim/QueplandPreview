@@ -192,5 +192,89 @@
     "experienceGained": 25000,
     "type": "Forge",
     "levelRequired": 90
+  },
+   {
+    "name": "Cheap Guest Bed",
+    "id": 12,
+    "description": "A cheaply made bed for you to rest on.",
+    "planksRequired": 1000,
+    "barsRequired": 0,
+    "minimumPlankLevel": 0,
+    "minimumBarLevel": 0,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 1 ]
+    ],
+    "boostDuration": 1,
+    "boostAmount": 3,
+    "type": "Guest Bed"
+  },
+  {
+    "name": "Regular Guest Bed",
+    "id": 13,
+    "description": "An average bed for an average rest.",
+    "planksRequired": 3000,
+    "barsRequired": 300,
+    "minimumPlankLevel": 2,
+    "minimumBarLevel": 2,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 1 ]
+    ],
+    "boostDuration": 3,
+    "boostAmount": 4,
+    "type": "Guest Bed",
+    "levelRequired": 15
+  },
+  {
+    "name": "Fancy Guest Bed",
+    "id": 14,
+    "description": "A fancy bed. Something to separate you from the riffraff.",
+    "planksRequired": 7000,
+    "barsRequired": 500,
+    "minimumPlankLevel": 4,
+    "minimumBarLevel": 4,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 3 ]
+    ],
+    "boostDuration": 6,
+    "boostAmount": 5,
+    "type": "Guest Bed",
+    "levelRequired": 50
+  },
+  {
+    "name": "Exquisite Guest Bed",
+    "id": 15,
+    "description": "A bed for champions. Sleep like royalty, endulge yourself.",
+    "planksRequired": 15000,
+    "barsRequired": 2500,
+    "minimumPlankLevel": 6,
+    "minimumBarLevel": 6,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 5 ]
+    ],
+    "boostDuration": 12,
+    "boostAmount": 5,
+    "type": "Guest Bed",
+    "levelRequired": 80
+  },
+  {
+    "name": "Magnificent Guest Bed",
+    "id": 16,
+    "description": "A bed that would bring tears of awe to onlookers, if they could see inside your bedroom.",
+    "planksRequired": 30000,
+    "barsRequired": 3000,
+    "minimumPlankLevel": 9,
+    "minimumBarLevel": 9,
+    "experienceGained": 25000,
+    "otherItemCosts": [
+      [ 605, 10 ]
+    ],
+    "boostDuration": 18,
+    "boostAmount": 8,
+    "type": "Guest Bed",
+    "levelRequired": 115
   }
 ]

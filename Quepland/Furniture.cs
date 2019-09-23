@@ -26,6 +26,7 @@ public class Furniture
     public bool IsFinished { get; set; }
     public int BoostDuration { get; set; }
     public int BoostAmount { get; set; }
+    public Follower Follower { get; set; }
 
     public int GetWorkRequired()
     {
@@ -52,6 +53,10 @@ public class Furniture
             }
         }
         return 0;
+    }
+    public void SetFollower(Follower f)
+    {
+        Follower = f;
     }
     public TimeSpan GetWithdrawTime()
     {
