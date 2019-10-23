@@ -8,8 +8,18 @@
 
 <h1>Welcome Home</h1>
 
+<p>Your house has @Program.houseManager.GetSpaceUsed()/@GameState.playerHouse.HouseSize.Level Spaces available.</p>
+
 @LoadBuildDropdown()
-@foreach(FurnitureSlot slot in Program.houseManager.emptySlots)
+@if (GameState.isGathering == false)
+{
+    <button class="btn btn-primary" onclick="@(new Action(() => BuildUpHouse()))">Build Up House</button>
+}
+else
+{
+    <button class="btn btn-primary" onclick="@(new Action(() => StopBuilding()))">Stop Building</button>
+}
+@foreach (FurnitureSlot slot in Program.houseManager.emptySlots)
 {
     <FurnitureSlotComponent furnitureSlot="@slot"></FurnitureSlotComponent>
 }
@@ -76,15 +86,59 @@
         };
     }
 
+    private void BuildUpHouse()
+    {
+        GameState.StopActions();
+        GameState.isGathering = true;
+        GameState.gatherTimer = new Timer(new TimerCallback(_ =>
+        {
+            GameItem plank = GameState.GetPlayerBank().GetInventory().GetLowestLevelPlank();
+            if (plank == null || GameState.GetPlayerInventory().GetBestNails() == null)
+            {
+                if (plank == null)
+                {
+                    MessageManager.AddMessage("You have run out of planks. Please note that construction uses planks directly from your bank.");
+                }
+                else if ( GameState.GetPlayerInventory().GetBestNails() == null)
+                {
+                    MessageManager.AddMessage("You have run out of nails.");
+                }
+                GameState.StopActions();
+                GameState.UpdateState();
+                return;
+            }
+            GameItem nail = GameState.GetPlayerInventory().GetBestNails();
+            if (nail == null)
+            {
+                MessageManager.AddMessage("You have run out of nails.");
+                GameState.StopActions();
+                return;
+            }
+            GameState.playerHouse.BuildUp(plank);
+            GameState.GetPlayerBank().GetInventory().RemoveOneOfItem(plank);
+            int nailsUsed = Math.Min(rand.Next(1, 1 + Math.Max(100 - GameState.GetPlayer().GetLevel("Construction"), 1)), GameState.GetPlayerInventory().GetAmountOfItem(nail));
+            GameState.GetPlayer().GainExperience("Construction", nail.NailLevel);
+            nailsUsed = GameState.GetPlayerInventory().RemoveAsManyItemsAsPossible(nail, nailsUsed);
+            MessageManager.AddMessage("You hammer two planks together with " + nailsUsed + " " + nail.ItemName);
 
+            GameState.UpdateState();
+        }), null, 750, 750);
+        GameState.UpdateState();
+    }
+    private void StopBuilding()
+    {
+        GameState.isGathering = false;
+        GameState.StopActions();
+        GameState.UpdateState();
+    }
 
     private void AddSlot(FurnitureSlot slot)
     {
-        if(slot.SpaceRequired + Program.houseManager.GetSpaceUsed() <= GameState.GetPlayer().house.availableSpace)
+        if (slot.SpaceRequired + Program.houseManager.GetSpaceUsed() <= GameState.playerHouse.HouseSize.Level)
         {
             FurnitureSlot newSlot = new FurnitureSlot(slot);
             Program.houseManager.emptySlots.Add(newSlot);
-            MessageManager.AddMessage("Space Used:" + slot.SpaceRequired + ", Total:" + Program.houseManager.GetSpaceUsed() + ", Available:" + GameState.GetPlayer().house.availableSpace);
+            MessageManager.AddMessage("Space Used:" + slot.SpaceRequired + ", Total:" + Program.houseManager.GetSpaceUsed() + ", Available:" + GameState.playerHouse.HouseSize.Level);
         }
         else
         {
@@ -99,6 +153,7 @@
 
     protected override void OnInitialized()
     {
+        GameState.playerHouse.messageManager = MessageManager;
         GameState.StateChanged += OnGameStateChanged;
         this.StateHasChanged();
     }

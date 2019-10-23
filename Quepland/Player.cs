@@ -9,7 +9,6 @@ public class Player
 {
     public Inventory inventory;
     public Bank bank;
-    public House house;
     public Follower activeFollower;
     public Pet activePet;
     public bool hasLoadedSkills;
@@ -35,7 +34,6 @@ public class Player
         bank = new Bank();
         skills = new List<Skill>();
         MaxHP = 50;
-        house = new House();
     
 	}
     public async Task LoadSkills(HttpClient Http)

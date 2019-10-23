@@ -448,7 +448,7 @@ public class Inventory
         return true;
     }
     public bool RemoveOneOfItem(GameItem item)
-    {
+    {       
         if (items.TryGetValue(item, out int amount))
         {
             if (amount >= 1)
